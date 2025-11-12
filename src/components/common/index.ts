@@ -7,3 +7,4 @@ export { default as LoadingState, CardSkeleton, ListSkeleton, TextSkeleton, Full
 export { default as Toast } from './Toast';
 export { default as ToastContainer } from './ToastContainer';
 export { default as ConfirmDialog } from './ConfirmDialog';
+export { default as LazyImage } from './LazyImage';

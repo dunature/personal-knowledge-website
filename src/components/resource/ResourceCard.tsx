@@ -3,7 +3,7 @@
  * 根据资源类型渲染不同的卡片
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { MoreVertical } from 'lucide-react';
 import type { Resource } from '@/types';
 import { VideoCard } from './VideoCard';
@@ -19,7 +19,7 @@ export interface ResourceCardProps {
     onTagClick?: (tag: string) => void;
 }
 
-export const ResourceCard: React.FC<ResourceCardProps> = ({
+export const ResourceCard: React.FC<ResourceCardProps> = React.memo(({
     resource,
     onEdit,
     onDelete,
@@ -27,24 +27,32 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
 }) => {
     const [showMenu, setShowMenu] = useState(false);
 
-    const handleCopyLink = () => {
+    const handleCopyLink = useCallback(() => {
         navigator.clipboard.writeText(resource.url);
         setShowMenu(false);
         // TODO: 显示成功提示
-    };
+    }, [resource.url]);
 
-    const handleEdit = () => {
+    const handleEdit = useCallback(() => {
         setShowMenu(false);
         onEdit?.(resource.id);
-    };
+    }, [onEdit, resource.id]);
 
-    const handleDelete = () => {
+    const handleDelete = useCallback(() => {
         setShowMenu(false);
         onDelete?.(resource.id);
-    };
+    }, [onDelete, resource.id]);
+
+    const toggleMenu = useCallback(() => {
+        setShowMenu(prev => !prev);
+    }, []);
+
+    const closeMenu = useCallback(() => {
+        setShowMenu(false);
+    }, []);
 
     // 根据资源类型渲染对应的卡片
-    const renderCard = () => {
+    const renderCard = useMemo(() => {
         const commonProps = {
             resource,
             onTagClick,
@@ -65,19 +73,19 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
             default:
                 return null;
         }
-    };
+    }, [resource, onTagClick]);
 
     return (
         <div className="relative group">
             {/* 卡片容器 */}
             <div className="w-[320px] bg-white rounded-card shadow-card hover:shadow-card-hover card-hover overflow-hidden">
-                {renderCard()}
+                {renderCard}
             </div>
 
             {/* 三点菜单 */}
             <div className="absolute top-4 right-4 z-10">
                 <button
-                    onClick={() => setShowMenu(!showMenu)}
+                    onClick={toggleMenu}
                     className="p-2 bg-white/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-fast hover:bg-white shadow-sm"
                     aria-label="更多操作"
                 >
@@ -90,7 +98,7 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
                         {/* 点击外部关闭 */}
                         <div
                             className="fixed inset-0 z-20"
-                            onClick={() => setShowMenu(false)}
+                            onClick={closeMenu}
                         />
 
                         <div className="absolute right-0 mt-2 w-32 bg-white rounded shadow-card border border-divider overflow-hidden z-30">
@@ -118,4 +126,4 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
             </div>
         </div>
     );
-};
+});
