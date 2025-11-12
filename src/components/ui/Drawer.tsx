@@ -5,7 +5,6 @@
 
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 
 export interface DrawerProps {
     isOpen: boolean;
@@ -59,42 +58,20 @@ export const Drawer: React.FC<DrawerProps> = ({
         }
     };
 
-    const drawerVariants = {
-        hidden: { x: '100%' },
-        visible: { x: 0 },
-        exit: { x: '100%' },
-    };
-
-    const overlayVariants = {
-        hidden: { opacity: 0 },
-        visible: { opacity: 1 },
-        exit: { opacity: 0 },
-    };
-
     return (
-        <AnimatePresence>
+        <>
             {isOpen && (
                 <div className="fixed inset-0 z-50 flex">
                     {/* 遮罩层 */}
-                    <motion.div
-                        className="absolute inset-0 bg-black/50"
-                        variants={overlayVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
-                        transition={{ duration: 0.3 }}
+                    <div
+                        className="absolute inset-0 bg-black/50 animate-fadeIn"
                         onClick={handleOverlayClick}
                     />
 
                     {/* 抽屉内容 */}
-                    <motion.div
-                        className={`ml-auto relative bg-white h-full shadow-modal overflow-hidden flex flex-col ${className}`}
+                    <div
+                        className={`ml-auto relative bg-white h-full shadow-modal overflow-hidden flex flex-col animate-slideInRight ${className}`}
                         style={{ width }}
-                        variants={drawerVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
-                        transition={{ duration: 0.3, ease: 'easeOut' }}
                         role="dialog"
                         aria-modal="true"
                         aria-labelledby={title ? 'drawer-title' : undefined}
@@ -123,9 +100,9 @@ export const Drawer: React.FC<DrawerProps> = ({
                         <div className="flex-1 overflow-auto">
                             {children}
                         </div>
-                    </motion.div>
+                    </div>
                 </div>
             )}
-        </AnimatePresence>
+        </>
     );
 };
