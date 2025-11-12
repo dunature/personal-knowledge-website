@@ -7,6 +7,7 @@ import MarkdownEditorTest from './pages/MarkdownEditorTest.tsx'
 import EditorDrawerTest from './pages/EditorDrawerTest.tsx'
 import QuestionModalTest from './pages/QuestionModalTest.tsx'
 import ErrorHandlingTest from './pages/ErrorHandlingTest.tsx'
+import NotificationTest from './pages/NotificationTest.tsx'
 import App from './App.tsx'
 
 // 导航菜单组件
@@ -37,6 +38,9 @@ const Navigation = () => (
     <Link to="/error-test" style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold' }}>
       错误处理测试
     </Link>
+    <Link to="/notification-test" style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold' }}>
+      通知系统测试
+    </Link>
   </nav>
 )
 
@@ -51,6 +55,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/markdown-test" element={<MarkdownEditorTest />} />
         <Route path="/drawer-test" element={<EditorDrawerTest />} />
         <Route path="/error-test" element={<ErrorHandlingTest />} />
+        <Route path="/notification-test" element={<NotificationTest />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
