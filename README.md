@@ -323,15 +323,21 @@ const hello = "world";
 ## 📖 文档
 
 ### 使用文档
-- **[中文使用指南](./USER_GUIDE_CN.md)** - 完整的中文使用教程 🇨🇳
-- [资源封面图片指南](./RESOURCE_COVER_GUIDE.md) - 如何添加和管理资源封面图片
-- [CRUD功能说明](./CRUD_COMPLETE.md) - 完整的增删改查功能文档
-- [快速测试指南](./QUICK_TEST_CRUD.md) - 功能测试步骤
+- **[中文使用指南](./docs/user-guides/USER_GUIDE_CN.md)** - 完整的中文使用教程 🇨🇳
+- [资源封面图片指南](./docs/user-guides/RESOURCE_COVER_GUIDE.md) - 如何添加和管理资源封面图片
+- [快速测试指南](./docs/user-guides/QUICK_TEST_CRUD.md) - 功能测试步骤
+
+### 开发文档
+- [CRUD功能说明](./docs/development/CRUD_COMPLETE.md) - 完整的增删改查功能文档
+- [文档总览](./docs/development/DOCUMENTATION_SUMMARY.md) - 所有文档索引
 
 ### 部署文档
-- [部署指南](./DEPLOYMENT.md) - 完整的部署文档
-- [快速部署](./QUICK_DEPLOY.md) - 快速部署到 Vercel/Netlify
-- [GitHub 设置](./GITHUB_SETUP.md) - GitHub 仓库创建指南
+- [部署指南](./docs/deployment/DEPLOYMENT.md) - 完整的部署文档
+- [快速部署](./docs/deployment/QUICK_DEPLOY.md) - 快速部署到 Vercel/Netlify
+- [GitHub 设置](./docs/deployment/GITHUB_SETUP.md) - GitHub 仓库创建指南
+
+### 更多文档
+- [查看所有文档](./docs/README.md) - 完整的文档目录
 
 ---
 
