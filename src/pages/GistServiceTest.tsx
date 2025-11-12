@@ -3,18 +3,30 @@
  * 测试 GistService、AuthService 和加密工具
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { gistService } from '@/services/gistService';
 import { authService } from '@/services/authService';
+import { syncService } from '@/services/syncService';
+import { cacheService, STORAGE_KEYS } from '@/services/cacheService';
 import { encryptToken, decryptToken } from '@/utils/cryptoUtils';
 import { validateGistData } from '@/utils/dataValidation';
 import type { GistData } from '@/types/gist';
+import type { SyncStatus } from '@/types/sync';
 
 const GistServiceTest: React.FC = () => {
     const [token, setToken] = useState('');
     const [gistId, setGistId] = useState('');
     const [testResults, setTestResults] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
+
+    // 监听同步状态
+    useEffect(() => {
+        const unsubscribe = syncService.onSyncStatusChange((status) => {
+            setSyncStatus(status);
+        });
+        return unsubscribe;
+    }, []);
 
     const addResult = (message: string, isError = false) => {
         const prefix = isError ? '❌' : '✅';
@@ -247,6 +259,94 @@ const GistServiceTest: React.FC = () => {
         }
     };
 
+    // 测试 7: SyncService - 同步到 Gist
+    const testSyncToGist = async () => {
+        if (!token || !gistId) {
+            addResult('请先配置 Token 和 Gist ID', true);
+            return;
+        }
+
+        clearResults();
+        setIsLoading(true);
+        addResult('开始测试同步到 Gist...');
+
+        try {
+            // 先设置 Token 和 Gist ID
+            await authService.setToken(token);
+            authService.setGistId(gistId);
+
+            // 准备测试数据
+            await cacheService.saveData(STORAGE_KEYS.RESOURCES, [
+                {
+                    id: 'sync_test_1',
+                    title: '同步测试资源',
+                    url: 'https://example.com',
+                    type: 'blog',
+                    cover: 'https://via.placeholder.com/320x180',
+                    platform: 'Test',
+                    content_tags: ['测试'],
+                    category: '测试',
+                    author: '测试作者',
+                    recommendation: '这是同步测试',
+                    metadata: {},
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                },
+            ]);
+
+            addResult('测试数据已准备');
+
+            // 执行同步
+            const result = await syncService.syncToGist();
+
+            if (result.success) {
+                addResult('同步到 Gist 成功！');
+                addResult(`同步时间: ${result.timestamp}`);
+            } else {
+                addResult(`同步失败: ${result.error}`, true);
+            }
+        } catch (error) {
+            addResult(`同步测试失败: ${error}`, true);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // 测试 8: SyncService - 从 Gist 同步
+    const testSyncFromGist = async () => {
+        if (!gistId) {
+            addResult('请先输入 Gist ID', true);
+            return;
+        }
+
+        clearResults();
+        setIsLoading(true);
+        addResult('开始测试从 Gist 同步...');
+
+        try {
+            authService.setGistId(gistId);
+
+            const result = await syncService.syncFromGist();
+
+            if (result.success) {
+                addResult('从 Gist 同步成功！');
+                addResult(`同步时间: ${result.timestamp}`);
+
+                // 检查缓存数据
+                const resources = await cacheService.getData(STORAGE_KEYS.RESOURCES);
+                const questions = await cacheService.getData(STORAGE_KEYS.QUESTIONS);
+                addResult(`已加载 ${(resources as any[])?.length || 0} 个资源`);
+                addResult(`已加载 ${(questions as any[])?.length || 0} 个问题`);
+            } else {
+                addResult(`同步失败: ${result.error}`, true);
+            }
+        } catch (error) {
+            addResult(`同步测试失败: ${error}`, true);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-background p-8">
             <div className="max-w-4xl mx-auto">
@@ -345,7 +445,32 @@ const GistServiceTest: React.FC = () => {
                         >
                             6. 数据验证
                         </button>
+
+                        <button
+                            onClick={testSyncToGist}
+                            disabled={isLoading || !token || !gistId}
+                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                        >
+                            7. 同步到 Gist
+                        </button>
+
+                        <button
+                            onClick={testSyncFromGist}
+                            disabled={isLoading || !gistId}
+                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                        >
+                            8. 从 Gist 同步
+                        </button>
                     </div>
+
+                    {/* 同步状态指示器 */}
+                    {syncStatus !== 'idle' && (
+                        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <p className="text-sm text-blue-800">
+                                同步状态: <span className="font-semibold">{syncStatus}</span>
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 {/* 测试结果 */}
@@ -377,8 +502,8 @@ const GistServiceTest: React.FC = () => {
                                 <div
                                     key={index}
                                     className={`p-2 rounded ${result.startsWith('❌')
-                                            ? 'bg-red-50 text-red-700'
-                                            : 'bg-green-50 text-green-700'
+                                        ? 'bg-red-50 text-red-700'
+                                        : 'bg-green-50 text-green-700'
                                         }`}
                                 >
                                     {result}
