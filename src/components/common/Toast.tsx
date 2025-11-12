@@ -104,23 +104,26 @@ const Toast: React.FC<ToastProps> = ({
     return (
         <div
             className={`
-        ${config.bgColor} text-white
-        px-lg py-md rounded-medium shadow-modal
+        ${config.bgColor}
+        px-lg py-md rounded-medium
+        shadow-[0_4px_12px_rgba(0,0,0,0.15)]
+        border-2 border-white/20
         flex items-center gap-md
         animate-slideInRight
         min-w-[300px] max-w-[500px]
+        backdrop-blur-sm
       `}
             role="alert"
             aria-live="polite"
         >
-            <div className="flex-shrink-0">{config.icon}</div>
+            <div className="flex-shrink-0 text-white">{config.icon}</div>
 
-            <p className="flex-1 text-body">{message}</p>
+            <p className="flex-1 text-body text-white font-medium">{message}</p>
 
             {type !== 'loading' && (
                 <button
                     onClick={() => onClose(id)}
-                    className="flex-shrink-0 hover:opacity-80 transition-opacity"
+                    className="flex-shrink-0 text-white hover:opacity-80 transition-opacity"
                     aria-label="关闭"
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
