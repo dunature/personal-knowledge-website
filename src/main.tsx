@@ -6,6 +6,7 @@ import HomePage from './pages/HomePage.tsx'
 import MarkdownEditorTest from './pages/MarkdownEditorTest.tsx'
 import EditorDrawerTest from './pages/EditorDrawerTest.tsx'
 import QuestionModalTest from './pages/QuestionModalTest.tsx'
+import ErrorHandlingTest from './pages/ErrorHandlingTest.tsx'
 import App from './App.tsx'
 
 // 导航菜单组件
@@ -33,6 +34,9 @@ const Navigation = () => (
     <Link to="/drawer-test" style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold' }}>
       编辑器抽屉
     </Link>
+    <Link to="/error-test" style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold' }}>
+      错误处理测试
+    </Link>
   </nav>
 )
 
@@ -46,6 +50,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/question-modal-test" element={<QuestionModalTest />} />
         <Route path="/markdown-test" element={<MarkdownEditorTest />} />
         <Route path="/drawer-test" element={<EditorDrawerTest />} />
+        <Route path="/error-test" element={<ErrorHandlingTest />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
