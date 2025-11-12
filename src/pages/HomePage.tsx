@@ -3,18 +3,23 @@
  * 整合资源导航区域和问答板区域
  */
 
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { ResourceSection } from '@/components/layout/ResourceSection';
 import { QASection } from '@/components/layout/QASection';
-import { QuestionModalWithEdit } from '@/components/qa/QuestionModalWithEdit';
-import { EditorDrawer } from '@/components/editor/EditorDrawer';
-import { EditorForm } from '@/components/editor/EditorForm';
+import LoadingState from '@/components/common/LoadingState';
+import Toast from '@/components/common/Toast';
+import { useToast } from '@/hooks/useToast';
 import { ResourceProvider } from '@/contexts/ResourceContext';
 import { QAProvider } from '@/contexts/QAContext';
 import type { Resource } from '@/types/resource';
 import type { BigQuestion, SubQuestion, TimelineAnswer } from '@/types/question';
 import type { Category } from '@/components/resource/CategoryFilter';
 import { generatePlaceholder, PLACEHOLDER_COLORS } from '@/utils/placeholderUtils';
+
+// 懒加载大型组件以优化初始加载性能
+const QuestionModalWithEdit = lazy(() => import('@/components/qa/QuestionModalWithEdit').then(module => ({ default: module.QuestionModalWithEdit })));
+const EditorDrawer = lazy(() => import('@/components/editor/EditorDrawer').then(module => ({ default: module.EditorDrawer })));
+const EditorForm = lazy(() => import('@/components/editor/EditorForm').then(module => ({ default: module.EditorForm })));
 
 // 示例数据
 const sampleResources: Resource[] = [
@@ -157,6 +162,9 @@ const sampleAnswers: TimelineAnswer[] = [
 ];
 
 export const HomePage: React.FC = () => {
+    // Toast通知系统
+    const { toasts, showToast } = useToast();
+
     const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
     const [questions, setQuestions] = useState<BigQuestion[]>(sampleQuestions);
     const [subQuestions, setSubQuestions] = useState<SubQuestion[]>(sampleSubQuestions);
@@ -309,13 +317,14 @@ export const HomePage: React.FC = () => {
     const handleDeleteResource = (id: string) => {
         if (confirm('确定要删除这个资源吗？')) {
             setResources(prev => prev.filter(r => r.id !== id));
+            showToast('success', '资源已删除');
         }
     };
 
     // 保存资源
     const handleSaveResource = () => {
         if (!editorData.title || !editorData.url) {
-            alert('请填写标题和链接');
+            showToast('error', '请填写标题和链接');
             return;
         }
 
@@ -336,6 +345,7 @@ export const HomePage: React.FC = () => {
                     }
                     : r
             ));
+            showToast('success', '资源已更新');
         } else {
             // 创建新资源
             const newResource: Resource = {
@@ -354,6 +364,7 @@ export const HomePage: React.FC = () => {
                 updated_at: new Date().toISOString(),
             };
             setResources(prev => [...prev, newResource]);
+            showToast('success', '资源已添加');
         }
 
         setIsEditorOpen(false);
@@ -405,13 +416,15 @@ export const HomePage: React.FC = () => {
             if (selectedQuestionId === id) {
                 setSelectedQuestionId(null);
             }
+
+            showToast('success', '问题已删除');
         }
     };
 
     // 保存大问题
     const handleSaveQuestion = () => {
         if (!editorData.title) {
-            alert('请填写问题标题');
+            showToast('error', '请填写问题标题');
             return;
         }
 
@@ -429,6 +442,7 @@ export const HomePage: React.FC = () => {
                     }
                     : q
             ));
+            showToast('success', '问题已更新');
         } else {
             // 创建新问题
             const newQuestion: BigQuestion = {
@@ -443,6 +457,7 @@ export const HomePage: React.FC = () => {
                 updated_at: new Date().toISOString(),
             };
             setQuestions(prev => [...prev, newQuestion]);
+            showToast('success', '问题已添加');
         }
 
         setIsEditorOpen(false);
@@ -470,6 +485,7 @@ export const HomePage: React.FC = () => {
 
             // 删除相关回答
             setAnswers(prev => prev.filter(a => a.question_id !== id));
+            showToast('success', '小问题已删除');
         }
     };
 
@@ -488,6 +504,7 @@ export const HomePage: React.FC = () => {
                         : sq
                 ));
             }
+            showToast('success', '回答已删除');
         }
     };
 
@@ -554,45 +571,63 @@ export const HomePage: React.FC = () => {
                         <p>© 2024 个人知识管理系统. All rights reserved.</p>
                     </footer>
 
-                    {/* 问题详情弹窗（带编辑功能） */}
+                    {/* 问题详情弹窗（带编辑功能） - 使用Suspense包裹懒加载组件 */}
                     {selectedQuestion && (
-                        <QuestionModalWithEdit
-                            question={selectedQuestion}
-                            subQuestions={selectedSubQuestions}
-                            answers={answersMap}
-                            isOpen={!!selectedQuestionId}
-                            onClose={() => setSelectedQuestionId(null)}
-                            onSave={handleUpdateQuestion}
-                            onStatusChange={handleStatusChange}
-                            onEdit={() => handleEditQuestion(selectedQuestionId!)}
-                            onDelete={() => handleDeleteQuestion(selectedQuestionId!)}
-                            onSaveSubQuestion={handleSaveSubQuestion}
-                            onCreateSubQuestion={handleCreateSubQuestion}
-                            onDeleteSubQuestion={handleDeleteSubQuestion}
-                            onSaveAnswer={handleSaveAnswer}
-                            onCreateAnswer={handleCreateAnswer}
-                            onDeleteAnswer={handleDeleteAnswer}
-                        />
+                        <Suspense fallback={<LoadingState message="加载中..." />}>
+                            <QuestionModalWithEdit
+                                question={selectedQuestion}
+                                subQuestions={selectedSubQuestions}
+                                answers={answersMap}
+                                isOpen={!!selectedQuestionId}
+                                onClose={() => setSelectedQuestionId(null)}
+                                onSave={handleUpdateQuestion}
+                                onStatusChange={handleStatusChange}
+                                onEdit={() => handleEditQuestion(selectedQuestionId!)}
+                                onDelete={() => handleDeleteQuestion(selectedQuestionId!)}
+                                onSaveSubQuestion={handleSaveSubQuestion}
+                                onCreateSubQuestion={handleCreateSubQuestion}
+                                onDeleteSubQuestion={handleDeleteSubQuestion}
+                                onSaveAnswer={handleSaveAnswer}
+                                onCreateAnswer={handleCreateAnswer}
+                                onDeleteAnswer={handleDeleteAnswer}
+                            />
+                        </Suspense>
                     )}
 
-                    {/* 编辑器抽屉 */}
-                    <EditorDrawer
-                        isOpen={isEditorOpen}
-                        onClose={() => setIsEditorOpen(false)}
-                        onSave={handleEditorSave}
-                        title={
-                            editorType === 'resource'
-                                ? editingId ? '编辑资源' : '添加资源'
-                                : editingId ? '编辑大问题' : '添加大问题'
-                        }
-                    >
-                        <EditorForm
-                            type={editorType}
-                            data={editorData}
-                            onChange={setEditorData}
-                            categories={categories.map(c => c.id).filter(id => id)}
-                        />
-                    </EditorDrawer>
+                    {/* 编辑器抽屉 - 使用Suspense包裹懒加载组件 */}
+                    <Suspense fallback={<LoadingState message="加载编辑器..." />}>
+                        <EditorDrawer
+                            isOpen={isEditorOpen}
+                            onClose={() => setIsEditorOpen(false)}
+                            onSave={handleEditorSave}
+                            title={
+                                editorType === 'resource'
+                                    ? editingId ? '编辑资源' : '添加资源'
+                                    : editingId ? '编辑大问题' : '添加大问题'
+                            }
+                        >
+                            <EditorForm
+                                type={editorType}
+                                data={editorData}
+                                onChange={setEditorData}
+                                categories={categories.map(c => c.id).filter(id => id)}
+                            />
+                        </EditorDrawer>
+                    </Suspense>
+
+                    {/* Toast通知容器 */}
+                    <div className="fixed top-4 right-4 z-50 space-y-2">
+                        {toasts.map((toast) => (
+                            <Toast
+                                key={toast.id}
+                                id={toast.id}
+                                message={toast.message}
+                                type={toast.type}
+                                duration={toast.duration}
+                                onClose={toast.onClose}
+                            />
+                        ))}
+                    </div>
                 </div>
             </QAProvider>
         </ResourceProvider>

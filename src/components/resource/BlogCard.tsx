@@ -14,7 +14,7 @@ export interface BlogCardProps {
     onTagClick?: (tag: string) => void;
 }
 
-export const BlogCard: React.FC<BlogCardProps> = ({ resource, onTagClick }) => {
+export const BlogCard: React.FC<BlogCardProps> = React.memo(({ resource, onTagClick }) => {
     const { title, cover, content_tags, author, platform, recommendation, metadata, url } = resource;
 
     return (
@@ -85,4 +85,4 @@ export const BlogCard: React.FC<BlogCardProps> = ({ resource, onTagClick }) => {
             </div>
         </>
     );
-};
+});

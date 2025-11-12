@@ -1,421 +1,266 @@
 # 贡献指南
 
-感谢你考虑为个人知识管理系统做出贡献！
+感谢你考虑为个人知识管理系统做出贡献！本文档提供了贡献代码的指南和最佳实践。
 
-## 🚀 开始之前
+## 📋 目录
+
+- [开发环境设置](#开发环境设置)
+- [项目结构](#项目结构)
+- [编码规范](#编码规范)
+- [提交规范](#提交规范)
+- [Pull Request流程](#pull-request流程)
+- [测试指南](#测试指南)
+
+## 🛠️ 开发环境设置
 
 ### 前提条件
 
 - Node.js >= 18
-- npm 或 yarn
+- npm >= 9 或 yarn >= 1.22
 - Git
-- 代码编辑器（推荐 VS Code）
 
-### 推荐的VS Code扩展
+### 安装步骤
 
-- ESLint
-- Prettier
-- Tailwind CSS IntelliSense
-- TypeScript Vue Plugin (Volar)
+1. **Fork 仓库**
+   ```bash
+   # 在 GitHub 上点击 Fork 按钮
+   ```
 
-## 📋 开发流程
+2. **克隆你的 Fork**
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/personal-knowledge-website.git
+   cd personal-knowledge-website
+   ```
 
-### 1. Fork 和 Clone
+3. **添加上游仓库**
+   ```bash
+   git remote add upstream https://github.com/ORIGINAL_OWNER/personal-knowledge-website.git
+   ```
 
-```bash
-# Fork 仓库到你的GitHub账号
-# 然后clone到本地
-git clone https://github.com/YOUR_USERNAME/personal-knowledge-website.git
-cd personal-knowledge-website
-```
+4. **安装依赖**
+   ```bash
+   npm install
+   ```
 
-### 2. 安装依赖
+5. **启动开发服务器**
+   ```bash
+   npm run dev
+   ```
 
-```bash
-npm install
-```
+6. **访问应用**
+   ```
+   打开浏览器访问 http://localhost:5173
+   ```
 
-### 3. 创建分支
-
-```bash
-git checkout -b feature/your-feature-name
-# 或
-git checkout -b fix/your-bug-fix
-```
-
-### 4. 开发
-
-```bash
-# 启动开发服务器
-npm run dev
-
-# 在另一个终端运行类型检查
-npm run type-check
-```
-
-### 5. 测试
-
-```bash
-# 构建测试
-npm run build
-
-# 预览构建结果
-npm run preview
-```
-
-### 6. 提交
-
-```bash
-git add .
-git commit -m "feat: add new feature"
-git push origin feature/your-feature-name
-```
-
-### 7. 创建 Pull Request
-
-在GitHub上创建Pull Request，描述你的更改。
-
-## 📝 代码规范
-
-### Commit Message 规范
-
-使用 [Conventional Commits](https://www.conventionalcommits.org/) 格式：
+## 📁 项目结构
 
 ```
-<type>(<scope>): <subject>
-
-<body>
-
-<footer>
+personal-knowledge-website/
+├── public/
+│   └── data/              # 示例数据文件
+├── src/
+│   ├── components/        # React 组件
+│   │   ├── common/       # 通用组件（Toast, ErrorBoundary等）
+│   │   ├── editor/       # 编辑器组件
+│   │   ├── layout/       # 布局组件
+│   │   ├── qa/           # 问答相关组件
+│   │   ├── resource/     # 资源相关组件
+│   │   └── ui/           # 基础UI组件（Button, Input等）
+│   ├── contexts/         # React Context（状态管理）
+│   ├── hooks/            # 自定义 Hooks
+│   ├── pages/            # 页面组件
+│   ├── services/         # 服务层（数据加载、Markdown解析等）
+│   ├── types/            # TypeScript 类型定义
+│   ├── utils/            # 工具函数
+│   ├── styles/           # 全局样式
+│   ├── App.tsx           # 应用根组件
+│   └── main.tsx          # 应用入口
+├── docs/                 # 文档目录
+├── PERFORMANCE_OPTIMIZATION.md  # 性能优化文档
+├── ACCESSIBILITY_GUIDE.md       # 无障碍访问指南
+└── README.md             # 项目说明
 ```
 
-**类型（type）：**
-- `feat`: 新功能
-- `fix`: 修复bug
-- `docs`: 文档更新
-- `style`: 代码格式（不影响功能）
-- `refactor`: 重构
-- `perf`: 性能优化
-- `test`: 测试相关
-- `chore`: 构建/工具相关
-
-**示例：**
-```
-feat(resource): add image lazy loading
-
-- Implement LazyImage component
-- Use Intersection Observer API
-- Add fade-in animation
-
-Closes #123
-```
-
-### TypeScript 规范
-
-```typescript
-// ✅ 使用明确的类型
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
-
-// ✅ 使用类型推断
-const count = 0; // 推断为 number
-
-// ❌ 避免使用 any
-const data: any = {}; // 不推荐
-
-// ✅ 使用 unknown 或具体类型
-const data: unknown = {};
-```
-
-### React 组件规范
-
-```tsx
-// ✅ 使用函数组件和Hooks
-export const MyComponent: React.FC<Props> = ({ prop1, prop2 }) => {
-  const [state, setState] = useState(initialValue);
-  
-  useEffect(() => {
-    // 副作用
-  }, [dependencies]);
-  
-  return <div>{/* JSX */}</div>;
-};
-
-// ✅ 使用React.memo优化性能
-export const MyComponent = React.memo(({ data }) => {
-  return <div>{data}</div>;
-});
-
-// ✅ 使用useCallback缓存回调
-const handleClick = useCallback(() => {
-  doSomething();
-}, [dependencies]);
-```
-
-### CSS/Tailwind 规范
-
-```tsx
-// ✅ 使用Tailwind类
-<div className="flex items-center gap-md p-lg bg-white rounded-card">
-
-// ✅ 使用CSS变量
-<div style={{ color: 'var(--color-primary)' }}>
-
-// ❌ 避免内联样式（除非必要）
-<div style={{ color: '#0047AB' }}>
-```
-
-### 文件命名规范
-
-- 组件文件：`PascalCase.tsx` (例如：`ResourceCard.tsx`)
-- 工具函数：`camelCase.ts` (例如：`dateUtils.ts`)
-- 类型文件：`camelCase.ts` (例如：`resource.ts`)
-- 样式文件：`kebab-case.css` (例如：`markdown-preview.css`)
-
-## 🏗️ 项目结构
-
-```
-src/
-├── components/        # React组件
-│   ├── common/       # 通用组件（Button, Modal等）
-│   ├── editor/       # 编辑器组件
-│   ├── layout/       # 布局组件
-│   ├── qa/           # 问答相关组件
-│   ├── resource/     # 资源相关组件
-│   └── ui/           # 基础UI组件
-├── contexts/         # React Context
-├── hooks/            # 自定义Hooks
-├── pages/            # 页面组件
-├── services/         # 服务层（API调用等）
-├── types/            # TypeScript类型定义
-├── utils/            # 工具函数
-└── main.tsx          # 应用入口
-```
-
-## 🎨 设计系统
-
-### 颜色
-
-```css
---color-primary: #0047AB;      /* 主色调 */
---color-secondary: #666;       /* 次要文本 */
---color-tertiary: #999;        /* 辅助文本 */
---color-text: #333;            /* 主文本 */
---color-success: #2E7D32;      /* 成功 */
---color-error: #D32F2F;        /* 错误 */
---color-warning: #F57C00;      /* 警告 */
-```
-
-### 间距
-
-```css
---spacing-xs: 4px;
---spacing-sm: 8px;
---spacing-md: 16px;
---spacing-lg: 24px;
---spacing-xl: 32px;
---spacing-xxl: 48px;
-```
-
-### 字体
-
-```css
---font-size-h1: 32px;
---font-size-h2: 24px;
---font-size-h3: 18px;
---font-size-body: 16px;
---font-size-small: 12px;
-```
-
-## 🧪 测试指南
-
-### 手动测试
-
-访问测试页面：
-- `/error-test` - 错误处理组件测试
-- `/notification-test` - 通知系统测试
-
-### 功能测试清单
-
-- [ ] 资源CRUD操作
-- [ ] 问题CRUD操作
-- [ ] 搜索和筛选
-- [ ] Markdown编辑和预览
-- [ ] 响应式布局
-- [ ] 键盘导航
-- [ ] 错误处理
-
-## 📚 文档
-
-### 添加新组件
-
-1. 创建组件文件
-2. 添加TypeScript类型
-3. 添加注释说明
-4. 导出组件
-5. 更新相关文档
-
-示例：
-
-```tsx
-/**
- * MyComponent 组件
- * 用于展示某某功能
- * 
- * @example
- * <MyComponent data={data} onAction={handleAction} />
- */
-export const MyComponent: React.FC<MyComponentProps> = ({
-  data,
-  onAction,
-}) => {
-  // 实现
-};
-```
-
-### 更新文档
-
-如果你的更改影响到用户使用，请更新相应文档：
-
-- `README.md` - 主要文档
-- `docs/user-guides/` - 用户指南
-- `docs/development/` - 开发文档
-
-## 🐛 报告Bug
-
-### Bug报告应包含
-
-1. **描述**：清晰简洁的bug描述
-2. **重现步骤**：
-   - 步骤1
-   - 步骤2
-   - ...
-3. **预期行为**：应该发生什么
-4. **实际行为**：实际发生了什么
-5. **截图**：如果适用
-6. **环境**：
-   - 浏览器和版本
-   - 操作系统
-   - Node.js版本
-
-## 💡 功能建议
-
-### 功能建议应包含
-
-1. **问题**：当前存在什么问题或限制
-2. **解决方案**：你建议的解决方案
-3. **替代方案**：其他可能的解决方案
-4. **使用场景**：谁会使用这个功能，如何使用
-
-## ❓ 需要帮助？
-
-- 查看 [文档](./docs/README.md)
-- 搜索 [Issues](https://github.com/dunature/personal-knowledge-website/issues)
-- 创建新的 Issue
-
-## 📄 License
-
-通过贡献代码，你同意你的贡献将在MIT许可下发布。
-
----
-
-**感谢你的贡献！** 🎉
-# 贡献指南
-
-感谢你考虑为个人知识管理系统做出贡献！
-
-## 🚀 开始之前
-
-### 前提条件
-
-- Node.js >= 18
-- npm 或 yarn
-- Git
-- 代码编辑器（推荐 VS Code）
-
-### 推荐的VS Code扩展
-
-- ESLint
-- Prettier
-- Tailwind CSS IntelliSense
-- TypeScript Vue Plugin (Volar)
-
-## 📋 开发流程
-
-### 1. Fork 和 Clone
-
-```bash
-# Fork 仓库到你的账号
-# 然后 clone 到本地
-git clone https://github.com/YOUR_USERNAME/personal-knowledge-website.git
-cd personal-knowledge-website
-```
-
-### 2. 安装依赖
-
-```bash
-npm install
-```
-
-### 3. 创建分支
-
-```bash
-# 创建功能分支
-git checkout -b feature/your-feature-name
-
-# 或创建修复分支
-git checkout -b fix/your-fix-name
-```
-
-### 4. 开发
-
-```bash
-# 启动开发服务器
-npm run dev
-
-# 在浏览器中访问 http://localhost:5173
-```
-
-### 5. 测试
-
-```bash
-# 运行类型检查
-npm run type-check
-
-# 构建测试
-npm run build
-
-# 预览构建
-npm run preview
-```
-
-### 6. 提交代码
-
-```bash
-# 添加更改
-git add .
-
-# 提交（遵循提交规范）
-git commit -m "feat: add new feature"
-
-# 推送到你的fork
-git push origin feature/your-feature-name
-```
-
-### 7. 创建 Pull Request
-
-1. 访问你的 fork 仓库
-2. 点击 "New Pull Request"
-3. 填写 PR 描述
-4. 等待审核
-
-## 📝 提交规范
+### 组件组织原则
+
+- **common/**: 跨功能的通用组件
+- **ui/**: 基础UI组件，可复用
+- **layout/**: 页面布局组件
+- **resource/**: 资源管理相关组件
+- **qa/**: 问答板相关组件
+- **editor/**: 编辑器相关组件
+
+## 📝 编码规范
+
+### TypeScript
+
+1. **使用严格的类型定义**
+   ```typescript
+   // ✅ 好的做法
+   interface User {
+     id: string;
+     name: string;
+     email: string;
+   }
+
+   // ❌ 避免
+   const user: any = { ... };
+   ```
+
+2. **导出类型**
+   ```typescript
+   // types/resource.ts
+   export interface Resource {
+     id: string;
+     title: string;
+     // ...
+   }
+   ```
+
+3. **使用类型推断**
+   ```typescript
+   // ✅ 好的做法
+   const count = 5; // TypeScript 自动推断为 number
+
+   // ❌ 不必要的类型注解
+   const count: number = 5;
+   ```
+
+### React 组件
+
+1. **使用函数组件和 Hooks**
+   ```typescript
+   // ✅ 好的做法
+   export const MyComponent: React.FC<Props> = ({ data }) => {
+     const [state, setState] = useState(initialState);
+     return <div>{data}</div>;
+   };
+   ```
+
+2. **组件文件命名**
+   - 使用 PascalCase: `MyComponent.tsx`
+   - 一个文件一个组件
+   - 组件名与文件名一致
+
+3. **Props 接口命名**
+   ```typescript
+   // ✅ 好的做法
+   interface MyComponentProps {
+     data: string;
+     onSave: () => void;
+   }
+
+   export const MyComponent: React.FC<MyComponentProps> = ({ data, onSave }) => {
+     // ...
+   };
+   ```
+
+4. **使用性能优化**
+   ```typescript
+   // 对于纯组件使用 React.memo
+   export const MyComponent = React.memo(({ data }) => {
+     return <div>{data}</div>;
+   });
+
+   // 对于计算密集型操作使用 useMemo
+   const expensiveValue = useMemo(() => {
+     return computeExpensiveValue(data);
+   }, [data]);
+
+   // 对于回调函数使用 useCallback
+   const handleClick = useCallback(() => {
+     doSomething();
+   }, []);
+   ```
+
+### 样式
+
+1. **使用 Tailwind CSS**
+   ```tsx
+   // ✅ 好的做法
+   <div className="flex items-center gap-4 p-4 bg-white rounded-lg">
+     {children}
+   </div>
+   ```
+
+2. **使用 CSS 变量**
+   ```css
+   /* 在 index.css 中定义 */
+   :root {
+     --color-primary: #0047AB;
+     --color-secondary: #666;
+   }
+
+   /* 在组件中使用 */
+   .my-component {
+     color: var(--color-primary);
+   }
+   ```
+
+3. **响应式设计**
+   ```tsx
+   <div className="w-full md:w-1/2 lg:w-1/3">
+     {content}
+   </div>
+   ```
+
+### 无障碍访问
+
+1. **使用语义化 HTML**
+   ```tsx
+   // ✅ 好的做法
+   <button onClick={handleClick}>点击</button>
+   <nav>...</nav>
+   <main>...</main>
+
+   // ❌ 避免
+   <div onClick={handleClick}>点击</div>
+   ```
+
+2. **添加 ARIA 属性**
+   ```tsx
+   // 图标按钮
+   <button aria-label="关闭">
+     <CloseIcon />
+   </button>
+
+   // 模态框
+   <div role="dialog" aria-modal="true" aria-labelledby="title">
+     <h2 id="title">标题</h2>
+   </div>
+   ```
+
+3. **确保键盘导航**
+   ```tsx
+   // 支持 Esc 键关闭
+   useEffect(() => {
+     const handleEscape = (e: KeyboardEvent) => {
+       if (e.key === 'Escape') {
+         onClose();
+       }
+     };
+     document.addEventListener('keydown', handleEscape);
+     return () => document.removeEventListener('keydown', handleEscape);
+   }, [onClose]);
+   ```
+
+## 📦 提交规范
 
 使用 [Conventional Commits](https://www.conventionalcommits.org/) 规范：
 
+### 提交类型
+
+- `feat`: 新功能
+- `fix`: 修复 bug
+- `docs`: 文档更新
+- `style`: 代码格式（不影响代码运行）
+- `refactor`: 重构（既不是新功能也不是修复bug）
+- `perf`: 性能优化
+- `test`: 测试相关
+- `chore`: 构建过程或辅助工具的变动
+
+### 提交格式
+
 ```
 <type>(<scope>): <subject>
 
@@ -423,232 +268,256 @@ git push origin feature/your-feature-name
 
 <footer>
 ```
-
-### Type 类型
-
-- `feat`: 新功能
-- `fix`: 修复bug
-- `docs`: 文档更新
-- `style`: 代码格式（不影响功能）
-- `refactor`: 重构
-- `perf`: 性能优化
-- `test`: 测试相关
-- `chore`: 构建/工具相关
 
 ### 示例
 
 ```bash
 # 新功能
-git commit -m "feat: add dark mode support"
+git commit -m "feat(resource): add video card component"
 
-# 修复bug
-git commit -m "fix: resolve image loading issue"
+# 修复 bug
+git commit -m "fix(qa): fix timeline answer sorting issue"
 
 # 文档更新
-git commit -m "docs: update README with new features"
+git commit -m "docs: update README with deployment instructions"
 
 # 性能优化
-git commit -m "perf: optimize resource card rendering"
+git commit -m "perf(resource): add React.memo to ResourceCard"
+
+# 重构
+git commit -m "refactor(editor): extract MarkdownPreview component"
 ```
 
-## 🎨 代码规范
+## 🔄 Pull Request 流程
 
-### TypeScript
+### 1. 创建分支
 
-```typescript
-// ✅ 使用类型注解
-interface User {
-  id: string;
-  name: string;
-}
-
-const user: User = {
-  id: '1',
-  name: 'John',
-};
-
-// ✅ 使用函数类型
-const handleClick = (id: string): void => {
-  console.log(id);
-};
-
-// ❌ 避免使用 any
-const data: any = {}; // 不推荐
+```bash
+# 从 main 分支创建新分支
+git checkout main
+git pull upstream main
+git checkout -b feature/my-new-feature
 ```
 
-### React组件
+### 2. 开发和提交
 
-```tsx
-// ✅ 使用函数组件和Hooks
-import React, { useState, useCallback } from 'react';
+```bash
+# 进行开发
+# ...
 
-interface Props {
-  title: string;
-  onSave: (data: string) => void;
-}
+# 添加更改
+git add .
 
-export const MyComponent: React.FC<Props> = ({ title, onSave }) => {
-  const [value, setValue] = useState('');
-
-  const handleSave = useCallback(() => {
-    onSave(value);
-  }, [value, onSave]);
-
-  return (
-    <div>
-      <h1>{title}</h1>
-      <button onClick={handleSave}>Save</button>
-    </div>
-  );
-};
+# 提交更改
+git commit -m "feat: add new feature"
 ```
 
-### 样式
+### 3. 推送到你的 Fork
 
-```tsx
-// ✅ 使用Tailwind CSS类
-<div className="flex items-center gap-md p-lg bg-white rounded-card">
-  <span className="text-body text-primary">Content</span>
-</div>
-
-// ✅ 使用CSS变量
-<div style={{ color: 'var(--color-primary)' }}>
-
-// ❌ 避免内联样式
-<div style={{ color: '#0047AB', padding: '16px' }}> // 不推荐
+```bash
+git push origin feature/my-new-feature
 ```
 
-## 📁 项目结构
+### 4. 创建 Pull Request
 
+1. 访问你的 Fork 仓库
+2. 点击 "New Pull Request"
+3. 选择你的分支
+4. 填写 PR 描述：
+   - 描述你的更改
+   - 关联相关的 Issue
+   - 添加截图（如果是 UI 更改）
+   - 列出测试步骤
+
+### 5. PR 描述模板
+
+```markdown
+## 描述
+简要描述你的更改
+
+## 类型
+- [ ] 新功能
+- [ ] Bug 修复
+- [ ] 文档更新
+- [ ] 性能优化
+- [ ] 重构
+- [ ] 其他
+
+## 更改内容
+- 添加了 XXX 功能
+- 修复了 XXX 问题
+- 优化了 XXX 性能
+
+## 测试
+- [ ] 本地测试通过
+- [ ] 无障碍测试通过
+- [ ] 性能测试通过
+
+## 截图（如果适用）
+[添加截图]
+
+## 相关 Issue
+Closes #123
 ```
-src/
-├── components/        # React组件
-│   ├── common/       # 通用组件（Button, Modal等）
-│   ├── editor/       # 编辑器组件
-│   ├── layout/       # 布局组件
-│   ├── qa/           # 问答相关组件
-│   ├── resource/     # 资源相关组件
-│   └── ui/           # 基础UI组件
-├── contexts/         # React Context
-├── hooks/            # 自定义Hooks
-├── pages/            # 页面组件
-├── services/         # 服务层（API调用等）
-├── types/            # TypeScript类型定义
-├── utils/            # 工具函数
-└── main.tsx          # 应用入口
+
+### 6. 代码审查
+
+- 响应审查意见
+- 进行必要的修改
+- 推送更新
+
+```bash
+# 修改代码后
+git add .
+git commit -m "fix: address review comments"
+git push origin feature/my-new-feature
 ```
 
 ## 🧪 测试指南
 
 ### 手动测试
 
-1. 测试所有CRUD操作
-2. 测试搜索和筛选功能
-3. 测试Markdown编辑器
-4. 测试响应式布局
-5. 测试键盘导航
-6. 测试错误处理
+1. **功能测试**
+   ```bash
+   # 启动开发服务器
+   npm run dev
 
-### 测试页面
+   # 测试所有功能
+   - 添加/编辑/删除资源
+   - 添加/编辑/删除问题
+   - 搜索和筛选
+   - Markdown 编辑
+   ```
 
-访问以下测试页面：
-- `/error-test` - 错误处理测试
-- `/notification-test` - 通知系统测试
-- `/markdown-test` - Markdown编辑器测试
-- `/drawer-test` - 编辑器抽屉测试
+2. **键盘导航测试**
+   ```bash
+   # 断开鼠标
+   # 使用 Tab 键浏览页面
+   # 确认所有交互元素可访问
+   ```
 
-## 📚 文档贡献
+3. **屏幕阅读器测试**
+   ```bash
+   # macOS: 启动 VoiceOver (Cmd + F5)
+   # Windows: 启动 NVDA
+   # 浏览页面确认内容可被朗读
+   ```
 
-### 文档类型
+4. **性能测试**
+   ```bash
+   # 打开 Chrome DevTools
+   # 运行 Lighthouse 审计
+   # 确认性能得分 > 90
+   ```
 
-- 用户文档：`docs/user-guides/`
-- 开发文档：`docs/development/`
-- 部署文档：`docs/deployment/`
-- 修复文档：`docs/fixes/`
+### 构建测试
 
-### 文档规范
+```bash
+# 构建生产版本
+npm run build
 
-- 使用清晰的标题层级
-- 提供代码示例
-- 添加截图（如果需要）
-- 保持简洁明了
-- 使用中文编写
+# 预览构建结果
+npm run preview
 
-## 🐛 报告Bug
-
-### Bug报告应包含
-
-1. **标题**：简短描述问题
-2. **环境**：浏览器、操作系统、Node版本
-3. **重现步骤**：详细的操作步骤
-4. **预期行为**：应该发生什么
-5. **实际行为**：实际发生了什么
-6. **截图**：如果可能，提供截图
-7. **错误信息**：控制台错误信息
-
-### 示例
-
-```markdown
-**标题**: 资源卡片图片无法显示
-
-**环境**:
-- 浏览器: Chrome 120
-- 操作系统: macOS 14
-- Node版本: 18.17.0
-
-**重现步骤**:
-1. 添加新资源
-2. 输入图片URL
-3. 保存资源
-4. 图片不显示
-
-**预期行为**: 图片应该正常显示
-
-**实际行为**: 显示占位图
-
-**截图**: [附上截图]
-
-**错误信息**:
-​```
-Failed to load resource: net::ERR_BLOCKED_BY_CLIENT
-​```
+# 确认构建成功且应用正常运行
 ```
 
-## 💡 功能建议
+## 💡 开发技巧
 
-### 功能建议应包含
+### 1. 使用 React DevTools
 
-1. **标题**：功能名称
-2. **问题**：要解决什么问题
-3. **解决方案**：建议的实现方式
-4. **替代方案**：其他可能的方案
-5. **优先级**：高/中/低
+安装 [React DevTools](https://react.dev/learn/react-developer-tools) 浏览器扩展：
+- 检查组件层级
+- 查看 props 和 state
+- 使用 Profiler 分析性能
 
-## 🔍 代码审查
+### 2. 使用 TypeScript 严格模式
 
-### 审查清单
+确保 `tsconfig.json` 中启用严格模式：
+```json
+{
+  "compilerOptions": {
+    "strict": true
+  }
+}
+```
 
-- [ ] 代码符合项目规范
-- [ ] 没有TypeScript错误
-- [ ] 没有ESLint警告
-- [ ] 功能正常工作
-- [ ] 没有破坏现有功能
-- [ ] 代码有适当的注释
-- [ ] 提交信息符合规范
-- [ ] 文档已更新（如需要）
+### 3. 使用 ESLint 和 Prettier
 
-## 📞 获取帮助
+```bash
+# 运行 ESLint
+npm run lint
 
-如果你有任何问题：
+# 自动修复
+npm run lint:fix
+```
 
-1. 查看[文档](./docs/README.md)
-2. 搜索[已有Issues](https://github.com/dunature/personal-knowledge-website/issues)
-3. 创建新Issue询问
+### 4. 热重载
 
-## 🎉 感谢
+Vite 支持热模块替换（HMR），修改代码后会自动刷新：
+- 修改组件 → 自动更新
+- 修改样式 → 自动更新
+- 修改配置 → 需要手动刷新
 
-感谢所有贡献者！你们的贡献让这个项目变得更好。
+## 📚 参考资源
+
+### 官方文档
+- [React 文档](https://react.dev/)
+- [TypeScript 文档](https://www.typescriptlang.org/docs/)
+- [Vite 文档](https://vitejs.dev/)
+- [Tailwind CSS 文档](https://tailwindcss.com/docs)
+
+### 项目文档
+- [README](./README.md) - 项目说明
+- [性能优化文档](./PERFORMANCE_OPTIMIZATION.md) - 性能优化指南
+- [无障碍访问指南](./ACCESSIBILITY_GUIDE.md) - 无障碍实施细节
+
+### 编码规范
+- [Airbnb React/JSX Style Guide](https://github.com/airbnb/javascript/tree/master/react)
+- [TypeScript Style Guide](https://google.github.io/styleguide/tsguide.html)
+- [Conventional Commits](https://www.conventionalcommits.org/)
+
+## ❓ 常见问题
+
+### Q: 如何添加新的组件？
+
+A: 
+1. 在相应的目录下创建组件文件
+2. 使用 TypeScript 定义 Props 接口
+3. 实现组件逻辑
+4. 添加必要的样式
+5. 确保无障碍访问
+6. 在父组件中导入使用
+
+### Q: 如何添加新的类型？
+
+A:
+1. 在 `src/types/` 目录下创建或修改类型文件
+2. 导出类型定义
+3. 在需要的地方导入使用
+
+### Q: 如何优化组件性能？
+
+A:
+1. 使用 React.memo 包裹纯组件
+2. 使用 useMemo 缓存计算结果
+3. 使用 useCallback 缓存回调函数
+4. 避免在渲染中创建新对象/数组
+5. 使用 React DevTools Profiler 分析性能
+
+### Q: 如何确保无障碍访问？
+
+A:
+1. 使用语义化 HTML 元素
+2. 添加适当的 ARIA 属性
+3. 确保键盘导航支持
+4. 测试颜色对比度
+5. 使用屏幕阅读器测试
+
+## 🙏 感谢
+
+感谢所有贡献者的付出！你的贡献让这个项目变得更好。
 
 ---
 
-**Happy Coding! 🚀**
+**有问题？** 欢迎在 [GitHub Issues](https://github.com/YOUR_USERNAME/personal-knowledge-website/issues) 中提问。

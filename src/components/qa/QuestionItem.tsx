@@ -14,7 +14,7 @@ interface QuestionItemProps {
     onClick: (id: string) => void;
 }
 
-export const QuestionItem: React.FC<QuestionItemProps> = ({
+export const QuestionItem: React.FC<QuestionItemProps> = React.memo(({
     question,
     subQuestionCount = 0,
     onClick,
@@ -60,4 +60,4 @@ export const QuestionItem: React.FC<QuestionItemProps> = ({
             </span>
         </div>
     );
-};
+});

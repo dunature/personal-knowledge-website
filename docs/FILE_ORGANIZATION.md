@@ -100,6 +100,7 @@ personal-knowledge-website/
 **包含文档**:
 - 使用指南和教程
 - 功能测试指南
+- 错误处理测试指南
 - 常见问题解答
 
 **目标用户**: 
@@ -171,6 +172,8 @@ git mv TESTING_GUIDE.md docs/user-guides/
 git mv QUICK_TEST_CRUD.md docs/user-guides/
 git mv QUICK_TEST_CHECKLIST.md docs/user-guides/
 git mv QUICK_TEST_SUB_QUESTIONS.md docs/user-guides/
+mv ERROR_HANDLING_TEST_GUIDE.md docs/user-guides/
+mv ERROR_HANDLING_TEST_CHECKLIST.md docs/user-guides/
 ```
 
 ### 移动到 development/

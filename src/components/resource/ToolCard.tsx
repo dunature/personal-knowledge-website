@@ -14,7 +14,7 @@ export interface ToolCardProps {
     onTagClick?: (tag: string) => void;
 }
 
-export const ToolCard: React.FC<ToolCardProps> = ({ resource, onTagClick }) => {
+export const ToolCard: React.FC<ToolCardProps> = React.memo(({ resource, onTagClick }) => {
     const { title, cover, content_tags, author, recommendation, metadata, url } = resource;
 
     return (
@@ -85,4 +85,4 @@ export const ToolCard: React.FC<ToolCardProps> = ({ resource, onTagClick }) => {
             </div>
         </>
     );
-};
+});

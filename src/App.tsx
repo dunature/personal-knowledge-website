@@ -1,11 +1,14 @@
 import './App.css'
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import { ResourceSection } from '@/components/layout/ResourceSection'
 import { QASection } from '@/components/layout/QASection'
-import { QuestionModal } from '@/components/qa/QuestionModal'
+import LoadingState from '@/components/common/LoadingState'
 import type { Resource } from '@/types/resource'
 import type { BigQuestion, SubQuestion, TimelineAnswer } from '@/types/question'
 import type { Category } from '@/components/resource/CategoryFilter'
+
+// 懒加载大型组件
+const QuestionModal = lazy(() => import('@/components/qa/QuestionModal').then(module => ({ default: module.QuestionModal })))
 
 function App() {
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null)
@@ -231,22 +234,24 @@ function App() {
         </div>
       </div>
 
-      {/* 问题详情弹窗 */}
+      {/* 问题详情弹窗 - 使用Suspense包裹懒加载组件 */}
       {selectedQuestion && (
-        <QuestionModal
-          question={selectedQuestion}
-          subQuestions={selectedSubQuestions}
-          answers={answersMap}
-          isOpen={!!selectedQuestionId}
-          onClose={() => setSelectedQuestionId(null)}
-          onEdit={() => alert('编辑大问题')}
-          onStatusChange={(status) => alert(`修改状态为: ${status}`)}
-          onEditSummary={() => alert('编辑总结')}
-          onEditSubQuestion={(id) => alert(`编辑小问题: ${id}`)}
-          onAddAnswer={(sqId) => alert(`添加回答到小问题: ${sqId}`)}
-          onEditAnswer={(ansId) => alert(`编辑回答: ${ansId}`)}
-          onAddSubQuestion={() => alert('添加小问题')}
-        />
+        <Suspense fallback={<LoadingState message="加载中..." />}>
+          <QuestionModal
+            question={selectedQuestion}
+            subQuestions={selectedSubQuestions}
+            answers={answersMap}
+            isOpen={!!selectedQuestionId}
+            onClose={() => setSelectedQuestionId(null)}
+            onEdit={() => alert('编辑大问题')}
+            onStatusChange={(status) => alert(`修改状态为: ${status}`)}
+            onEditSummary={() => alert('编辑总结')}
+            onEditSubQuestion={(id) => alert(`编辑小问题: ${id}`)}
+            onAddAnswer={(sqId) => alert(`添加回答到小问题: ${sqId}`)}
+            onEditAnswer={(ansId) => alert(`编辑回答: ${ansId}`)}
+            onAddSubQuestion={() => alert('添加小问题')}
+          />
+        </Suspense>
       )}
     </div>
   )

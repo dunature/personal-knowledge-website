@@ -14,17 +14,18 @@ export interface GitHubCardProps {
     onTagClick?: (tag: string) => void;
 }
 
-export const GitHubCard: React.FC<GitHubCardProps> = ({ resource, onTagClick }) => {
+export const GitHubCard: React.FC<GitHubCardProps> = React.memo(({ resource, onTagClick }) => {
     const { title, cover, content_tags, author, recommendation, metadata, url } = resource;
 
-    // 格式化Star数
-    const formatStars = (stars?: number) => {
+    // 格式化Star数 - 使用useMemo优化
+    const formattedStars = React.useMemo(() => {
+        const stars = metadata.stars;
         if (!stars) return '0';
         if (stars >= 1000) {
             return `${(stars / 1000).toFixed(1)}K`;
         }
         return stars.toString();
-    };
+    }, [metadata.stars]);
 
     return (
         <>
@@ -81,7 +82,7 @@ export const GitHubCard: React.FC<GitHubCardProps> = ({ resource, onTagClick }) 
                     <div className="flex items-center gap-3 text-small text-tertiary">
                         <span className="inline-flex items-center gap-1">
                             <Star size={12} fill="currentColor" />
-                            {formatStars(metadata.stars)}
+                            {formattedStars}
                         </span>
                         {metadata.language && (
                             <span>
@@ -102,4 +103,4 @@ export const GitHubCard: React.FC<GitHubCardProps> = ({ resource, onTagClick }) 
             </div>
         </>
     );
-};
+});

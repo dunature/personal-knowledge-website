@@ -35,7 +35,7 @@ const Toast: React.FC<ToastProps> = ({
         switch (type) {
             case 'success':
                 return {
-                    bgColor: 'bg-success',
+                    bgColor: 'bg-primary', // 统一使用蓝色背景
                     icon: (
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -49,7 +49,7 @@ const Toast: React.FC<ToastProps> = ({
                 };
             case 'error':
                 return {
-                    bgColor: 'bg-error',
+                    bgColor: 'bg-primary', // 统一使用蓝色背景
                     icon: (
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -63,7 +63,7 @@ const Toast: React.FC<ToastProps> = ({
                 };
             case 'warning':
                 return {
-                    bgColor: 'bg-warning',
+                    bgColor: 'bg-primary', // 统一使用蓝色背景
                     icon: (
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -77,14 +77,14 @@ const Toast: React.FC<ToastProps> = ({
                 };
             case 'loading':
                 return {
-                    bgColor: 'bg-primary',
+                    bgColor: 'bg-primary', // 统一使用蓝色背景
                     icon: (
                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     ),
                 };
             default: // info
                 return {
-                    bgColor: 'bg-primary',
+                    bgColor: 'bg-primary', // 统一使用蓝色背景
                     icon: (
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path

@@ -14,11 +14,12 @@ export interface RedditCardProps {
     onTagClick?: (tag: string) => void;
 }
 
-export const RedditCard: React.FC<RedditCardProps> = ({ resource, onTagClick }) => {
+export const RedditCard: React.FC<RedditCardProps> = React.memo(({ resource, onTagClick }) => {
     const { title, cover, content_tags, author, recommendation, metadata, url } = resource;
 
-    // 格式化成员数
-    const formatMembers = (members?: number) => {
+    // 格式化成员数 - 使用useMemo优化
+    const formattedMembers = React.useMemo(() => {
+        const members = metadata.members;
         if (!members) return '0';
         if (members >= 1000000) {
             return `${(members / 1000000).toFixed(1)}M`;
@@ -27,7 +28,7 @@ export const RedditCard: React.FC<RedditCardProps> = ({ resource, onTagClick }) 
             return `${(members / 1000).toFixed(1)}K`;
         }
         return members.toString();
-    };
+    }, [metadata.members]);
 
     return (
         <>
@@ -83,7 +84,7 @@ export const RedditCard: React.FC<RedditCardProps> = ({ resource, onTagClick }) 
                 <div className="flex items-center justify-between pt-2">
                     <span className="inline-flex items-center gap-1 text-small text-tertiary">
                         <Users size={12} />
-                        {formatMembers(metadata.members)} members
+                        {formattedMembers} members
                     </span>
                     <a
                         href={url}
@@ -98,4 +99,4 @@ export const RedditCard: React.FC<RedditCardProps> = ({ resource, onTagClick }) 
             </div>
         </>
     );
-};
+});

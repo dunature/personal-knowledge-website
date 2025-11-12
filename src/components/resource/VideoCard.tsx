@@ -14,7 +14,7 @@ export interface VideoCardProps {
     onTagClick?: (tag: string) => void;
 }
 
-export const VideoCard: React.FC<VideoCardProps> = ({ resource, onTagClick }) => {
+export const VideoCard: React.FC<VideoCardProps> = React.memo(({ resource, onTagClick }) => {
     const { title, cover, platform_logo, content_tags, author, recommendation, metadata, url } = resource;
 
     return (
@@ -104,4 +104,4 @@ export const VideoCard: React.FC<VideoCardProps> = ({ resource, onTagClick }) =>
             </div>
         </>
     );
-};
+});

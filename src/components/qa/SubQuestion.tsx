@@ -21,7 +21,7 @@ interface SubQuestionProps {
     onDeleteAnswer?: (answerId: string) => void;
 }
 
-export const SubQuestion: React.FC<SubQuestionProps> = ({
+export const SubQuestion: React.FC<SubQuestionProps> = React.memo(({
     subQuestion,
     answers = [],
     onEdit,
@@ -33,10 +33,12 @@ export const SubQuestion: React.FC<SubQuestionProps> = ({
     const [isExpanded, setIsExpanded] = useState(false);
     const statusConfig = STATUS_COLORS[subQuestion.status];
 
-    // 按时间倒序排列（最新的在前）
-    const sortedAnswers = [...answers].sort((a, b) => {
-        return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
-    });
+    // 按时间倒序排列（最新的在前）- 使用useMemo优化
+    const sortedAnswers = React.useMemo(() => {
+        return [...answers].sort((a, b) => {
+            return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+        });
+    }, [answers]);
 
     return (
         <div className="border border-[#E0E0E0] rounded-lg overflow-hidden bg-white">
@@ -141,4 +143,4 @@ export const SubQuestion: React.FC<SubQuestionProps> = ({
             )}
         </div>
     );
-};
+});

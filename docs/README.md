@@ -45,6 +45,18 @@ docs/
 - **QUICK_TEST_CHECKLIST.md** - 快速测试检查清单
 - **QUICK_TEST_SUB_QUESTIONS.md** - 小问题功能测试
 
+- **ERROR_HANDLING_TEST_GUIDE.md** - 错误处理组件测试指南
+  - ErrorBoundary测试
+  - ErrorMessage测试
+  - EmptyState测试
+  - LoadingState测试
+  - 骨架屏测试
+  - 样式和动画检查
+
+- **ERROR_HANDLING_TEST_CHECKLIST.md** - 错误处理测试清单
+  - 详细测试步骤
+  - 测试结果记录表
+
 ---
 
 ## 💻 开发文档 (development/)

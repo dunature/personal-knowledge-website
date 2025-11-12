@@ -15,22 +15,22 @@ interface TimelineAnswerProps {
     showDivider?: boolean;
 }
 
-export const TimelineAnswer: React.FC<TimelineAnswerProps> = ({
+export const TimelineAnswer: React.FC<TimelineAnswerProps> = React.memo(({
     answer,
     onEdit,
     onDelete,
     showDivider = true,
 }) => {
-    // 格式化时间戳为 YYYY.MM.DD HH:MM
-    const formatTimestamp = (timestamp: string) => {
-        const date = new Date(timestamp);
+    // 格式化时间戳为 YYYY.MM.DD HH:MM - 使用useMemo优化
+    const formattedTimestamp = React.useMemo(() => {
+        const date = new Date(answer.timestamp);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
         return `${year}.${month}.${day} ${hours}:${minutes}`;
-    };
+    }, [answer.timestamp]);
 
     return (
         <div className="animate-fadeIn">
@@ -38,7 +38,7 @@ export const TimelineAnswer: React.FC<TimelineAnswerProps> = ({
                 {/* 时间戳和操作按钮 */}
                 <div className="flex items-center justify-between mb-3">
                     <span className="text-xs text-[#999]">
-                        {formatTimestamp(answer.timestamp)}
+                        {formattedTimestamp}
                     </span>
                     <div className="flex items-center gap-2">
                         {onEdit && (
@@ -74,4 +74,4 @@ export const TimelineAnswer: React.FC<TimelineAnswerProps> = ({
             )}
         </div>
     );
-};
+});
