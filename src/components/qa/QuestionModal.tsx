@@ -20,11 +20,14 @@ interface QuestionModalProps {
     isOpen: boolean;
     onClose: () => void;
     onEdit?: () => void;
+    onDelete?: () => void;
     onStatusChange?: (status: QuestionStatus) => void;
     onEditSummary?: () => void;
     onEditSubQuestion?: (id: string) => void;
+    onDeleteSubQuestion?: (id: string) => void;
     onAddAnswer?: (subQuestionId: string) => void;
     onEditAnswer?: (answerId: string) => void;
+    onDeleteAnswer?: (answerId: string) => void;
     onAddSubQuestion?: () => void;
 }
 
@@ -35,11 +38,14 @@ export const QuestionModal: React.FC<QuestionModalProps> = ({
     isOpen,
     onClose,
     onEdit,
+    onDelete,
     onStatusChange,
     onEditSummary,
     onEditSubQuestion,
+    onDeleteSubQuestion,
     onAddAnswer,
     onEditAnswer,
+    onDeleteAnswer,
     onAddSubQuestion,
 }) => {
     const statusOptions: DropdownOption[] = [
@@ -72,7 +78,7 @@ export const QuestionModal: React.FC<QuestionModalProps> = ({
                         {question.title}
                     </h2>
 
-                    {/* 右侧：编辑、状态、关闭按钮 */}
+                    {/* 右侧：编辑、删除、状态、关闭按钮 */}
                     <div className="flex items-center gap-3">
                         <Button
                             variant="outline"
@@ -80,6 +86,15 @@ export const QuestionModal: React.FC<QuestionModalProps> = ({
                             onClick={onEdit}
                         >
                             编辑
+                        </Button>
+
+                        <Button
+                            variant="outline"
+                            size="small"
+                            onClick={onDelete}
+                            className="text-[#E65100] border-[#E65100] hover:bg-[#FFF3E0]"
+                        >
+                            删除
                         </Button>
 
                         <Dropdown
@@ -152,8 +167,10 @@ export const QuestionModal: React.FC<QuestionModalProps> = ({
                                             subQuestion={subQuestion}
                                             answers={answers[subQuestion.id] || []}
                                             onEdit={onEditSubQuestion}
+                                            onDelete={onDeleteSubQuestion}
                                             onAddAnswer={onAddAnswer}
                                             onEditAnswer={onEditAnswer}
+                                            onDeleteAnswer={onDeleteAnswer}
                                         />
                                     ))
                                 )}

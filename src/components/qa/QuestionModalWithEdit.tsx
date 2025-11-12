@@ -25,10 +25,14 @@ interface QuestionModalWithEditProps {
     isOpen: boolean;
     onClose: () => void;
     onSave?: (updates: Partial<BigQuestion>) => Promise<void>;
+    onEdit?: () => void;
+    onDelete?: () => void;
     onStatusChange?: (status: QuestionStatus) => void;
     onEditSubQuestion?: (id: string) => void;
+    onDeleteSubQuestion?: (id: string) => void;
     onAddAnswer?: (subQuestionId: string) => void;
     onEditAnswer?: (answerId: string) => void;
+    onDeleteAnswer?: (answerId: string) => void;
     onAddSubQuestion?: () => void;
     onSaveSubQuestion?: (id: string, updates: Partial<SubQuestion>) => Promise<void>;
     onSaveAnswer?: (id: string, content: string) => Promise<void>;
@@ -53,10 +57,14 @@ export const QuestionModalWithEdit: React.FC<QuestionModalWithEditProps> = ({
     isOpen,
     onClose,
     onSave,
+    onEdit,
+    onDelete,
     onStatusChange,
     // onEditSubQuestion,
+    onDeleteSubQuestion,
     // onAddAnswer,
     // onEditAnswer,
+    onDeleteAnswer,
     // onAddSubQuestion,
     onSaveSubQuestion,
     onSaveAnswer,
@@ -459,12 +467,33 @@ export const QuestionModalWithEdit: React.FC<QuestionModalWithEditProps> = ({
                             {question.title}
                         </h2>
 
-                        {/* 右侧：状态、关闭按钮 */}
+                        {/* 右侧：编辑、删除、状态、关闭按钮 */}
                         <div className="flex items-center gap-3">
                             {editMode !== 'view' && (
                                 <span className="text-sm text-[#666]">
                                     编辑模式
                                 </span>
+                            )}
+
+                            {editMode === 'view' && onEdit && (
+                                <Button
+                                    variant="outline"
+                                    size="small"
+                                    onClick={onEdit}
+                                >
+                                    编辑
+                                </Button>
+                            )}
+
+                            {editMode === 'view' && onDelete && (
+                                <Button
+                                    variant="outline"
+                                    size="small"
+                                    onClick={onDelete}
+                                    className="text-[#E65100] border-[#E65100] hover:bg-[#FFF3E0]"
+                                >
+                                    删除
+                                </Button>
                             )}
 
                             <Dropdown
@@ -616,11 +645,13 @@ export const QuestionModalWithEdit: React.FC<QuestionModalWithEditProps> = ({
                                                     subQuestion={subQuestion}
                                                     answers={answers[subQuestion.id] || []}
                                                     onEdit={() => startEditSubQuestion(subQuestion)}
+                                                    onDelete={onDeleteSubQuestion}
                                                     onAddAnswer={() => startAddAnswer(subQuestion.id)}
                                                     onEditAnswer={(answerId) => {
                                                         const answer = answers[subQuestion.id]?.find(a => a.id === answerId);
                                                         if (answer) startEditAnswer(answer);
                                                     }}
+                                                    onDeleteAnswer={onDeleteAnswer}
                                                 />
                                             ))
                                         )}

@@ -15,16 +15,20 @@ interface SubQuestionProps {
     subQuestion: SubQuestionType;
     answers?: TimelineAnswerType[];
     onEdit?: (id: string) => void;
+    onDelete?: (id: string) => void;
     onAddAnswer?: (subQuestionId: string) => void;
     onEditAnswer?: (answerId: string) => void;
+    onDeleteAnswer?: (answerId: string) => void;
 }
 
 export const SubQuestion: React.FC<SubQuestionProps> = ({
     subQuestion,
     answers = [],
     onEdit,
+    onDelete,
     onAddAnswer,
     onEditAnswer,
+    onDeleteAnswer,
 }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const statusConfig = STATUS_COLORS[subQuestion.status];
@@ -87,6 +91,19 @@ export const SubQuestion: React.FC<SubQuestionProps> = ({
                     编辑
                 </Button>
 
+                {/* 删除按钮 */}
+                <Button
+                    variant="text"
+                    size="small"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete?.(subQuestion.id);
+                    }}
+                    className="text-[#E65100]"
+                >
+                    删除
+                </Button>
+
                 {/* 添加回答按钮 */}
                 <Button
                     variant="outline"
@@ -114,6 +131,7 @@ export const SubQuestion: React.FC<SubQuestionProps> = ({
                                     key={answer.id}
                                     answer={answer}
                                     onEdit={onEditAnswer}
+                                    onDelete={onDeleteAnswer}
                                     showDivider={index < sortedAnswers.length - 1}
                                 />
                             ))}

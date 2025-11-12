@@ -11,12 +11,14 @@ import { Button } from '@/components/ui/Button';
 interface TimelineAnswerProps {
     answer: TimelineAnswerType;
     onEdit?: (id: string) => void;
+    onDelete?: (id: string) => void;
     showDivider?: boolean;
 }
 
 export const TimelineAnswer: React.FC<TimelineAnswerProps> = ({
     answer,
     onEdit,
+    onDelete,
     showDivider = true,
 }) => {
     // 格式化时间戳为 YYYY.MM.DD HH:MM
@@ -33,21 +35,33 @@ export const TimelineAnswer: React.FC<TimelineAnswerProps> = ({
     return (
         <div className="animate-fadeIn">
             <div className="py-4">
-                {/* 时间戳和编辑按钮 */}
+                {/* 时间戳和操作按钮 */}
                 <div className="flex items-center justify-between mb-3">
                     <span className="text-xs text-[#999]">
                         {formatTimestamp(answer.timestamp)}
                     </span>
-                    {onEdit && (
-                        <Button
-                            variant="text"
-                            size="small"
-                            onClick={() => onEdit(answer.id)}
-                            className="text-[#0047AB] text-xs"
-                        >
-                            编辑
-                        </Button>
-                    )}
+                    <div className="flex items-center gap-2">
+                        {onEdit && (
+                            <Button
+                                variant="text"
+                                size="small"
+                                onClick={() => onEdit(answer.id)}
+                                className="text-[#0047AB] text-xs"
+                            >
+                                编辑
+                            </Button>
+                        )}
+                        {onDelete && (
+                            <Button
+                                variant="text"
+                                size="small"
+                                onClick={() => onDelete(answer.id)}
+                                className="text-[#E65100] text-xs"
+                            >
+                                删除
+                            </Button>
+                        )}
+                    </div>
                 </div>
 
                 {/* 回答内容 */}

@@ -21,6 +21,7 @@ export interface EditorFormData {
 
     // 资源特定字段
     url?: string;
+    cover?: string;
     category?: string;
     tags?: string[];
     author?: string;
@@ -116,6 +117,26 @@ export const EditorForm: React.FC<EditorFormProps> = ({
                 placeholder="https://example.com"
                 fullWidth
             />
+            <Input
+                label="封面图片URL"
+                value={data.cover || ''}
+                onChange={(e) => updateField('cover', e.target.value)}
+                placeholder="https://example.com/image.jpg"
+                fullWidth
+            />
+            {data.cover && (
+                <div className="border border-[#E0E0E0] rounded p-2">
+                    <p className="text-xs text-[#666] mb-2">封面预览：</p>
+                    <img
+                        src={data.cover}
+                        alt="封面预览"
+                        className="w-full h-[180px] object-cover rounded"
+                        onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'https://via.placeholder.com/320x180/E0E0E0/666?text=图片加载失败';
+                        }}
+                    />
+                </div>
+            )}
             {categoryOptions.length > 0 && (
                 <div>
                     <label className="block text-sm font-medium text-[#333] mb-1">

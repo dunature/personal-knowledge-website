@@ -26,6 +26,11 @@ export const VideoCard: React.FC<VideoCardProps> = ({ resource, onTagClick }) =>
                     alt={title}
                     className="w-full h-full object-cover"
                     loading="lazy"
+                    onError={(e) => {
+                        // 图片加载失败时使用纯色背景
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                    }}
                 />
 
                 {/* 播放按钮 */}

@@ -7,11 +7,14 @@ import React, { useState } from 'react';
 import { ResourceSection } from '@/components/layout/ResourceSection';
 import { QASection } from '@/components/layout/QASection';
 import { QuestionModalWithEdit } from '@/components/qa/QuestionModalWithEdit';
+import { EditorDrawer } from '@/components/editor/EditorDrawer';
+import { EditorForm } from '@/components/editor/EditorForm';
 import { ResourceProvider } from '@/contexts/ResourceContext';
 import { QAProvider } from '@/contexts/QAContext';
 import type { Resource } from '@/types/resource';
 import type { BigQuestion, SubQuestion, TimelineAnswer } from '@/types/question';
 import type { Category } from '@/components/resource/CategoryFilter';
+import { generatePlaceholder, PLACEHOLDER_COLORS } from '@/utils/placeholderUtils';
 
 // 示例数据
 const sampleResources: Resource[] = [
@@ -20,10 +23,10 @@ const sampleResources: Resource[] = [
         title: 'Deep Dive into React Hooks',
         url: 'https://youtube.com/watch?v=example',
         type: 'youtube_video',
-        cover: 'https://via.placeholder.com/320x180/0047AB/FFFFFF?text=React+Hooks',
+        cover: generatePlaceholder({ backgroundColor: PLACEHOLDER_COLORS.blue, text: 'React Hooks' }),
         platform: 'YouTube',
         content_tags: ['Fundamentals', 'Tutorial', 'Deep Dive'],
-        category: 'AI学习',
+        category: '编程',
         author: 'Tech Channel',
         recommendation: '深入讲解React Hooks的最佳实践',
         metadata: { duration: '45:30' },
@@ -35,7 +38,7 @@ const sampleResources: Resource[] = [
         title: 'TypeScript Best Practices',
         url: 'https://blog.example.com/typescript',
         type: 'blog',
-        cover: 'https://via.placeholder.com/320x180/2E7D32/FFFFFF?text=TypeScript',
+        cover: generatePlaceholder({ backgroundColor: PLACEHOLDER_COLORS.green, text: 'TypeScript' }),
         platform: 'Medium',
         content_tags: ['Fundamentals', 'Best Practices'],
         category: '编程',
@@ -50,7 +53,7 @@ const sampleResources: Resource[] = [
         title: 'Awesome React Components',
         url: 'https://github.com/example/awesome-react',
         type: 'github',
-        cover: 'https://via.placeholder.com/320x180/E65100/FFFFFF?text=GitHub+Repo',
+        cover: generatePlaceholder({ backgroundColor: PLACEHOLDER_COLORS.orange, text: 'GitHub Repo' }),
         platform: 'GitHub',
         content_tags: ['Library', 'Framework'],
         category: '编程',
@@ -158,6 +161,13 @@ export const HomePage: React.FC = () => {
     const [questions, setQuestions] = useState<BigQuestion[]>(sampleQuestions);
     const [subQuestions, setSubQuestions] = useState<SubQuestion[]>(sampleSubQuestions);
     const [answers, setAnswers] = useState<TimelineAnswer[]>(sampleAnswers);
+    const [resources, setResources] = useState<Resource[]>(sampleResources);
+
+    // 编辑器抽屉状态
+    const [isEditorOpen, setIsEditorOpen] = useState(false);
+    const [editorType, setEditorType] = useState<'resource' | 'question' | 'subQuestion' | 'answer' | 'summary'>('resource');
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editorData, setEditorData] = useState<any>({});
 
     // 小问题数量统计
     const subQuestionCounts = questions.reduce((acc, q) => {
@@ -260,6 +270,242 @@ export const HomePage: React.FC = () => {
         ));
     };
 
+    // ========== 资源CRUD功能 ==========
+
+    // 添加资源
+    const handleAddResource = () => {
+        setEditorType('resource');
+        setEditingId(null);
+        setEditorData({
+            title: '',
+            url: '',
+            category: categories[1]?.id || '',
+            author: '',
+            recommendation: '',
+        });
+        setIsEditorOpen(true);
+    };
+
+    // 编辑资源
+    const handleEditResource = (id: string) => {
+        const resource = resources.find(r => r.id === id);
+        if (!resource) return;
+
+        setEditorType('resource');
+        setEditingId(id);
+        setEditorData({
+            title: resource.title,
+            url: resource.url,
+            cover: resource.cover,
+            category: resource.category,
+            author: resource.author,
+            recommendation: resource.recommendation,
+            tags: resource.content_tags,
+        });
+        setIsEditorOpen(true);
+    };
+
+    // 删除资源
+    const handleDeleteResource = (id: string) => {
+        if (confirm('确定要删除这个资源吗？')) {
+            setResources(prev => prev.filter(r => r.id !== id));
+        }
+    };
+
+    // 保存资源
+    const handleSaveResource = () => {
+        if (!editorData.title || !editorData.url) {
+            alert('请填写标题和链接');
+            return;
+        }
+
+        if (editingId) {
+            // 更新现有资源
+            setResources(prev => prev.map(r =>
+                r.id === editingId
+                    ? {
+                        ...r,
+                        title: editorData.title,
+                        url: editorData.url,
+                        cover: editorData.cover || r.cover,
+                        category: editorData.category || r.category,
+                        author: editorData.author || r.author,
+                        recommendation: editorData.recommendation || r.recommendation,
+                        content_tags: editorData.tags || r.content_tags,
+                        updated_at: new Date().toISOString(),
+                    }
+                    : r
+            ));
+        } else {
+            // 创建新资源
+            const newResource: Resource = {
+                id: `res_${Date.now()}`,
+                title: editorData.title,
+                url: editorData.url,
+                type: 'blog', // 默认类型
+                cover: editorData.cover || 'https://via.placeholder.com/320x180/0047AB/FFFFFF?text=New+Resource',
+                platform: 'Web',
+                content_tags: editorData.tags || [],
+                category: editorData.category || '其他',
+                author: editorData.author || '未知',
+                recommendation: editorData.recommendation || '',
+                metadata: {},
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            };
+            setResources(prev => [...prev, newResource]);
+        }
+
+        setIsEditorOpen(false);
+    };
+
+    // ========== 大问题CRUD功能 ==========
+
+    // 添加大问题
+    const handleAddQuestion = () => {
+        setEditorType('question');
+        setEditingId(null);
+        setEditorData({
+            title: '',
+            description: '',
+            category: '技术',
+            status: 'unsolved',
+        });
+        setIsEditorOpen(true);
+    };
+
+    // 编辑大问题
+    const handleEditQuestion = (id: string) => {
+        const question = questions.find(q => q.id === id);
+        if (!question) return;
+
+        setEditorType('question');
+        setEditingId(id);
+        setEditorData({
+            title: question.title,
+            description: question.description,
+            category: question.category,
+            status: question.status,
+        });
+        setIsEditorOpen(true);
+    };
+
+    // 删除大问题
+    const handleDeleteQuestion = (id: string) => {
+        if (confirm('确定要删除这个大问题吗？相关的小问题和回答也会被删除。')) {
+            setQuestions(prev => prev.filter(q => q.id !== id));
+            setSubQuestions(prev => prev.filter(sq => sq.parent_id !== id));
+            // 删除相关回答
+            const subQuestionIds = subQuestions
+                .filter(sq => sq.parent_id === id)
+                .map(sq => sq.id);
+            setAnswers(prev => prev.filter(a => !subQuestionIds.includes(a.question_id)));
+
+            // 如果当前打开的就是这个问题，关闭弹窗
+            if (selectedQuestionId === id) {
+                setSelectedQuestionId(null);
+            }
+        }
+    };
+
+    // 保存大问题
+    const handleSaveQuestion = () => {
+        if (!editorData.title) {
+            alert('请填写问题标题');
+            return;
+        }
+
+        if (editingId) {
+            // 更新现有问题
+            setQuestions(prev => prev.map(q =>
+                q.id === editingId
+                    ? {
+                        ...q,
+                        title: editorData.title,
+                        description: editorData.description || q.description,
+                        category: editorData.category || q.category,
+                        status: editorData.status || q.status,
+                        updated_at: new Date().toISOString(),
+                    }
+                    : q
+            ));
+        } else {
+            // 创建新问题
+            const newQuestion: BigQuestion = {
+                id: `q_${Date.now()}`,
+                title: editorData.title,
+                description: editorData.description || '',
+                status: editorData.status || 'unsolved',
+                category: editorData.category || '技术',
+                summary: '',
+                sub_questions: [],
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            };
+            setQuestions(prev => [...prev, newQuestion]);
+        }
+
+        setIsEditorOpen(false);
+    };
+
+    // ========== 小问题删除功能 ==========
+
+    const handleDeleteSubQuestion = (id: string) => {
+        if (confirm('确定要删除这个小问题吗？相关的回答也会被删除。')) {
+            const subQuestion = subQuestions.find(sq => sq.id === id);
+            setSubQuestions(prev => prev.filter(sq => sq.id !== id));
+
+            // 从父问题的sub_questions数组中移除
+            if (subQuestion) {
+                setQuestions(prev => prev.map(q =>
+                    q.id === subQuestion.parent_id
+                        ? {
+                            ...q,
+                            sub_questions: q.sub_questions.filter(sqId => sqId !== id),
+                            updated_at: new Date().toISOString(),
+                        }
+                        : q
+                ));
+            }
+
+            // 删除相关回答
+            setAnswers(prev => prev.filter(a => a.question_id !== id));
+        }
+    };
+
+    // ========== 回答删除功能 ==========
+
+    const handleDeleteAnswer = (id: string) => {
+        if (confirm('确定要删除这个回答吗？')) {
+            const answer = answers.find(a => a.id === id);
+            setAnswers(prev => prev.filter(a => a.id !== id));
+
+            // 从小问题的answers数组中移除
+            if (answer) {
+                setSubQuestions(prev => prev.map(sq =>
+                    sq.id === answer.question_id
+                        ? { ...sq, answers: sq.answers.filter(aId => aId !== id) }
+                        : sq
+                ));
+            }
+        }
+    };
+
+    // ========== 编辑器保存功能 ==========
+
+    const handleEditorSave = () => {
+        switch (editorType) {
+            case 'resource':
+                handleSaveResource();
+                break;
+            case 'question':
+                handleSaveQuestion();
+                break;
+            default:
+                setIsEditorOpen(false);
+        }
+    };
+
     return (
         <ResourceProvider initialResources={sampleResources}>
             <QAProvider
@@ -283,10 +529,11 @@ export const HomePage: React.FC = () => {
                         {/* 资源导航区域 */}
                         <section className="mb-16">
                             <ResourceSection
-                                resources={sampleResources}
+                                resources={resources}
                                 categories={categories}
-                                onEdit={(id) => alert(`编辑资源: ${id}`)}
-                                onDelete={(id) => alert(`删除资源: ${id}`)}
+                                onEdit={handleEditResource}
+                                onDelete={handleDeleteResource}
+                                onAdd={handleAddResource}
                                 onTagClick={(tag) => console.log(`点击标签: ${tag}`)}
                             />
                         </section>
@@ -297,6 +544,7 @@ export const HomePage: React.FC = () => {
                                 questions={questions}
                                 subQuestionCounts={subQuestionCounts}
                                 onQuestionClick={(id) => setSelectedQuestionId(id)}
+                                onAddQuestion={handleAddQuestion}
                             />
                         </section>
                     </main>
@@ -316,12 +564,35 @@ export const HomePage: React.FC = () => {
                             onClose={() => setSelectedQuestionId(null)}
                             onSave={handleUpdateQuestion}
                             onStatusChange={handleStatusChange}
+                            onEdit={() => handleEditQuestion(selectedQuestionId!)}
+                            onDelete={() => handleDeleteQuestion(selectedQuestionId!)}
                             onSaveSubQuestion={handleSaveSubQuestion}
                             onCreateSubQuestion={handleCreateSubQuestion}
+                            onDeleteSubQuestion={handleDeleteSubQuestion}
                             onSaveAnswer={handleSaveAnswer}
                             onCreateAnswer={handleCreateAnswer}
+                            onDeleteAnswer={handleDeleteAnswer}
                         />
                     )}
+
+                    {/* 编辑器抽屉 */}
+                    <EditorDrawer
+                        isOpen={isEditorOpen}
+                        onClose={() => setIsEditorOpen(false)}
+                        onSave={handleEditorSave}
+                        title={
+                            editorType === 'resource'
+                                ? editingId ? '编辑资源' : '添加资源'
+                                : editingId ? '编辑大问题' : '添加大问题'
+                        }
+                    >
+                        <EditorForm
+                            type={editorType}
+                            data={editorData}
+                            onChange={setEditorData}
+                            categories={categories.map(c => c.id).filter(id => id)}
+                        />
+                    </EditorDrawer>
                 </div>
             </QAProvider>
         </ResourceProvider>

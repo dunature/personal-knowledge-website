@@ -18,6 +18,7 @@ interface ResourceSectionProps {
     categories?: Category[];
     onEdit?: (id: string) => void;
     onDelete?: (id: string) => void;
+    onAdd?: () => void;
     onTagClick?: (tag: string) => void;
 }
 
@@ -26,6 +27,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
     categories = [],
     onEdit,
     onDelete,
+    onAdd,
     onTagClick,
 }) => {
     const [isExpanded, setIsExpanded] = useState(false);
@@ -189,11 +191,23 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
 
             {/* 搜索和排序栏 - 仅在展开模式显示 */}
             {isExpanded && (
-                <div className="animate-fadeIn">
+                <div className="mb-6 animate-fadeIn">
                     <SearchBar
                         onSearch={handleSearch}
                         onSortChange={handleSortChange}
                     />
+
+                    {/* 添加资源按钮 */}
+                    {onAdd && (
+                        <div className="flex justify-center mt-4">
+                            <Button
+                                variant="primary"
+                                onClick={onAdd}
+                            >
+                                + 添加资源
+                            </Button>
+                        </div>
+                    )}
                 </div>
             )}
 

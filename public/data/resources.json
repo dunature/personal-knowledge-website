@@ -4,7 +4,7 @@
         "title": "React Hooks 完全指南",
         "url": "https://www.youtube.com/watch?v=dpw9EHDh2bM",
         "type": "youtube_video",
-        "cover": "https://i.ytimg.com/vi/dpw9EHDh2bM/maxresdefault.jpg",
+        "cover": "https://via.placeholder.com/320x180/0047AB/FFFFFF?text=React+Hooks",
         "platform": "YouTube",
         "content_tags": [
             "React",
@@ -26,7 +26,7 @@
         "title": "TypeScript 最佳实践 2024",
         "url": "https://blog.logrocket.com/typescript-best-practices-2024/",
         "type": "blog",
-        "cover": "https://blog.logrocket.com/wp-content/uploads/2024/01/typescript-best-practices.png",
+        "cover": "https://via.placeholder.com/320x180/2E7D32/FFFFFF?text=TypeScript",
         "platform": "LogRocket Blog",
         "content_tags": [
             "TypeScript",
@@ -48,7 +48,7 @@
         "title": "awesome-react",
         "url": "https://github.com/enaqx/awesome-react",
         "type": "github",
-        "cover": "https://opengraph.githubassets.com/awesome-react",
+        "cover": "https://via.placeholder.com/320x180/E65100/FFFFFF?text=GitHub+Repo",
         "platform": "GitHub",
         "content_tags": [
             "React",
@@ -71,7 +71,7 @@
         "title": "CSS 动画技巧分享",
         "url": "https://www.bilibili.com/video/BV1234567890",
         "type": "bilibili_video",
-        "cover": "https://i0.hdslb.com/bfs/archive/placeholder.jpg",
+        "cover": "https://via.placeholder.com/320x180/9C27B0/FFFFFF?text=CSS+Animation",
         "platform": "Bilibili",
         "content_tags": [
             "CSS",
@@ -93,7 +93,7 @@
         "title": "Figma 设计系统搭建",
         "url": "https://www.figma.com/community/file/design-system-example",
         "type": "tool",
-        "cover": "https://cdn.figma.com/design-system-cover.png",
+        "cover": "https://via.placeholder.com/320x180/FF5722/FFFFFF?text=Figma+Design",
         "platform": "Figma",
         "content_tags": [
             "设计系统",
@@ -115,7 +115,7 @@
         "title": "AI 提示词工程完全指南",
         "url": "https://www.youtube.com/watch?v=ai-prompts-guide",
         "type": "youtube_video",
-        "cover": "https://i.ytimg.com/vi/ai-prompts-guide/maxresdefault.jpg",
+        "cover": "https://via.placeholder.com/320x180/00BCD4/FFFFFF?text=AI+Prompts",
         "platform": "YouTube",
         "content_tags": [
             "AI",
@@ -137,7 +137,7 @@
         "title": "机器学习入门笔记",
         "url": "https://medium.com/@ml-beginner/machine-learning-notes",
         "type": "blog",
-        "cover": "https://miro.medium.com/max/1400/ml-notes-cover.jpg",
+        "cover": "https://via.placeholder.com/320x180/4CAF50/FFFFFF?text=Machine+Learning",
         "platform": "Medium",
         "content_tags": [
             "机器学习",
@@ -159,7 +159,7 @@
         "title": "Notion 使用技巧合集",
         "url": "https://www.notion.so/templates/productivity-tips",
         "type": "tool",
-        "cover": "https://www.notion.so/images/productivity-cover.png",
+        "cover": "https://via.placeholder.com/320x180/607D8B/FFFFFF?text=Notion+Tips",
         "platform": "Notion",
         "content_tags": [
             "生产力",

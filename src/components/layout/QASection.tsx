@@ -14,12 +14,14 @@ interface QASectionProps {
     questions: BigQuestion[];
     subQuestionCounts?: Record<string, number>;
     onQuestionClick: (id: string) => void;
+    onAddQuestion?: () => void;
 }
 
 export const QASection: React.FC<QASectionProps> = ({
     questions,
     subQuestionCounts = {},
     onQuestionClick,
+    onAddQuestion,
 }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState<QuestionStatus | 'all'>('all');
@@ -99,32 +101,30 @@ export const QASection: React.FC<QASectionProps> = ({
                 </div>
             )}
 
-            {/* 展开模式下的筛选和排序功能 */}
-            {isExpanded && (
-                <div className="mt-6 space-y-4 animate-fadeIn">
-                    {categories.length > 0 && (
-                        <QuestionFilter
-                            selectedStatus={selectedStatus}
-                            selectedCategory={selectedCategory}
-                            sortOption={sortOption}
-                            categories={categories}
-                            onStatusChange={setSelectedStatus}
-                            onCategoryChange={setSelectedCategory}
-                            onSortChange={setSortOption}
-                        />
-                    )}
+            {/* 添加大问题按钮 - 始终显示 */}
+            {onAddQuestion && (
+                <div className="flex justify-center mt-6">
+                    <Button
+                        variant="primary"
+                        onClick={onAddQuestion}
+                    >
+                        + 添加大问题
+                    </Button>
+                </div>
+            )}
 
-                    {/* 添加大问题按钮 */}
-                    <div className="flex justify-center">
-                        <Button
-                            variant="primary"
-                            onClick={() => {
-                                alert('添加大问题功能');
-                            }}
-                        >
-                            + 添加大问题
-                        </Button>
-                    </div>
+            {/* 展开模式下的筛选和排序功能 */}
+            {isExpanded && categories.length > 0 && (
+                <div className="mt-6 animate-fadeIn">
+                    <QuestionFilter
+                        selectedStatus={selectedStatus}
+                        selectedCategory={selectedCategory}
+                        sortOption={sortOption}
+                        categories={categories}
+                        onStatusChange={setSelectedStatus}
+                        onCategoryChange={setSelectedCategory}
+                        onSortChange={setSortOption}
+                    />
                 </div>
             )}
         </section>
