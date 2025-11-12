@@ -1,0 +1,179 @@
+[
+    {
+        "id": "res_001",
+        "title": "React Hooks 完全指南",
+        "url": "https://www.youtube.com/watch?v=dpw9EHDh2bM",
+        "type": "youtube_video",
+        "cover": "https://i.ytimg.com/vi/dpw9EHDh2bM/maxresdefault.jpg",
+        "platform": "YouTube",
+        "content_tags": [
+            "React",
+            "Hooks",
+            "前端开发"
+        ],
+        "category": "编程",
+        "author": "Codevolution",
+        "recommendation": "深入浅出讲解 React Hooks，适合初学者和进阶开发者",
+        "metadata": {
+            "duration": "45:30",
+            "views": "125K"
+        },
+        "created_at": "2024-01-15T10:00:00Z",
+        "updated_at": "2024-01-15T10:00:00Z"
+    },
+    {
+        "id": "res_002",
+        "title": "TypeScript 最佳实践 2024",
+        "url": "https://blog.logrocket.com/typescript-best-practices-2024/",
+        "type": "blog",
+        "cover": "https://blog.logrocket.com/wp-content/uploads/2024/01/typescript-best-practices.png",
+        "platform": "LogRocket Blog",
+        "content_tags": [
+            "TypeScript",
+            "最佳实践",
+            "代码质量"
+        ],
+        "category": "编程",
+        "author": "John Doe",
+        "recommendation": "总结了 TypeScript 开发中的常见陷阱和最佳实践，值得收藏",
+        "metadata": {
+            "read_time": 12,
+            "published_date": "2024-01-10"
+        },
+        "created_at": "2024-01-10T10:00:00Z",
+        "updated_at": "2024-01-10T10:00:00Z"
+    },
+    {
+        "id": "res_003",
+        "title": "awesome-react",
+        "url": "https://github.com/enaqx/awesome-react",
+        "type": "github",
+        "cover": "https://opengraph.githubassets.com/awesome-react",
+        "platform": "GitHub",
+        "content_tags": [
+            "React",
+            "资源合集",
+            "开源"
+        ],
+        "category": "编程",
+        "author": "enaqx",
+        "recommendation": "精选的 React 生态系统资源列表，包含组件库、工具、教程等",
+        "metadata": {
+            "stars": 58000,
+            "language": "JavaScript",
+            "last_updated": "2024-01-20"
+        },
+        "created_at": "2024-01-05T10:00:00Z",
+        "updated_at": "2024-01-05T10:00:00Z"
+    },
+    {
+        "id": "res_004",
+        "title": "CSS 动画技巧分享",
+        "url": "https://www.bilibili.com/video/BV1234567890",
+        "type": "bilibili_video",
+        "cover": "https://i0.hdslb.com/bfs/archive/placeholder.jpg",
+        "platform": "Bilibili",
+        "content_tags": [
+            "CSS",
+            "动画",
+            "前端"
+        ],
+        "category": "设计",
+        "author": "前端小课",
+        "recommendation": "讲解了多种 CSS 动画技巧，配合实例演示，非常实用",
+        "metadata": {
+            "duration": "28:15",
+            "views": "45K"
+        },
+        "created_at": "2024-01-12T10:00:00Z",
+        "updated_at": "2024-01-12T10:00:00Z"
+    },
+    {
+        "id": "res_005",
+        "title": "Figma 设计系统搭建",
+        "url": "https://www.figma.com/community/file/design-system-example",
+        "type": "tool",
+        "cover": "https://cdn.figma.com/design-system-cover.png",
+        "platform": "Figma",
+        "content_tags": [
+            "设计系统",
+            "UI/UX",
+            "Figma"
+        ],
+        "category": "设计",
+        "author": "Figma Team",
+        "recommendation": "完整的设计系统模板，包含组件库、颜色规范、字体规范等",
+        "metadata": {
+            "price": "免费",
+            "rating": 4.8
+        },
+        "created_at": "2024-01-08T10:00:00Z",
+        "updated_at": "2024-01-08T10:00:00Z"
+    },
+    {
+        "id": "res_006",
+        "title": "AI 提示词工程完全指南",
+        "url": "https://www.youtube.com/watch?v=ai-prompts-guide",
+        "type": "youtube_video",
+        "cover": "https://i.ytimg.com/vi/ai-prompts-guide/maxresdefault.jpg",
+        "platform": "YouTube",
+        "content_tags": [
+            "AI",
+            "ChatGPT",
+            "提示词"
+        ],
+        "category": "AI学习",
+        "author": "AI Explained",
+        "recommendation": "系统讲解如何编写高质量的 AI 提示词，提升 AI 使用效率",
+        "metadata": {
+            "duration": "52:40",
+            "views": "230K"
+        },
+        "created_at": "2024-01-18T10:00:00Z",
+        "updated_at": "2024-01-18T10:00:00Z"
+    },
+    {
+        "id": "res_007",
+        "title": "机器学习入门笔记",
+        "url": "https://medium.com/@ml-beginner/machine-learning-notes",
+        "type": "blog",
+        "cover": "https://miro.medium.com/max/1400/ml-notes-cover.jpg",
+        "platform": "Medium",
+        "content_tags": [
+            "机器学习",
+            "Python",
+            "数据科学"
+        ],
+        "category": "AI学习",
+        "author": "ML Beginner",
+        "recommendation": "从零开始的机器学习笔记，配合代码示例，易于理解",
+        "metadata": {
+            "read_time": 15,
+            "published_date": "2024-01-14"
+        },
+        "created_at": "2024-01-14T10:00:00Z",
+        "updated_at": "2024-01-14T10:00:00Z"
+    },
+    {
+        "id": "res_008",
+        "title": "Notion 使用技巧合集",
+        "url": "https://www.notion.so/templates/productivity-tips",
+        "type": "tool",
+        "cover": "https://www.notion.so/images/productivity-cover.png",
+        "platform": "Notion",
+        "content_tags": [
+            "生产力",
+            "笔记",
+            "工作流"
+        ],
+        "category": "工具",
+        "author": "Notion Team",
+        "recommendation": "Notion 官方整理的生产力模板和使用技巧，提升工作效率",
+        "metadata": {
+            "price": "免费",
+            "rating": 4.9
+        },
+        "created_at": "2024-01-16T10:00:00Z",
+        "updated_at": "2024-01-16T10:00:00Z"
+    }
+]

@@ -1,0 +1,170 @@
+{
+    "bigQuestions": [
+        {
+            "id": "q_001",
+            "title": "如何搭建个人博客网站？",
+            "description": "我想搭建一个个人博客用于记录学习笔记和技术文章，需要考虑哪些技术栈？有哪些部署方案？",
+            "status": "solved",
+            "category": "技术",
+            "summary": "最终选择了 Hugo + GitHub Pages 方案。Hugo 构建速度快，主题丰富；GitHub Pages 免费且稳定。整个流程包括：选择静态网站生成器、配置主题、编写内容、自动化部署。",
+            "sub_questions": [
+                "sq_001",
+                "sq_002",
+                "sq_003"
+            ],
+            "created_at": "2024-01-01T10:00:00Z",
+            "updated_at": "2024-01-20T10:00:00Z"
+        },
+        {
+            "id": "q_002",
+            "title": "React 性能优化最佳实践",
+            "description": "在大型 React 应用中，如何进行性能优化？有哪些常见的性能瓶颈和解决方案？",
+            "status": "solving",
+            "category": "技术",
+            "summary": "",
+            "sub_questions": [
+                "sq_004",
+                "sq_005"
+            ],
+            "created_at": "2023-12-20T10:00:00Z",
+            "updated_at": "2024-01-18T10:00:00Z"
+        },
+        {
+            "id": "q_003",
+            "title": "TypeScript 类型系统深入理解",
+            "description": "TypeScript 的高级类型如何使用？泛型、条件类型、映射类型等概念如何应用到实际项目中？",
+            "status": "unsolved",
+            "category": "技术",
+            "summary": "",
+            "sub_questions": [],
+            "created_at": "2024-01-20T10:00:00Z",
+            "updated_at": "2024-01-20T10:00:00Z"
+        }
+    ],
+    "subQuestions": [
+        {
+            "id": "sq_001",
+            "parent_id": "q_001",
+            "title": "选择什么静态网站生成器？",
+            "status": "solved",
+            "answers": [
+                "ans_001",
+                "ans_002"
+            ],
+            "created_at": "2024-01-01T10:00:00Z",
+            "updated_at": "2024-01-05T10:00:00Z"
+        },
+        {
+            "id": "sq_002",
+            "parent_id": "q_001",
+            "title": "如何部署到 GitHub Pages？",
+            "status": "solved",
+            "answers": [
+                "ans_003",
+                "ans_004"
+            ],
+            "created_at": "2024-01-05T10:00:00Z",
+            "updated_at": "2024-01-15T10:00:00Z"
+        },
+        {
+            "id": "sq_003",
+            "parent_id": "q_001",
+            "title": "如何配置自定义域名？",
+            "status": "solved",
+            "answers": [
+                "ans_005"
+            ],
+            "created_at": "2024-01-15T10:00:00Z",
+            "updated_at": "2024-01-20T10:00:00Z"
+        },
+        {
+            "id": "sq_004",
+            "parent_id": "q_002",
+            "title": "如何使用 React.memo 优化组件？",
+            "status": "solved",
+            "answers": [
+                "ans_006",
+                "ans_007"
+            ],
+            "created_at": "2023-12-20T10:00:00Z",
+            "updated_at": "2024-01-10T10:00:00Z"
+        },
+        {
+            "id": "sq_005",
+            "parent_id": "q_002",
+            "title": "虚拟列表如何实现？",
+            "status": "solving",
+            "answers": [
+                "ans_008"
+            ],
+            "created_at": "2024-01-10T10:00:00Z",
+            "updated_at": "2024-01-18T10:00:00Z"
+        }
+    ],
+    "answers": [
+        {
+            "id": "ans_001",
+            "question_id": "sq_001",
+            "content": "调研了三个主流的静态网站生成器：\n\n1. **Jekyll** - Ruby 编写，GitHub Pages 原生支持\n2. **Hugo** - Go 编写，构建速度最快\n3. **Hexo** - Node.js 编写，中文社区活跃\n\n初步倾向于 Hugo，因为构建速度快，主题丰富。",
+            "timestamp": "2024-01-02T10:00:00Z",
+            "created_at": "2024-01-02T10:00:00Z",
+            "updated_at": "2024-01-02T10:00:00Z"
+        },
+        {
+            "id": "ans_002",
+            "question_id": "sq_001",
+            "content": "最终选择了 **Hugo**！\n\n优点：\n- 构建速度极快（毫秒级）\n- 主题丰富，文档完善\n- 支持多语言\n- 活跃的社区\n\n已经安装并创建了第一个站点，效果不错。",
+            "timestamp": "2024-01-05T10:00:00Z",
+            "created_at": "2024-01-05T10:00:00Z",
+            "updated_at": "2024-01-05T10:00:00Z"
+        },
+        {
+            "id": "ans_003",
+            "question_id": "sq_002",
+            "content": "使用 **GitHub Actions** 自动部署到 GitHub Pages。\n\n步骤：\n1. 在仓库中创建 `.github/workflows/deploy.yml`\n2. 配置 Hugo 构建和部署流程\n3. 推送代码后自动触发部署\n\n参考了官方文档，配置很简单。",
+            "timestamp": "2024-01-10T10:00:00Z",
+            "created_at": "2024-01-10T10:00:00Z",
+            "updated_at": "2024-01-10T10:00:00Z"
+        },
+        {
+            "id": "ans_004",
+            "question_id": "sq_002",
+            "content": "部署成功！网站已经可以通过 `username.github.io` 访问。\n\n遇到的问题：\n- 初次部署时 CSS 样式没有加载，原因是 `baseURL` 配置错误\n- 修改配置后重新部署，问题解决\n\n现在可以正常访问了。",
+            "timestamp": "2024-01-15T10:00:00Z",
+            "created_at": "2024-01-15T10:00:00Z",
+            "updated_at": "2024-01-15T10:00:00Z"
+        },
+        {
+            "id": "ans_005",
+            "question_id": "sq_003",
+            "content": "配置自定义域名的步骤：\n\n1. 在域名提供商处添加 CNAME 记录，指向 `username.github.io`\n2. 在 GitHub 仓库的 `static` 目录下创建 `CNAME` 文件，内容为自定义域名\n3. 在 GitHub Pages 设置中启用自定义域名\n4. 等待 DNS 生效（通常几分钟到几小时）\n\n配置完成后，可以通过自定义域名访问博客了！",
+            "timestamp": "2024-01-20T10:00:00Z",
+            "created_at": "2024-01-20T10:00:00Z",
+            "updated_at": "2024-01-20T10:00:00Z"
+        },
+        {
+            "id": "ans_006",
+            "question_id": "sq_004",
+            "content": "学习了 `React.memo` 的使用方法：\n\n```jsx\nconst MyComponent = React.memo(({ data }) => {\n  return <div>{data}</div>;\n});\n```\n\n`React.memo` 会对 props 进行浅比较，如果 props 没有变化，就不会重新渲染组件。\n\n注意事项：\n- 只对 props 进行浅比较\n- 可以传入自定义比较函数\n- 不要过度使用，会增加内存开销",
+            "timestamp": "2024-01-05T10:00:00Z",
+            "created_at": "2024-01-05T10:00:00Z",
+            "updated_at": "2024-01-05T10:00:00Z"
+        },
+        {
+            "id": "ans_007",
+            "question_id": "sq_004",
+            "content": "在项目中应用了 `React.memo`，性能提升明显！\n\n优化前：\n- 列表滚动时，所有列表项都会重新渲染\n- 帧率下降到 30fps\n\n优化后：\n- 只有可见区域的列表项会渲染\n- 帧率稳定在 60fps\n\n配合 `useMemo` 和 `useCallback` 使用效果更好。",
+            "timestamp": "2024-01-10T10:00:00Z",
+            "created_at": "2024-01-10T10:00:00Z",
+            "updated_at": "2024-01-10T10:00:00Z"
+        },
+        {
+            "id": "ans_008",
+            "question_id": "sq_005",
+            "content": "开始研究虚拟列表的实现原理：\n\n核心思路：\n1. 只渲染可见区域的列表项\n2. 使用绝对定位模拟滚动\n3. 监听滚动事件，动态计算可见区域\n\n找到了几个优秀的库：\n- `react-window` - 轻量级，性能好\n- `react-virtualized` - 功能丰富，但体积较大\n\n准备先用 `react-window` 试试。",
+            "timestamp": "2024-01-18T10:00:00Z",
+            "created_at": "2024-01-18T10:00:00Z",
+            "updated_at": "2024-01-18T10:00:00Z"
+        }
+    ]
+}

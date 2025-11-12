@@ -1,0 +1,54 @@
+{
+    "resourceCategories": [
+        {
+            "id": "programming",
+            "name": "编程",
+            "description": "编程语言、框架、工具等技术资源",
+            "color": "#0047AB"
+        },
+        {
+            "id": "design",
+            "name": "设计",
+            "description": "UI/UX设计、平面设计、设计工具等",
+            "color": "#E91E63"
+        },
+        {
+            "id": "ai",
+            "name": "AI学习",
+            "description": "人工智能、机器学习、深度学习等",
+            "color": "#9C27B0"
+        },
+        {
+            "id": "tools",
+            "name": "工具",
+            "description": "生产力工具、开发工具、效率工具等",
+            "color": "#FF9800"
+        }
+    ],
+    "questionCategories": [
+        {
+            "id": "tech",
+            "name": "技术",
+            "description": "技术相关的问题和解决方案",
+            "color": "#0047AB"
+        },
+        {
+            "id": "career",
+            "name": "职业",
+            "description": "职业发展、求职、面试等",
+            "color": "#4CAF50"
+        },
+        {
+            "id": "learning",
+            "name": "学习",
+            "description": "学习方法、资源推荐等",
+            "color": "#2196F3"
+        },
+        {
+            "id": "life",
+            "name": "生活",
+            "description": "生活相关的问题和经验",
+            "color": "#FF5722"
+        }
+    ]
+}

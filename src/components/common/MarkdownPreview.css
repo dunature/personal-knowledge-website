@@ -1,0 +1,182 @@
+/**
+ * Markdown预览样式
+ * 为渲染的Markdown内容提供美观的样式
+ */
+
+.markdown-preview {
+    padding: 16px;
+    color: #333;
+}
+
+/* 标题 */
+.markdown-preview h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-top: 24px;
+    margin-bottom: 16px;
+    color: #0047AB;
+    border-bottom: 2px solid #E0E0E0;
+    padding-bottom: 8px;
+}
+
+.markdown-preview h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 12px;
+    color: #0047AB;
+}
+
+.markdown-preview h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-top: 16px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.markdown-preview h4 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 14px;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.markdown-preview h5,
+.markdown-preview h6 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 12px;
+    margin-bottom: 6px;
+    color: #333;
+}
+
+/* 段落 */
+.markdown-preview p {
+    margin-bottom: 12px;
+    line-height: 1.6;
+}
+
+/* 列表 */
+.markdown-preview ul,
+.markdown-preview ol {
+    margin-bottom: 12px;
+    padding-left: 24px;
+}
+
+.markdown-preview li {
+    margin-bottom: 6px;
+    line-height: 1.6;
+}
+
+.markdown-preview ul {
+    list-style-type: disc;
+}
+
+.markdown-preview ol {
+    list-style-type: decimal;
+}
+
+/* 代码 */
+.markdown-preview code {
+    background-color: #F5F5F5;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    color: #E65100;
+}
+
+.markdown-preview pre {
+    background-color: #F5F5F5;
+    border: 1px solid #E0E0E0;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+    overflow-x: auto;
+}
+
+.markdown-preview pre code {
+    background-color: transparent;
+    padding: 0;
+    color: inherit;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* 引用 */
+.markdown-preview blockquote {
+    border-left: 4px solid #0047AB;
+    padding-left: 16px;
+    margin: 12px 0;
+    color: #666;
+    font-style: italic;
+}
+
+/* 链接 */
+.markdown-preview a {
+    color: #0047AB;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
+}
+
+.markdown-preview a:hover {
+    border-bottom-color: #0047AB;
+}
+
+/* 图片 */
+.markdown-preview img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    margin: 12px 0;
+}
+
+/* 表格 */
+.markdown-preview table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 12px;
+}
+
+.markdown-preview th,
+.markdown-preview td {
+    border: 1px solid #E0E0E0;
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.markdown-preview th {
+    background-color: #F5F5F5;
+    font-weight: 600;
+}
+
+/* 水平线 */
+.markdown-preview hr {
+    border: none;
+    border-top: 2px solid #E0E0E0;
+    margin: 20px 0;
+}
+
+/* 任务列表 */
+.markdown-preview input[type="checkbox"] {
+    margin-right: 6px;
+}
+
+/* 强调 */
+.markdown-preview strong {
+    font-weight: 700;
+    color: #333;
+}
+
+.markdown-preview em {
+    font-style: italic;
+}
+
+/* 删除线 */
+.markdown-preview del {
+    text-decoration: line-through;
+    color: #999;
+}
