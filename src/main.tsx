@@ -8,6 +8,7 @@ import EditorDrawerTest from './pages/EditorDrawerTest.tsx'
 import QuestionModalTest from './pages/QuestionModalTest.tsx'
 import ErrorHandlingTest from './pages/ErrorHandlingTest.tsx'
 import NotificationTest from './pages/NotificationTest.tsx'
+import GistServiceTest from './pages/GistServiceTest.tsx'
 import App from './App.tsx'
 
 // 导航菜单组件
@@ -41,6 +42,9 @@ const Navigation = () => (
     <Link to="/notification-test" style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold' }}>
       通知系统测试
     </Link>
+    <Link to="/gist-test" style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold' }}>
+      Gist服务测试
+    </Link>
   </nav>
 )
 
@@ -56,6 +60,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/drawer-test" element={<EditorDrawerTest />} />
         <Route path="/error-test" element={<ErrorHandlingTest />} />
         <Route path="/notification-test" element={<NotificationTest />} />
+        <Route path="/gist-test" element={<GistServiceTest />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
