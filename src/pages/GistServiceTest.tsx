@@ -347,6 +347,132 @@ const GistServiceTest: React.FC = () => {
         }
     };
 
+    // 测试 9: 增量同步
+    const testIncrementalSync = async () => {
+        if (!token || !gistId) {
+            addResult('请先配置 Token 和 Gist ID', true);
+            return;
+        }
+
+        clearResults();
+        setIsLoading(true);
+        addResult('开始测试增量同步...');
+
+        try {
+            // 先设置 Token 和 Gist ID
+            await authService.setToken(token);
+            authService.setGistId(gistId);
+
+            // 清除待同步变更
+            await syncService.clearAllPendingChanges();
+            addResult('已清除所有待同步变更');
+
+            // 添加多个变更
+            addResult('添加测试变更...');
+
+            // 变更 1: 创建资源
+            await syncService.addPendingChange({
+                type: 'create',
+                entity: 'resource',
+                id: 'inc_test_1',
+                data: {
+                    id: 'inc_test_1',
+                    title: '增量测试资源 1',
+                    url: 'https://example.com/1',
+                    type: 'blog',
+                    cover: 'https://via.placeholder.com/320x180',
+                    platform: 'Test',
+                    content_tags: ['增量同步'],
+                    category: '测试',
+                    author: '测试作者',
+                    recommendation: '增量同步测试',
+                    metadata: {},
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                },
+                timestamp: new Date().toISOString(),
+            });
+            addResult('✓ 添加创建变更');
+
+            // 变更 2: 更新同一资源（应该合并）
+            await syncService.addPendingChange({
+                type: 'update',
+                entity: 'resource',
+                id: 'inc_test_1',
+                data: {
+                    id: 'inc_test_1',
+                    title: '增量测试资源 1 (已更新)',
+                    url: 'https://example.com/1',
+                    type: 'blog',
+                    cover: 'https://via.placeholder.com/320x180',
+                    platform: 'Test',
+                    content_tags: ['增量同步', '已更新'],
+                    category: '测试',
+                    author: '测试作者',
+                    recommendation: '增量同步测试 - 已更新',
+                    metadata: {},
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                },
+                timestamp: new Date().toISOString(),
+            });
+            addResult('✓ 添加更新变更（应与创建合并）');
+
+            // 变更 3: 创建另一个资源
+            await syncService.addPendingChange({
+                type: 'create',
+                entity: 'resource',
+                id: 'inc_test_2',
+                data: {
+                    id: 'inc_test_2',
+                    title: '增量测试资源 2',
+                    url: 'https://example.com/2',
+                    type: 'video',
+                    cover: 'https://via.placeholder.com/320x180',
+                    platform: 'Test',
+                    content_tags: ['增量同步'],
+                    category: '测试',
+                    author: '测试作者',
+                    recommendation: '增量同步测试',
+                    metadata: {},
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                },
+                timestamp: new Date().toISOString(),
+            });
+            addResult('✓ 添加第二个创建变更');
+
+            // 检查待同步变更
+            const pendingCount = await syncService.getPendingChangesCount();
+            addResult(`待同步变更数量: ${pendingCount} (应该是 2，因为前两个已合并)`);
+
+            const pendingChanges = await syncService.getPendingChanges();
+            addResult(`变更详情: ${JSON.stringify(pendingChanges.map(c => ({ type: c.type, entity: c.entity, id: c.id })))}`);
+
+            // 执行同步
+            addResult('执行增量同步...');
+            const result = await syncService.syncNow();
+
+            if (result.success) {
+                addResult('增量同步成功！');
+                addResult(`同步时间: ${result.timestamp}`);
+                if (result.changes) {
+                    addResult(`变更统计: 新增 ${result.changes.added}, 更新 ${result.changes.updated}, 删除 ${result.changes.deleted}`);
+                }
+
+                // 验证待同步变更已清除
+                const remainingCount = await syncService.getPendingChangesCount();
+                addResult(`剩余待同步变更: ${remainingCount} (应该是 0)`);
+            } else {
+                addResult(`增量同步失败: ${result.error}`, true);
+            }
+        } catch (error) {
+            addResult(`增量同步测试失败: ${error}`, true);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-background p-8">
             <div className="max-w-4xl mx-auto">
@@ -461,6 +587,14 @@ const GistServiceTest: React.FC = () => {
                         >
                             8. 从 Gist 同步
                         </button>
+
+                        <button
+                            onClick={testIncrementalSync}
+                            disabled={isLoading || !token || !gistId}
+                            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50"
+                        >
+                            9. 增量同步测试
+                        </button>
                     </div>
 
                     {/* 同步状态指示器 */}
@@ -522,6 +656,8 @@ const GistServiceTest: React.FC = () => {
                         <li>• 测试 3: 会在你的 GitHub 账号创建一个公开 Gist</li>
                         <li>• 测试 4: 需要先创建 Gist 或输入已存在的 Gist ID</li>
                         <li>• 测试 6: 不需要 Token，测试数据验证逻辑</li>
+                        <li>• 测试 7-8: 测试完整数据同步（上传和下载）</li>
+                        <li>• 测试 9: 测试增量同步功能，包括变更合并和优化</li>
                     </ul>
                 </div>
             </div>

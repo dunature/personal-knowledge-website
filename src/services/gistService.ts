@@ -11,6 +11,7 @@ import type {
     GistCreateResult,
     GistVersion,
 } from '@/types/gist';
+import { handleApiError, toGistError } from '@/utils/errorHandler';
 
 const GITHUB_API_BASE = 'https://api.github.com';
 
@@ -39,7 +40,11 @@ class GistService {
                         error: 'Token 无效或已过期',
                     };
                 }
-                throw new Error(`GitHub API 错误: ${response.status}`);
+                const apiError = await handleApiError(response);
+                return {
+                    valid: false,
+                    error: apiError.getUserMessage(),
+                };
             }
 
             const user = await response.json();
@@ -51,9 +56,10 @@ class GistService {
             };
         } catch (error) {
             console.error('Token 验证失败:', error);
+            const gistError = toGistError(error, { context: 'validateToken' });
             return {
                 valid: false,
-                error: error instanceof Error ? error.message : '网络错误',
+                error: gistError.getUserMessage(),
             };
         }
     }

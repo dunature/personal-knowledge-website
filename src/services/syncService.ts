@@ -7,6 +7,7 @@ import { gistService } from './gistService';
 import { authService } from './authService';
 import { cacheService, STORAGE_KEYS } from './cacheService';
 import { validateGistData } from '@/utils/dataValidation';
+import { toGistError } from '@/utils/errorHandler';
 import type { GistData } from '@/types/gist';
 import type { Resource } from '@/types/resource';
 import type { BigQuestion, SubQuestion, TimelineAnswer } from '@/types/question';
@@ -35,6 +36,16 @@ class SyncService {
      */
     async syncToGist(): Promise<SyncResult> {
         try {
+            // 检查网络状态
+            if (!navigator.onLine) {
+                console.log('离线状态，跳过同步');
+                return {
+                    success: false,
+                    timestamp: new Date().toISOString(),
+                    error: '当前处于离线状态',
+                };
+            }
+
             // 检查是否已认证
             if (!authService.isAuthenticated()) {
                 throw new Error('未认证，无法同步');
@@ -51,24 +62,36 @@ class SyncService {
             // 更新状态
             this.updateStatus('syncing');
 
-            // 从缓存读取数据
-            const resources = (await cacheService.getData<Resource[]>(STORAGE_KEYS.RESOURCES)) ?? [];
-            const questions = (await cacheService.getData<BigQuestion[]>(STORAGE_KEYS.QUESTIONS)) ?? [];
-            const subQuestions = (await cacheService.getData<SubQuestion[]>(STORAGE_KEYS.SUB_QUESTIONS)) ?? [];
-            const answers = (await cacheService.getData<TimelineAnswer[]>(STORAGE_KEYS.ANSWERS)) ?? [];
+            // 获取待同步变更
+            const pendingChanges = await this.getPendingChanges();
 
-            // 构建 Gist 数据
-            const gistData: GistData = {
-                resources,
-                questions,
-                subQuestions,
-                answers,
-                metadata: {
-                    version: '1.0.0',
-                    lastSync: new Date().toISOString(),
-                    owner: (await authService.getCurrentUser())?.username || 'unknown',
-                },
-            };
+            // 如果有待同步变更，使用增量同步
+            let gistData: GistData;
+            let changeStats = { added: 0, updated: 0, deleted: 0 };
+
+            if (pendingChanges.length > 0) {
+                // 增量同步：合并变更
+                gistData = await this.mergeChanges(pendingChanges);
+                changeStats = this.calculateChangeStats(pendingChanges);
+            } else {
+                // 完整同步：读取所有数据
+                const resources = (await cacheService.getData<Resource[]>(STORAGE_KEYS.RESOURCES)) ?? [];
+                const questions = (await cacheService.getData<BigQuestion[]>(STORAGE_KEYS.QUESTIONS)) ?? [];
+                const subQuestions = (await cacheService.getData<SubQuestion[]>(STORAGE_KEYS.SUB_QUESTIONS)) ?? [];
+                const answers = (await cacheService.getData<TimelineAnswer[]>(STORAGE_KEYS.ANSWERS)) ?? [];
+
+                gistData = {
+                    resources,
+                    questions,
+                    subQuestions,
+                    answers,
+                    metadata: {
+                        version: '1.0.0',
+                        lastSync: new Date().toISOString(),
+                        owner: (await authService.getCurrentUser())?.username || 'unknown',
+                    },
+                };
+            }
 
             // 上传到 Gist
             if (gistId) {
@@ -93,14 +116,17 @@ class SyncService {
             return {
                 success: true,
                 timestamp: new Date().toISOString(),
+                changes: changeStats,
             };
         } catch (error) {
-            console.error('同步到 Gist 失败:', error);
+            const gistError = toGistError(error, { context: 'syncToGist' });
+            console.error('同步到 Gist 失败:', gistError.toJSON());
             this.updateStatus('error');
 
-            // 尝试重试
-            if (this.retryCount < this.config.maxRetries) {
+            // 尝试重试（仅对可重试的错误）
+            if (gistError.isRetryable && this.retryCount < this.config.maxRetries) {
                 this.retryCount++;
+                console.log(`将在 ${this.config.retryDelay}ms 后重试 (${this.retryCount}/${this.config.maxRetries})`);
                 setTimeout(() => {
                     this.syncToGist();
                 }, this.config.retryDelay);
@@ -109,7 +135,7 @@ class SyncService {
             return {
                 success: false,
                 timestamp: new Date().toISOString(),
-                error: error instanceof Error ? error.message : '同步失败',
+                error: gistError.getUserMessage(),
             };
         }
     }
@@ -159,13 +185,14 @@ class SyncService {
                 timestamp: new Date().toISOString(),
             };
         } catch (error) {
-            console.error('从 Gist 同步失败:', error);
+            const gistError = toGistError(error, { context: 'syncFromGist' });
+            console.error('从 Gist 同步失败:', gistError.toJSON());
             this.updateStatus('error');
 
             return {
                 success: false,
                 timestamp: new Date().toISOString(),
-                error: error instanceof Error ? error.message : '同步失败',
+                error: gistError.getUserMessage(),
             };
         }
     }
@@ -233,20 +260,170 @@ class SyncService {
     }
 
     /**
+     * 合并待同步变更到完整数据集
+     * @param changes 待同步变更列表
+     * @returns 合并后的完整数据
+     */
+    private async mergeChanges(changes: PendingChange[]): Promise<GistData> {
+        // 从缓存读取当前数据
+        const resources = (await cacheService.getData<Resource[]>(STORAGE_KEYS.RESOURCES)) ?? [];
+        const questions = (await cacheService.getData<BigQuestion[]>(STORAGE_KEYS.QUESTIONS)) ?? [];
+        const subQuestions = (await cacheService.getData<SubQuestion[]>(STORAGE_KEYS.SUB_QUESTIONS)) ?? [];
+        const answers = (await cacheService.getData<TimelineAnswer[]>(STORAGE_KEYS.ANSWERS)) ?? [];
+
+        // 应用变更
+        for (const change of changes) {
+            switch (change.entity) {
+                case 'resource':
+                    this.applyChangeToArray(resources, change);
+                    break;
+                case 'question':
+                    this.applyChangeToArray(questions, change);
+                    break;
+                case 'subQuestion':
+                    this.applyChangeToArray(subQuestions, change);
+                    break;
+                case 'answer':
+                    this.applyChangeToArray(answers, change);
+                    break;
+            }
+        }
+
+        // 构建完整数据
+        return {
+            resources,
+            questions,
+            subQuestions,
+            answers,
+            metadata: {
+                version: '1.0.0',
+                lastSync: new Date().toISOString(),
+                owner: (await authService.getCurrentUser())?.username || 'unknown',
+            },
+        };
+    }
+
+    /**
+     * 应用变更到数组
+     * @param array 目标数组
+     * @param change 变更对象
+     */
+    private applyChangeToArray<T extends { id: string }>(array: T[], change: PendingChange): void {
+        const index = array.findIndex((item) => item.id === change.id);
+
+        switch (change.type) {
+            case 'create':
+                // 如果不存在，添加
+                if (index === -1 && change.data) {
+                    array.push(change.data);
+                }
+                break;
+            case 'update':
+                // 如果存在，更新
+                if (index !== -1 && change.data) {
+                    array[index] = change.data;
+                }
+                break;
+            case 'delete':
+                // 如果存在，删除
+                if (index !== -1) {
+                    array.splice(index, 1);
+                }
+                break;
+        }
+    }
+
+    /**
+     * 计算变更统计
+     * @param changes 变更列表
+     * @returns 变更统计
+     */
+    private calculateChangeStats(changes: PendingChange[]): {
+        added: number;
+        updated: number;
+        deleted: number;
+    } {
+        return changes.reduce(
+            (stats, change) => {
+                switch (change.type) {
+                    case 'create':
+                        stats.added++;
+                        break;
+                    case 'update':
+                        stats.updated++;
+                        break;
+                    case 'delete':
+                        stats.deleted++;
+                        break;
+                }
+                return stats;
+            },
+            { added: 0, updated: 0, deleted: 0 }
+        );
+    }
+
+    /**
      * 添加待同步变更
      */
     async addPendingChange(change: PendingChange): Promise<void> {
         try {
             const pending =
                 (await cacheService.getData<PendingChange[]>(STORAGE_KEYS.PENDING_CHANGES)) || [];
-            pending.push(change);
-            await cacheService.saveData(STORAGE_KEYS.PENDING_CHANGES, pending);
 
-            // 触发同步
-            this.triggerSync();
+            // 优化：合并相同实体的变更
+            const optimizedPending = this.optimizePendingChanges([...pending, change]);
+
+            await cacheService.saveData(STORAGE_KEYS.PENDING_CHANGES, optimizedPending);
+
+            // 如果在线，触发同步；如果离线，只保存到本地
+            if (navigator.onLine) {
+                this.triggerSync();
+            } else {
+                console.log('离线状态，变更已保存到本地，将在网络恢复后同步');
+            }
         } catch (error) {
             console.error('添加待同步变更失败:', error);
         }
+    }
+
+    /**
+     * 优化待同步变更列表
+     * 合并相同实体的多次变更，只保留最终状态
+     * @param changes 原始变更列表
+     * @returns 优化后的变更列表
+     */
+    private optimizePendingChanges(changes: PendingChange[]): PendingChange[] {
+        const changeMap = new Map<string, PendingChange>();
+
+        for (const change of changes) {
+            const key = `${change.entity}:${change.id}`;
+            const existing = changeMap.get(key);
+
+            if (!existing) {
+                // 第一次出现，直接添加
+                changeMap.set(key, change);
+            } else {
+                // 已存在，合并变更
+                if (existing.type === 'create' && change.type === 'update') {
+                    // create + update = create (使用最新数据)
+                    changeMap.set(key, { ...existing, data: change.data, timestamp: change.timestamp });
+                } else if (existing.type === 'create' && change.type === 'delete') {
+                    // create + delete = 无操作（删除该变更）
+                    changeMap.delete(key);
+                } else if (existing.type === 'update' && change.type === 'update') {
+                    // update + update = update (使用最新数据)
+                    changeMap.set(key, { ...existing, data: change.data, timestamp: change.timestamp });
+                } else if (existing.type === 'update' && change.type === 'delete') {
+                    // update + delete = delete
+                    changeMap.set(key, change);
+                } else {
+                    // 其他情况，使用最新的变更
+                    changeMap.set(key, change);
+                }
+            }
+        }
+
+        return Array.from(changeMap.values());
     }
 
     /**
@@ -254,6 +431,86 @@ class SyncService {
      */
     async getPendingChanges(): Promise<PendingChange[]> {
         return (await cacheService.getData<PendingChange[]>(STORAGE_KEYS.PENDING_CHANGES)) || [];
+    }
+
+    /**
+     * 清除特定实体的待同步变更
+     * @param entity 实体类型
+     * @param id 实体 ID
+     */
+    async clearPendingChange(entity: PendingChange['entity'], id: string): Promise<void> {
+        try {
+            const pending = await this.getPendingChanges();
+            const filtered = pending.filter((change) => !(change.entity === entity && change.id === id));
+            await cacheService.saveData(STORAGE_KEYS.PENDING_CHANGES, filtered);
+        } catch (error) {
+            console.error('清除待同步变更失败:', error);
+        }
+    }
+
+    /**
+     * 清除所有待同步变更
+     */
+    async clearAllPendingChanges(): Promise<void> {
+        await cacheService.clearData(STORAGE_KEYS.PENDING_CHANGES);
+    }
+
+    /**
+     * 获取待同步变更数量
+     */
+    async getPendingChangesCount(): Promise<number> {
+        const changes = await this.getPendingChanges();
+        return changes.length;
+    }
+
+    /**
+     * 同步所有待同步变更（用于网络恢复后）
+     * @returns 同步结果
+     */
+    async syncPendingChanges(): Promise<SyncResult> {
+        try {
+            // 检查网络状态
+            if (!navigator.onLine) {
+                return {
+                    success: false,
+                    timestamp: new Date().toISOString(),
+                    error: '当前处于离线状态',
+                };
+            }
+
+            // 获取待同步变更
+            const pendingChanges = await this.getPendingChanges();
+
+            if (pendingChanges.length === 0) {
+                return {
+                    success: true,
+                    timestamp: new Date().toISOString(),
+                    changes: { added: 0, updated: 0, deleted: 0 },
+                };
+            }
+
+            console.log(`开始同步 ${pendingChanges.length} 个待同步变更`);
+
+            // 执行同步
+            return await this.syncToGist();
+        } catch (error) {
+            const gistError = toGistError(error, { context: 'syncPendingChanges' });
+            console.error('同步待同步变更失败:', gistError.toJSON());
+            return {
+                success: false,
+                timestamp: new Date().toISOString(),
+                error: gistError.getUserMessage(),
+            };
+        }
+    }
+
+    /**
+     * 检查是否有待同步变更
+     * @returns 是否有待同步变更
+     */
+    async hasPendingChanges(): Promise<boolean> {
+        const count = await this.getPendingChangesCount();
+        return count > 0;
     }
 
     /**

@@ -3,9 +3,13 @@
  * 管理大问题、小问题、回答列表和筛选排序状态
  */
 
-import React, { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
+import { syncService } from '@/services/syncService';
+import { cacheService, STORAGE_KEYS } from '@/services/cacheService';
+import { useAuth } from './AuthContext';
 import type { BigQuestion, SubQuestion, TimelineAnswer, QuestionStatus } from '@/types/question';
 import type { QuestionSortOption } from '@/components/qa/QuestionFilter';
+import type { SyncStatus } from '@/types/sync';
 
 interface QAContextState {
     // 数据
@@ -20,21 +24,21 @@ interface QAContextState {
 
     // 大问题方法
     setQuestions: (questions: BigQuestion[]) => void;
-    addQuestion: (question: BigQuestion) => void;
-    updateQuestion: (id: string, updates: Partial<BigQuestion>) => void;
-    deleteQuestion: (id: string) => void;
+    addQuestion: (question: BigQuestion) => Promise<void>;
+    updateQuestion: (id: string, updates: Partial<BigQuestion>) => Promise<void>;
+    deleteQuestion: (id: string) => Promise<void>;
 
     // 小问题方法
     setSubQuestions: (subQuestions: SubQuestion[]) => void;
-    addSubQuestion: (subQuestion: SubQuestion) => void;
-    updateSubQuestion: (id: string, updates: Partial<SubQuestion>) => void;
-    deleteSubQuestion: (id: string) => void;
+    addSubQuestion: (subQuestion: SubQuestion) => Promise<void>;
+    updateSubQuestion: (id: string, updates: Partial<SubQuestion>) => Promise<void>;
+    deleteSubQuestion: (id: string) => Promise<void>;
 
     // 回答方法
     setAnswers: (answers: TimelineAnswer[]) => void;
-    addAnswer: (answer: TimelineAnswer) => void;
-    updateAnswer: (id: string, updates: Partial<TimelineAnswer>) => void;
-    deleteAnswer: (id: string) => void;
+    addAnswer: (answer: TimelineAnswer) => Promise<void>;
+    updateAnswer: (id: string, updates: Partial<TimelineAnswer>) => Promise<void>;
+    deleteAnswer: (id: string) => Promise<void>;
 
     // 筛选和排序方法
     setSelectedStatus: (status: QuestionStatus | 'all') => void;
@@ -47,6 +51,11 @@ interface QAContextState {
     getSubQuestionsByParent: (parentId: string) => SubQuestion[];
     getAnswersByQuestion: (questionId: string) => TimelineAnswer[];
     getSubQuestionCount: (questionId: string) => number;
+
+    // 同步相关
+    syncStatus: SyncStatus;
+    syncNow: () => Promise<void>;
+    lastSyncTime: string | null;
 }
 
 const QAContext = createContext<QAContextState | undefined>(undefined);
@@ -72,6 +81,75 @@ export const QAProvider: React.FC<QAProviderProps> = ({
     const [selectedCategory, setSelectedCategory] = useState<string>('');
     const [sortOption, setSortOption] = useState<QuestionSortOption>('newest');
 
+    const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
+    const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
+    const { isAuthenticated, mode } = useAuth();
+
+    // 初始化时加载缓存数据
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                // 从缓存加载数据
+                const cachedQuestions = await cacheService.getData<BigQuestion[]>(STORAGE_KEYS.QUESTIONS);
+                const cachedSubQuestions = await cacheService.getData<SubQuestion[]>(STORAGE_KEYS.SUB_QUESTIONS);
+                const cachedAnswers = await cacheService.getData<TimelineAnswer[]>(STORAGE_KEYS.ANSWERS);
+
+                if (cachedQuestions && cachedQuestions.length > 0) {
+                    setQuestions(cachedQuestions);
+                }
+                if (cachedSubQuestions && cachedSubQuestions.length > 0) {
+                    setSubQuestions(cachedSubQuestions);
+                }
+                if (cachedAnswers && cachedAnswers.length > 0) {
+                    setAnswers(cachedAnswers);
+                }
+
+                // 获取最后同步时间
+                const lastSync = await syncService.getLastSyncTime();
+                setLastSyncTime(lastSync);
+            } catch (error) {
+                console.error('Failed to load QA data:', error);
+            }
+        };
+        loadData();
+    }, []);
+
+    // 监听同步状态变化
+    useEffect(() => {
+        const unsubscribe = syncService.onSyncStatusChange((status) => {
+            setSyncStatus(status);
+        });
+        return unsubscribe;
+    }, []);
+
+    // 当数据变化时保存到缓存
+    useEffect(() => {
+        const saveToCache = async () => {
+            if (questions.length > 0) {
+                await cacheService.saveData(STORAGE_KEYS.QUESTIONS, questions);
+            }
+        };
+        saveToCache();
+    }, [questions]);
+
+    useEffect(() => {
+        const saveToCache = async () => {
+            if (subQuestions.length > 0) {
+                await cacheService.saveData(STORAGE_KEYS.SUB_QUESTIONS, subQuestions);
+            }
+        };
+        saveToCache();
+    }, [subQuestions]);
+
+    useEffect(() => {
+        const saveToCache = async () => {
+            if (answers.length > 0) {
+                await cacheService.saveData(STORAGE_KEYS.ANSWERS, answers);
+            }
+        };
+        saveToCache();
+    }, [answers]);
+
     // 获取所有分类
     const categories = React.useMemo(() => {
         const cats = new Set(questions.map(q => q.category));
@@ -79,26 +157,55 @@ export const QAProvider: React.FC<QAProviderProps> = ({
     }, [questions]);
 
     // 添加大问题
-    const addQuestion = useCallback((question: BigQuestion) => {
+    const addQuestion = useCallback(async (question: BigQuestion) => {
         setQuestions(prev => [...prev, question]);
-    }, []);
+        // 如果是拥有者模式且已认证，触发同步
+        if (isAuthenticated && mode === 'owner') {
+            await syncService.addPendingChange({
+                type: 'create',
+                entity: 'question',
+                id: question.id,
+                data: question,
+                timestamp: new Date().toISOString(),
+            });
+        }
+    }, [isAuthenticated, mode]);
 
     // 更新大问题
-    const updateQuestion = useCallback((id: string, updates: Partial<BigQuestion>) => {
+    const updateQuestion = useCallback(async (id: string, updates: Partial<BigQuestion>) => {
         setQuestions(prev =>
             prev.map(q => (q.id === id ? { ...q, ...updates, updated_at: new Date().toISOString() } : q))
         );
-    }, []);
+        // 如果是拥有者模式且已认证，触发同步
+        if (isAuthenticated && mode === 'owner') {
+            await syncService.addPendingChange({
+                type: 'update',
+                entity: 'question',
+                id,
+                data: updates,
+                timestamp: new Date().toISOString(),
+            });
+        }
+    }, [isAuthenticated, mode]);
 
     // 删除大问题
-    const deleteQuestion = useCallback((id: string) => {
+    const deleteQuestion = useCallback(async (id: string) => {
         setQuestions(prev => prev.filter(q => q.id !== id));
         // 同时删除相关的小问题
         setSubQuestions(prev => prev.filter(sq => sq.parent_id !== id));
-    }, []);
+        // 如果是拥有者模式且已认证，触发同步
+        if (isAuthenticated && mode === 'owner') {
+            await syncService.addPendingChange({
+                type: 'delete',
+                entity: 'question',
+                id,
+                timestamp: new Date().toISOString(),
+            });
+        }
+    }, [isAuthenticated, mode]);
 
     // 添加小问题
-    const addSubQuestion = useCallback((subQuestion: SubQuestion) => {
+    const addSubQuestion = useCallback(async (subQuestion: SubQuestion) => {
         setSubQuestions(prev => [...prev, subQuestion]);
         // 更新父问题的sub_questions数组
         setQuestions(prev =>
@@ -108,10 +215,20 @@ export const QAProvider: React.FC<QAProviderProps> = ({
                     : q
             )
         );
-    }, []);
+        // 如果是拥有者模式且已认证，触发同步
+        if (isAuthenticated && mode === 'owner') {
+            await syncService.addPendingChange({
+                type: 'create',
+                entity: 'subQuestion',
+                id: subQuestion.id,
+                data: subQuestion,
+                timestamp: new Date().toISOString(),
+            });
+        }
+    }, [isAuthenticated, mode]);
 
     // 更新小问题
-    const updateSubQuestion = useCallback((id: string, updates: Partial<SubQuestion>) => {
+    const updateSubQuestion = useCallback(async (id: string, updates: Partial<SubQuestion>) => {
         setSubQuestions(prev =>
             prev.map(sq => (sq.id === id ? { ...sq, ...updates, updated_at: new Date().toISOString() } : sq))
         );
@@ -126,10 +243,20 @@ export const QAProvider: React.FC<QAProviderProps> = ({
                 )
             );
         }
-    }, [subQuestions]);
+        // 如果是拥有者模式且已认证，触发同步
+        if (isAuthenticated && mode === 'owner') {
+            await syncService.addPendingChange({
+                type: 'update',
+                entity: 'subQuestion',
+                id,
+                data: updates,
+                timestamp: new Date().toISOString(),
+            });
+        }
+    }, [subQuestions, isAuthenticated, mode]);
 
     // 删除小问题
-    const deleteSubQuestion = useCallback((id: string) => {
+    const deleteSubQuestion = useCallback(async (id: string) => {
         const subQuestion = subQuestions.find(sq => sq.id === id);
         setSubQuestions(prev => prev.filter(sq => sq.id !== id));
         // 从父问题的sub_questions数组中移除
@@ -148,10 +275,19 @@ export const QAProvider: React.FC<QAProviderProps> = ({
         }
         // 删除相关的回答
         setAnswers(prev => prev.filter(a => a.question_id !== id));
-    }, [subQuestions]);
+        // 如果是拥有者模式且已认证，触发同步
+        if (isAuthenticated && mode === 'owner') {
+            await syncService.addPendingChange({
+                type: 'delete',
+                entity: 'subQuestion',
+                id,
+                timestamp: new Date().toISOString(),
+            });
+        }
+    }, [subQuestions, isAuthenticated, mode]);
 
     // 添加回答
-    const addAnswer = useCallback((answer: TimelineAnswer) => {
+    const addAnswer = useCallback(async (answer: TimelineAnswer) => {
         setAnswers(prev => [...prev, answer]);
         // 更新小问题的answers数组
         setSubQuestions(prev =>
@@ -161,17 +297,37 @@ export const QAProvider: React.FC<QAProviderProps> = ({
                     : sq
             )
         );
-    }, []);
+        // 如果是拥有者模式且已认证，触发同步
+        if (isAuthenticated && mode === 'owner') {
+            await syncService.addPendingChange({
+                type: 'create',
+                entity: 'answer',
+                id: answer.id,
+                data: answer,
+                timestamp: new Date().toISOString(),
+            });
+        }
+    }, [isAuthenticated, mode]);
 
     // 更新回答
-    const updateAnswer = useCallback((id: string, updates: Partial<TimelineAnswer>) => {
+    const updateAnswer = useCallback(async (id: string, updates: Partial<TimelineAnswer>) => {
         setAnswers(prev =>
             prev.map(a => (a.id === id ? { ...a, ...updates, updated_at: new Date().toISOString() } : a))
         );
-    }, []);
+        // 如果是拥有者模式且已认证，触发同步
+        if (isAuthenticated && mode === 'owner') {
+            await syncService.addPendingChange({
+                type: 'update',
+                entity: 'answer',
+                id,
+                data: updates,
+                timestamp: new Date().toISOString(),
+            });
+        }
+    }, [isAuthenticated, mode]);
 
     // 删除回答
-    const deleteAnswer = useCallback((id: string) => {
+    const deleteAnswer = useCallback(async (id: string) => {
         const answer = answers.find(a => a.id === id);
         setAnswers(prev => prev.filter(a => a.id !== id));
         // 从小问题的answers数组中移除
@@ -184,7 +340,16 @@ export const QAProvider: React.FC<QAProviderProps> = ({
                 )
             );
         }
-    }, [answers]);
+        // 如果是拥有者模式且已认证，触发同步
+        if (isAuthenticated && mode === 'owner') {
+            await syncService.addPendingChange({
+                type: 'delete',
+                entity: 'answer',
+                id,
+                timestamp: new Date().toISOString(),
+            });
+        }
+    }, [answers, isAuthenticated, mode]);
 
     // 根据父ID获取小问题
     const getSubQuestionsByParent = useCallback(
@@ -234,6 +399,17 @@ export const QAProvider: React.FC<QAProviderProps> = ({
         return sorted;
     }, [questions, selectedStatus, selectedCategory, sortOption]);
 
+    // 手动同步
+    const syncNow = useCallback(async () => {
+        if (isAuthenticated && mode === 'owner') {
+            const result = await syncService.syncNow();
+            if (result.success) {
+                const newLastSync = await syncService.getLastSyncTime();
+                setLastSyncTime(newLastSync);
+            }
+        }
+    }, [isAuthenticated, mode]);
+
     const value: QAContextState = {
         questions,
         subQuestions,
@@ -261,6 +437,9 @@ export const QAProvider: React.FC<QAProviderProps> = ({
         getSubQuestionsByParent,
         getAnswersByQuestion,
         getSubQuestionCount,
+        syncStatus,
+        syncNow,
+        lastSyncTime,
     };
 
     return <QAContext.Provider value={value}>{children}</QAContext.Provider>;

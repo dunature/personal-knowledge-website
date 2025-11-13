@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { permissionService } from '@/services/permissionService';
 import type { BigQuestion, QuestionStatus } from '@/types/question';
 import { QuestionItem } from '@/components/qa/QuestionItem';
 import { QuestionFilter } from '@/components/qa/QuestionFilter';
@@ -27,6 +28,7 @@ export const QASection: React.FC<QASectionProps> = ({
     const [selectedStatus, setSelectedStatus] = useState<QuestionStatus | 'all'>('all');
     const [selectedCategory, setSelectedCategory] = useState<string>('');
     const [sortOption, setSortOption] = useState<QuestionSortOption>('newest');
+    const canAdd = permissionService.shouldShowAddButtons();
 
     // 获取所有分类
     const categories = useMemo(() => {
@@ -160,8 +162,8 @@ export const QASection: React.FC<QASectionProps> = ({
                 </div>
             )}
 
-            {/* 添加大问题按钮 - 仅在展开模式显示 */}
-            {isExpanded && onAddQuestion && (
+            {/* 添加大问题按钮 - 仅在展开模式且拥有者模式显示 */}
+            {isExpanded && onAddQuestion && canAdd && (
                 <div className="flex justify-center mt-6">
                     <Button
                         variant="primary"

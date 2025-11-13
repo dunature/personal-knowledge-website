@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { permissionService } from '@/services/permissionService';
 import type { Resource } from '@/types/resource';
 import { ResourceCard } from '@/components/resource/ResourceCard';
 import { CategoryFilter } from '@/components/resource/CategoryFilter';
@@ -35,6 +36,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [sortOption, setSortOption] = useState<SortOption>('newest');
+    const canAdd = permissionService.shouldShowAddButtons();
 
     // 获取二级标题
     const getSubtitle = () => {
@@ -197,8 +199,8 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
                         onSortChange={handleSortChange}
                     />
 
-                    {/* 添加资源按钮 */}
-                    {onAdd && (
+                    {/* 添加资源按钮 - 仅在拥有者模式显示 */}
+                    {onAdd && canAdd && (
                         <div className="flex justify-center mt-4">
                             <Button
                                 variant="primary"
