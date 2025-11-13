@@ -7,10 +7,14 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { syncService } from '@/services/syncService';
 import { cacheService } from '@/services/cacheService';
+import { authService } from '@/services/authService';
+import { gistService } from '@/services/gistService';
 import { useToast } from '@/hooks/useToast';
+import { DataExport } from '@/components/settings/DataExport';
+import { DataImport } from '@/components/settings/DataImport';
 
 export default function SettingsPage() {
-    const { user, mode, gistId, clearAll } = useAuth();
+    const { user, mode, gistId, clearAll, setToken } = useAuth();
     const { showToast } = useToast();
     const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
     const [cacheInfo, setCacheInfo] = useState<{
@@ -19,6 +23,9 @@ export default function SettingsPage() {
         questionCount: number;
     } | null>(null);
     const [pendingChanges, setPendingChanges] = useState(0);
+    const [hasToken, setHasToken] = useState(false);
+    const [showTokenInput, setShowTokenInput] = useState(false);
+    const [newToken, setNewToken] = useState('');
 
     // 加载设置信息
     useEffect(() => {
@@ -45,8 +52,57 @@ export default function SettingsPage() {
             // 获取待同步变更数量
             const count = await syncService.getPendingChangesCount();
             setPendingChanges(count);
+
+            // 检查是否有 Token
+            const token = await authService.getToken();
+            setHasToken(!!token);
         } catch (error) {
             console.error('加载设置失败:', error);
+        }
+    };
+
+    const handleUpdateToken = async () => {
+        if (!newToken.trim()) {
+            showToast('error', '请输入 Token');
+            return;
+        }
+
+        try {
+            // 验证 Token
+            const validation = await gistService.validateToken(newToken);
+
+            if (!validation.valid) {
+                showToast('error', validation.error || 'Token 无效');
+                return;
+            }
+
+            // 保存 Token
+            const success = await setToken(newToken);
+
+            if (success) {
+                showToast('success', 'Token 已更新');
+                setNewToken('');
+                setShowTokenInput(false);
+                await loadSettings();
+            } else {
+                showToast('error', 'Token 保存失败');
+            }
+        } catch (error) {
+            showToast('error', 'Token 更新失败');
+        }
+    };
+
+    const handleDeleteToken = async () => {
+        if (!confirm('确定要删除 Token 吗？删除后将无法同步数据到 Gist。')) {
+            return;
+        }
+
+        try {
+            await authService.clearToken();
+            showToast('success', 'Token 已删除');
+            await loadSettings();
+        } catch (error) {
+            showToast('error', 'Token 删除失败');
         }
     };
 
@@ -147,6 +203,91 @@ export default function SettingsPage() {
                     </div>
                 </div>
 
+                {/* Token 管理 */}
+                {mode === 'owner' && (
+                    <div className="bg-white rounded-lg shadow p-6 mb-6">
+                        <h2 className="text-xl font-semibold text-gray-900 mb-4">Token 管理</h2>
+
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                                <span className="text-gray-600">Token 状态</span>
+                                <span
+                                    className={`font-medium ${hasToken ? 'text-green-600' : 'text-red-600'
+                                        }`}
+                                >
+                                    {hasToken ? '已配置' : '未配置'}
+                                </span>
+                            </div>
+                        </div>
+
+                        {!showTokenInput ? (
+                            <div className="mt-4 space-y-2">
+                                <button
+                                    onClick={() => setShowTokenInput(true)}
+                                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                                >
+                                    {hasToken ? '更新 Token' : '配置 Token'}
+                                </button>
+
+                                {hasToken && (
+                                    <button
+                                        onClick={handleDeleteToken}
+                                        className="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors"
+                                    >
+                                        删除 Token
+                                    </button>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="mt-4 space-y-3">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        GitHub Personal Access Token
+                                    </label>
+                                    <input
+                                        type="password"
+                                        value={newToken}
+                                        onChange={(e) => setNewToken(e.target.value)}
+                                        placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                    <p className="mt-1 text-sm text-gray-500">
+                                        需要 <code className="bg-gray-100 px-1 rounded">gist</code>{' '}
+                                        权限
+                                    </p>
+                                </div>
+
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={handleUpdateToken}
+                                        className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                                    >
+                                        保存
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setShowTokenInput(false);
+                                            setNewToken('');
+                                        }}
+                                        className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition-colors"
+                                    >
+                                        取消
+                                    </button>
+                                </div>
+
+                                <a
+                                    href="https://github.com/settings/tokens/new?scopes=gist&description=Personal%20Knowledge%20Website"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block text-center text-sm text-blue-600 hover:text-blue-700"
+                                >
+                                    如何获取 Token？
+                                </a>
+                            </div>
+                        )}
+                    </div>
+                )}
+
                 {/* 同步状态 */}
                 {mode === 'owner' && (
                     <div className="bg-white rounded-lg shadow p-6 mb-6">
@@ -211,6 +352,25 @@ export default function SettingsPage() {
                         </button>
                     </div>
                 )}
+
+                {/* 数据管理 */}
+                <div className="bg-white rounded-lg shadow p-6 mb-6">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-6">数据管理</h2>
+
+                    <div className="space-y-6">
+                        {/* 数据导出 */}
+                        <div>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">导出数据</h3>
+                            <DataExport />
+                        </div>
+
+                        {/* 数据导入 */}
+                        <div>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">导入数据</h3>
+                            <DataImport />
+                        </div>
+                    </div>
+                </div>
 
                 {/* 账户操作 */}
                 {mode === 'owner' && (
