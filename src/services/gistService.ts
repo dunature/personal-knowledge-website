@@ -12,6 +12,7 @@ import type {
     GistVersion,
 } from '@/types/gist';
 import { handleApiError, toGistError } from '@/utils/errorHandler';
+import { compressData, decompressData, shouldCompress, formatDataSize } from '@/utils/compression';
 
 const GITHUB_API_BASE = 'https://api.github.com';
 
@@ -72,26 +73,47 @@ class GistService {
      */
     async createGist(data: GistData, token: string): Promise<GistCreateResult> {
         try {
+            // 准备数据
+            const resourcesContent = JSON.stringify(data.resources, null, 2);
+            const questionsContent = JSON.stringify(
+                {
+                    questions: data.questions,
+                    subQuestions: data.subQuestions,
+                    answers: data.answers,
+                },
+                null,
+                2
+            );
+            const metadataContent = JSON.stringify(data.metadata, null, 2);
+
+            // 压缩大数据
+            const compressedResources = await compressData(resourcesContent);
+            const compressedQuestions = await compressData(questionsContent);
+
+            // 记录压缩信息
+            if (shouldCompress(resourcesContent)) {
+                console.log(
+                    `资源数据压缩: ${formatDataSize(resourcesContent.length)} -> ${formatDataSize(compressedResources.length)}`
+                );
+            }
+            if (shouldCompress(questionsContent)) {
+                console.log(
+                    `问答数据压缩: ${formatDataSize(questionsContent.length)} -> ${formatDataSize(compressedQuestions.length)}`
+                );
+            }
+
             const gistPayload = {
                 description: 'Personal Knowledge Base Data',
                 public: true,
                 files: {
                     'resources.json': {
-                        content: JSON.stringify(data.resources, null, 2),
+                        content: compressedResources,
                     },
                     'questions.json': {
-                        content: JSON.stringify(
-                            {
-                                questions: data.questions,
-                                subQuestions: data.subQuestions,
-                                answers: data.answers,
-                            },
-                            null,
-                            2
-                        ),
+                        content: compressedQuestions,
                     },
                     'metadata.json': {
-                        content: JSON.stringify(data.metadata, null, 2),
+                        content: metadataContent,
                     },
                 },
             };
@@ -161,8 +183,12 @@ class GistService {
                 throw new Error('Gist 数据格式不完整');
             }
 
-            const resources = JSON.parse(resourcesContent);
-            const questionsData = JSON.parse(questionsContent);
+            // 解压数据（如果已压缩）
+            const decompressedResources = await decompressData(resourcesContent);
+            const decompressedQuestions = await decompressData(questionsContent);
+
+            const resources = JSON.parse(decompressedResources);
+            const questionsData = JSON.parse(decompressedQuestions);
             const metadata = JSON.parse(metadataContent);
 
             return {
@@ -186,24 +212,33 @@ class GistService {
      */
     async updateGist(gistId: string, data: GistData, token: string): Promise<void> {
         try {
+            // 准备数据
+            const resourcesContent = JSON.stringify(data.resources, null, 2);
+            const questionsContent = JSON.stringify(
+                {
+                    questions: data.questions,
+                    subQuestions: data.subQuestions,
+                    answers: data.answers,
+                },
+                null,
+                2
+            );
+            const metadataContent = JSON.stringify(data.metadata, null, 2);
+
+            // 压缩大数据
+            const compressedResources = await compressData(resourcesContent);
+            const compressedQuestions = await compressData(questionsContent);
+
             const gistPayload = {
                 files: {
                     'resources.json': {
-                        content: JSON.stringify(data.resources, null, 2),
+                        content: compressedResources,
                     },
                     'questions.json': {
-                        content: JSON.stringify(
-                            {
-                                questions: data.questions,
-                                subQuestions: data.subQuestions,
-                                answers: data.answers,
-                            },
-                            null,
-                            2
-                        ),
+                        content: compressedQuestions,
                     },
                     'metadata.json': {
-                        content: JSON.stringify(data.metadata, null, 2),
+                        content: metadataContent,
                     },
                 },
             };

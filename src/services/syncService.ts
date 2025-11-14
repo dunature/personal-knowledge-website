@@ -566,6 +566,54 @@ class SyncService {
             this.syncTimer = null;
         }
     }
+
+    /**
+     * 从历史版本恢复数据
+     * @param versionData 历史版本的数据
+     * @returns 同步结果
+     */
+    async restoreFromVersion(versionData: GistData): Promise<SyncResult> {
+        try {
+            // 更新状态
+            this.updateStatus('syncing');
+
+            // 验证数据
+            if (!validateGistData(versionData)) {
+                throw new Error('版本数据格式无效');
+            }
+
+            // 保存到本地缓存
+            await cacheService.saveData(STORAGE_KEYS.RESOURCES, versionData.resources);
+            await cacheService.saveData(STORAGE_KEYS.QUESTIONS, versionData.questions);
+            await cacheService.saveData(STORAGE_KEYS.SUB_QUESTIONS, versionData.subQuestions);
+            await cacheService.saveData(STORAGE_KEYS.ANSWERS, versionData.answers);
+            await cacheService.saveData(STORAGE_KEYS.METADATA, versionData.metadata);
+
+            // 清除待同步变更（因为我们恢复到了一个已知的状态）
+            await this.clearAllPendingChanges();
+
+            // 同步到 Gist（更新为恢复的版本）
+            const result = await this.syncToGist();
+
+            if (result.success) {
+                this.updateStatus('success');
+            } else {
+                this.updateStatus('error');
+            }
+
+            return result;
+        } catch (error) {
+            const gistError = toGistError(error, { context: 'restoreFromVersion' });
+            console.error('恢复版本失败:', gistError.toJSON());
+            this.updateStatus('error');
+
+            return {
+                success: false,
+                timestamp: new Date().toISOString(),
+                error: gistError.getUserMessage(),
+            };
+        }
+    }
 }
 
 // 导出单例

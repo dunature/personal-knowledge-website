@@ -122,6 +122,29 @@ export default function SettingsPage() {
         }
     };
 
+    const handleForceSync = async () => {
+        if (!confirm('强制同步将上传所有本地数据到 Gist，覆盖云端数据。确定继续吗？')) {
+            return;
+        }
+
+        try {
+            showToast('info', '开始强制同步...');
+
+            // 清除待同步变更，强制完整同步
+            await syncService.clearAllPendingChanges();
+            const result = await syncService.syncNow();
+
+            if (result.success) {
+                showToast('success', '强制同步成功');
+                await loadSettings();
+            } else {
+                showToast('error', `强制同步失败: ${result.error}`);
+            }
+        } catch (error) {
+            showToast('error', '强制同步失败');
+        }
+    };
+
     const handleClearCache = async () => {
         if (!confirm('确定要清除所有缓存数据吗？这将删除本地存储的所有资源和问答数据。')) {
             return;
@@ -309,12 +332,23 @@ export default function SettingsPage() {
                             </div>
                         </div>
 
-                        <button
-                            onClick={handleManualSync}
-                            className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                            立即同步
-                        </button>
+                        <div className="mt-4 space-y-2">
+                            <button
+                                onClick={handleManualSync}
+                                className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                                立即同步
+                            </button>
+                            <button
+                                onClick={handleForceSync}
+                                className="w-full bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-700 transition-colors"
+                            >
+                                强制完整同步
+                            </button>
+                            <p className="text-xs text-gray-500">
+                                💡 如果导入数据后同步没有上传，请使用"强制完整同步"
+                            </p>
+                        </div>
                     </div>
                 )}
 

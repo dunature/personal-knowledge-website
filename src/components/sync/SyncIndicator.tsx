@@ -3,23 +3,40 @@
  * 显示同步状态、最后同步时间和手动同步按钮
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { RefreshCw, Check, AlertCircle, Cloud } from 'lucide-react';
+import { syncService } from '@/services/syncService';
 import type { SyncStatus } from '@/types/sync';
 
 interface SyncIndicatorProps {
-    status: SyncStatus;
-    lastSyncTime: string | null;
-    onSync?: () => void;
     showButton?: boolean;
 }
 
 export const SyncIndicator: React.FC<SyncIndicatorProps> = ({
-    status,
-    lastSyncTime,
-    onSync,
     showButton = true,
 }) => {
+    const [status, setStatus] = useState<SyncStatus>('idle');
+    const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
+
+    useEffect(() => {
+        // 获取初始状态
+        setStatus(syncService.getSyncStatus());
+        syncService.getLastSyncTime().then(setLastSyncTime);
+
+        // 监听状态变化
+        const unsubscribe = syncService.onSyncStatusChange((newStatus) => {
+            setStatus(newStatus);
+            if (newStatus === 'success') {
+                syncService.getLastSyncTime().then(setLastSyncTime);
+            }
+        });
+
+        return unsubscribe;
+    }, []);
+
+    const handleSync = async () => {
+        await syncService.syncNow();
+    };
     const formatSyncTime = (time: string | null) => {
         if (!time) return '从未同步';
 
@@ -108,9 +125,9 @@ export const SyncIndicator: React.FC<SyncIndicatorProps> = ({
             </div>
 
             {/* 手动同步按钮 */}
-            {showButton && onSync && (
+            {showButton && (
                 <button
-                    onClick={onSync}
+                    onClick={handleSync}
                     disabled={status === 'syncing'}
                     className="ml-2 p-1.5 rounded hover:bg-white/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="手动同步"

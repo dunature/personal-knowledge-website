@@ -7,10 +7,18 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+
+# Build output
 dist
 dist-ssr
 *.local
+
+# Environment variables
+.env
+.env.local
+.env.*.local
 
 # Editor directories and files
 .vscode/*
@@ -22,3 +30,22 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Test files (keep in repo for reference)
+# test-import-*.json
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+.cache
+
+# Coverage
+coverage
+*.lcov
+
+# Debug
+.vscode/launch.json

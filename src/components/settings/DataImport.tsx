@@ -32,16 +32,40 @@ export function DataImport() {
             const { resources, questions, subQuestions, answers, metadata } = importData.data;
 
             // 验证数据
-            const isValid = validateGistData({
+            const dataToValidate = {
                 resources: resources || [],
                 questions: questions || [],
                 subQuestions: subQuestions || [],
                 answers: answers || [],
-                metadata: metadata || {},
-            });
+                metadata: metadata || {
+                    version: '1.0.0',
+                    lastSync: new Date().toISOString(),
+                    owner: 'local'
+                },
+            };
+
+            const isValid = validateGistData(dataToValidate);
 
             if (!isValid) {
-                throw new Error('数据验证失败');
+                // 提供更详细的错误信息
+                const errors: string[] = [];
+                if (!Array.isArray(dataToValidate.resources)) {
+                    errors.push('resources 必须是数组');
+                }
+                if (!Array.isArray(dataToValidate.questions)) {
+                    errors.push('questions 必须是数组');
+                }
+                if (!Array.isArray(dataToValidate.subQuestions)) {
+                    errors.push('subQuestions 必须是数组');
+                }
+                if (!Array.isArray(dataToValidate.answers)) {
+                    errors.push('answers 必须是数组');
+                }
+                if (!dataToValidate.metadata || typeof dataToValidate.metadata !== 'object') {
+                    errors.push('metadata 必须是对象');
+                }
+
+                throw new Error(`数据验证失败:\n${errors.join('\n') || '数据格式不符合要求，请检查所有字段是否完整'}`);
             }
 
             // 确认导入

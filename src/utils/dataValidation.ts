@@ -117,43 +117,81 @@ export function validateGistMetadata(data: any): data is GistMetadata {
  */
 export function validateGistData(data: any): data is GistData {
     if (typeof data !== 'object' || data === null) {
+        console.error('数据验证失败: 数据不是对象');
         return false;
     }
 
     // 验证 resources 数组
     if (!Array.isArray(data.resources)) {
+        console.error('数据验证失败: resources 不是数组');
         return false;
     }
-    if (!data.resources.every(validateResource)) {
+    const invalidResources = data.resources.filter((r: any, i: number) => {
+        const valid = validateResource(r);
+        if (!valid) {
+            console.error(`资源 ${i} 验证失败:`, r);
+        }
+        return !valid;
+    });
+    if (invalidResources.length > 0) {
+        console.error(`发现 ${invalidResources.length} 个无效资源`);
         return false;
     }
 
     // 验证 questions 数组
     if (!Array.isArray(data.questions)) {
+        console.error('数据验证失败: questions 不是数组');
         return false;
     }
-    if (!data.questions.every(validateBigQuestion)) {
+    const invalidQuestions = data.questions.filter((q: any, i: number) => {
+        const valid = validateBigQuestion(q);
+        if (!valid) {
+            console.error(`问题 ${i} 验证失败:`, q);
+        }
+        return !valid;
+    });
+    if (invalidQuestions.length > 0) {
+        console.error(`发现 ${invalidQuestions.length} 个无效问题`);
         return false;
     }
 
     // 验证 subQuestions 数组
     if (!Array.isArray(data.subQuestions)) {
+        console.error('数据验证失败: subQuestions 不是数组');
         return false;
     }
-    if (!data.subQuestions.every(validateSubQuestion)) {
+    const invalidSubQuestions = data.subQuestions.filter((sq: any, i: number) => {
+        const valid = validateSubQuestion(sq);
+        if (!valid) {
+            console.error(`子问题 ${i} 验证失败:`, sq);
+        }
+        return !valid;
+    });
+    if (invalidSubQuestions.length > 0) {
+        console.error(`发现 ${invalidSubQuestions.length} 个无效子问题`);
         return false;
     }
 
     // 验证 answers 数组
     if (!Array.isArray(data.answers)) {
+        console.error('数据验证失败: answers 不是数组');
         return false;
     }
-    if (!data.answers.every(validateTimelineAnswer)) {
+    const invalidAnswers = data.answers.filter((a: any, i: number) => {
+        const valid = validateTimelineAnswer(a);
+        if (!valid) {
+            console.error(`答案 ${i} 验证失败:`, a);
+        }
+        return !valid;
+    });
+    if (invalidAnswers.length > 0) {
+        console.error(`发现 ${invalidAnswers.length} 个无效答案`);
         return false;
     }
 
     // 验证 metadata
     if (!validateGistMetadata(data.metadata)) {
+        console.error('数据验证失败: metadata 无效', data.metadata);
         return false;
     }
 
