@@ -98,14 +98,18 @@ export const HomePage: React.FC = () => {
     const handleCreateSubQuestion = async (data: { title: string; status: any }) => {
         if (!selectedQuestionId) return;
 
-        const newSubQuestion: Omit<SubQuestion, 'id' | 'created_at' | 'updated_at'> = {
+        const now = new Date().toISOString();
+        const newSubQuestion: SubQuestion = {
+            id: `subquestion_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             parent_id: selectedQuestionId,
             title: data.title,
             status: data.status,
             answers: [],
+            created_at: now,
+            updated_at: now,
         };
 
-        await addSubQuestion(newSubQuestion as SubQuestion);
+        await addSubQuestion(newSubQuestion);
     };
 
     // 保存回答
@@ -115,13 +119,17 @@ export const HomePage: React.FC = () => {
 
     // 创建新回答
     const handleCreateAnswer = async (subQuestionId: string, content: string) => {
-        const newAnswer: Omit<TimelineAnswer, 'id' | 'created_at' | 'updated_at'> = {
+        const now = new Date().toISOString();
+        const newAnswer: TimelineAnswer = {
+            id: `answer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             question_id: subQuestionId,
             content,
-            timestamp: new Date().toISOString(),
+            timestamp: now,
+            created_at: now,
+            updated_at: now,
         };
 
-        await addAnswer(newAnswer as TimelineAnswer);
+        await addAnswer(newAnswer);
     };
 
     // ========== 资源CRUD功能 ==========
@@ -205,7 +213,9 @@ export const HomePage: React.FC = () => {
                 cover = getVideoThumbnail(editorData.url, editorData.type);
             }
 
-            const newResource: Omit<Resource, 'id' | 'created_at' | 'updated_at'> = {
+            const now = new Date().toISOString();
+            const newResource: Resource = {
+                id: `resource_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 title: editorData.title,
                 url: editorData.url,
                 type: editorData.type || 'blog', // 使用用户选择的类型
@@ -220,13 +230,15 @@ export const HomePage: React.FC = () => {
                 author: editorData.author || '未知',
                 recommendation: editorData.recommendation || '',
                 metadata: {},
+                created_at: now,
+                updated_at: now,
             };
             console.log('[HomePage] 准备添加资源:', {
                 title: newResource.title,
                 category: newResource.category,
                 editorData
             });
-            await addResource(newResource as Resource);
+            await addResource(newResource);
             console.log('[HomePage] 资源已添加');
             showToast('success', '资源已添加');
         }
@@ -297,15 +309,19 @@ export const HomePage: React.FC = () => {
             showToast('success', '问题已更新');
         } else {
             // 创建新问题
-            const newQuestion: Omit<BigQuestion, 'id' | 'created_at' | 'updated_at'> = {
+            const now = new Date().toISOString();
+            const newQuestion: BigQuestion = {
+                id: `question_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 title: editorData.title,
                 description: editorData.description || '',
                 status: editorData.status || 'unsolved',
                 category: editorData.category || '技术',
                 summary: '',
                 sub_questions: [],
+                created_at: now,
+                updated_at: now,
             };
-            await addQuestion(newQuestion as BigQuestion);
+            await addQuestion(newQuestion);
             showToast('success', '问题已添加');
         }
 
