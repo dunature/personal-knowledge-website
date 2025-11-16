@@ -142,7 +142,7 @@ export const QASection: React.FC<QASectionProps> = ({
             )}
 
             {/* 问题列表 */}
-            <div className="space-y-3">
+            <div className="space-y-4">
                 {displayedQuestions.map((question) => (
                     <QuestionItem
                         key={question.id}

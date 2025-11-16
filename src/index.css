@@ -3,26 +3,73 @@
 @tailwind utilities;
 
 /* ============================================
-   全局CSS变量系统
+   全局CSS变量系统 - 基于设计令牌
    ============================================ */
 :root {
-  /* 颜色系统 */
-  --color-primary: #0047AB;
-  --color-primary-hover: #003580;
-  --color-primary-light: #E3F2FD;
-  --color-secondary: #666;
-  --color-tertiary: #999;
-  --color-text: #333;
-  --color-text-light: #555;
+  /* Primary Colors - 主色 */
+  --color-primary: #0033FF;
+  --color-primary-hover: #0028CC;
+  --color-primary-light: #E6ECFF;
+  --color-primary-dark: #001A80;
+
+  /* Neutral Colors - 中性色 */
+  --color-gray-50: #FAFAFA;
+  --color-gray-100: #F5F5F5;
+  --color-gray-200: #EEEEEE;
+  --color-gray-300: #E0E0E0;
+  --color-gray-400: #BDBDBD;
+  --color-gray-500: #9E9E9E;
+  --color-gray-600: #757575;
+  --color-gray-700: #616161;
+  --color-gray-800: #424242;
+  --color-gray-900: #212121;
+
+  /* Text Colors - 文本色 */
+  --color-text-primary: #333333;
+  --color-text-secondary: #666666;
+  --color-text-tertiary: #999999;
+  --color-text-disabled: #BDBDBD;
+  --color-text-inverse: #FFFFFF;
+
+  /* Semantic Colors - 语义色 */
+  --color-success: #4CAF50;
+  --color-success-light: #E8F5E9;
+  --color-error: #F44336;
+  --color-error-light: #FFEBEE;
+  --color-warning: #FF9800;
+  --color-warning-light: #FFF3E0;
+  --color-info: #2196F3;
+  --color-info-light: #E3F2FD;
+
+  /* Background Colors - 背景色 */
+  --color-background-primary: #FFFFFF;
+  --color-background-secondary: #FAFAFA;
+  --color-background-tertiary: #F5F5F5;
+  --color-background-elevated: #FFFFFF;
+
+  /* Legacy colors for backward compatibility */
+  --color-secondary: #666666;
+  --color-tertiary: #999999;
+  --color-text: #333333;
+  --color-text-light: #555555;
   --color-background: #FFFFFF;
   --color-background-secondary: #F5F5F5;
   --color-background-hover: #EEEEEE;
   --color-divider: #E0E0E0;
-  --color-success: #2E7D32;
-  --color-error: #D32F2F;
-  --color-warning: #F57C00;
 
-  /* 字体大小 */
+  /* Font Sizes - 字号 */
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 30px;
+  --font-size-4xl: 36px;
+  --font-size-5xl: 48px;
+  --font-size-6xl: 60px;
+
+  /* Legacy font sizes */
   --font-size-h1: 32px;
   --font-size-h2: 24px;
   --font-size-h3: 18px;
@@ -31,17 +78,34 @@
   --font-size-secondary: 13px;
   --font-size-small: 12px;
 
-  /* 字体粗细 */
-  --font-weight-bold: 700;
-  --font-weight-semibold: 600;
+  /* Font Weights - 字重 */
   --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
 
-  /* 行高 */
-  --line-height-tight: 1.2;
-  --line-height-normal: 1.4;
-  --line-height-relaxed: 1.6;
+  /* Line Heights - 行高 */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  --line-height-loose: 2;
 
-  /* 间距系统 */
+  /* Spacing System - 间距系统 (基于 4px) */
+  --spacing-0: 0;
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+  --spacing-12: 48px;
+  --spacing-16: 64px;
+  --spacing-20: 80px;
+  --spacing-24: 96px;
+
+  /* Legacy spacing */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
@@ -49,31 +113,50 @@
   --spacing-xl: 32px;
   --spacing-xxl: 48px;
 
-  /* 圆角 */
+  /* Border Radius - 圆角 */
+  --radius-none: 0;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* Legacy radius */
   --radius-small: 4px;
   --radius-medium: 6px;
   --radius-card: 8px;
   --radius-large: 12px;
 
-  /* 阴影 */
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.15);
+  /* Shadows - 阴影 */
+  --shadow-none: none;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.12);
+
+  /* Legacy shadows */
   --shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.2);
 
-  /* 动画时长 */
-  --duration-fast: 200ms;
+  /* Transitions - 过渡时长 */
+  --duration-fast: 100ms;
+  --duration-base: 200ms;
   --duration-normal: 300ms;
-  --duration-slow: 500ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
 
-  /* 缓动函数 */
-  --ease-in: cubic-bezier(0.4, 0, 1, 1);
-  --ease-out: cubic-bezier(0, 0, 0.2, 1);
-  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  /* Easings - 缓动函数 */
+  --ease-linear: linear;
+  --ease: ease;
+  --ease-in: ease-in;
+  --ease-out: ease-out;
+  --ease-in-out: ease-in-out;
 
-  /* 字体系统 */
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  /* Font Family - 字体族 */
+  font-family: Inter, "Helvetica Neue", Arial, "PingFang SC", "HarmonyOS Sans", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -94,11 +177,13 @@ html {
 
 body {
   min-width: 1200px;
-  background-color: var(--color-background);
-  color: var(--color-text);
-  font-size: var(--font-size-body);
-  line-height: var(--line-height-relaxed);
+  background-color: var(--color-background-primary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
   overflow-x: hidden;
+  /* 默认过渡效果 */
+  transition: background-color var(--duration-base) var(--ease-out);
 }
 
 /* 标题样式 */
@@ -130,11 +215,17 @@ h3 {
 a {
   color: var(--color-primary);
   text-decoration: none;
-  transition: color var(--duration-fast) var(--ease-out);
+  transition: color var(--duration-base) var(--ease-out);
 }
 
 a:hover {
   color: var(--color-primary-hover);
+}
+
+a:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }
 
 /* 按钮重置 */
@@ -178,17 +269,18 @@ img {
 }
 
 ::-webkit-scrollbar-track {
-  background: #F5F5F5;
-  border-radius: 4px;
+  background: var(--color-gray-100);
+  border-radius: var(--radius-sm);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #0047AB;
-  border-radius: 4px;
+  background: var(--color-primary);
+  border-radius: var(--radius-sm);
+  transition: background-color var(--duration-base) var(--ease-out);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #003580;
+  background: var(--color-primary-hover);
 }
 
 /* ============================================
@@ -196,6 +288,10 @@ img {
    ============================================ */
 .transition-fast {
   transition: all var(--duration-fast) var(--ease-out);
+}
+
+.transition-base {
+  transition: all var(--duration-base) var(--ease-out);
 }
 
 .transition-normal {
@@ -207,17 +303,26 @@ img {
 }
 
 .transition-colors {
-  transition: color var(--duration-fast) var(--ease-out),
-    background-color var(--duration-fast) var(--ease-out),
-    border-color var(--duration-fast) var(--ease-out);
+  transition: color var(--duration-base) var(--ease-out),
+    background-color var(--duration-base) var(--ease-out),
+    border-color var(--duration-base) var(--ease-out);
 }
 
 .transition-transform {
-  transition: transform var(--duration-normal) var(--ease-out);
+  transition: transform var(--duration-base) var(--ease-out);
 }
 
 .transition-opacity {
-  transition: opacity var(--duration-normal) var(--ease-out);
+  transition: opacity var(--duration-base) var(--ease-out);
+}
+
+/* 默认过渡 - 应用于所有交互元素 */
+button,
+a,
+input,
+textarea,
+select {
+  transition: all var(--duration-base) var(--ease-out);
 }
 
 /* ============================================
@@ -241,34 +346,30 @@ img {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(-10px);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
 .animate-fadeIn {
-  animation: fadeIn var(--duration-normal) var(--ease-out);
+  animation: fadeIn var(--duration-base) var(--ease-out);
 }
 
 /* 淡出动画 */
 @keyframes fadeOut {
   from {
     opacity: 1;
-    transform: translateY(0);
   }
 
   to {
     opacity: 0;
-    transform: translateY(-10px);
   }
 }
 
 .animate-fadeOut {
-  animation: fadeOut var(--duration-normal) var(--ease-in);
+  animation: fadeOut var(--duration-base) var(--ease-in);
 }
 
 /* 从右侧滑入 */
@@ -325,7 +426,7 @@ img {
 /* 缩放进入 */
 @keyframes scaleIn {
   from {
-    transform: scale(0.9);
+    transform: scale(0.95);
     opacity: 0;
   }
 
@@ -336,7 +437,7 @@ img {
 }
 
 .animate-scaleIn {
-  animation: scaleIn var(--duration-normal) var(--ease-out);
+  animation: scaleIn var(--duration-base) var(--ease-out);
 }
 
 /* 缩放退出 */
@@ -347,13 +448,13 @@ img {
   }
 
   to {
-    transform: scale(0.9);
+    transform: scale(0.95);
     opacity: 0;
   }
 }
 
 .animate-scaleOut {
-  animation: scaleOut var(--duration-normal) var(--ease-in);
+  animation: scaleOut var(--duration-base) var(--ease-in);
 }
 
 /* 旋转加载动画 */

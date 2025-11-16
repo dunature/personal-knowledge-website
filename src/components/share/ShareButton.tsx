@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { Share2, Check } from 'lucide-react';
 import { authService } from '@/services/authService';
 import { useAuth } from '@/contexts/AuthContext';
+import { getButtonStyles } from '@/styles/buttonStyles';
 
 interface ShareButtonProps {
     className?: string;
@@ -50,13 +51,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
     return (
         <button
             onClick={handleShare}
-            className={`
-                flex items-center gap-2 px-4 py-2 
-                bg-blue-600 text-white rounded-lg
-                hover:bg-blue-700 transition-colors
-                disabled:bg-gray-400 disabled:cursor-not-allowed
-                ${className}
-            `}
+            className={getButtonStyles('primary', 'medium', false, className)}
             disabled={copied}
             title={copied ? '已复制到剪贴板' : '分享数据'}
         >

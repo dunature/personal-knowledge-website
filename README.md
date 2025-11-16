@@ -23,9 +23,12 @@
 
 ### ☁️ 云端同步
 - GitHub Gist 作为数据存储
+- 登录时自动检测和同步数据
 - 自动增量同步
 - 离线优先，支持离线编辑
 - 数据加密和验证
+
+> **💡 重要说明**：数据存储在 GitHub Gist 中，Token 只是访问凭证。更换 Token 后，系统会自动检测你的 Gist 并恢复数据，完全不会丢失！详见 [数据存储 FAQ](./docs/DATA_STORAGE_FAQ.md)
 
 ### 👥 双模式支持
 - **拥有者模式**：完整的编辑和同步权限
@@ -161,10 +164,18 @@ personal-knowledge-website/
 
 ## 📚 文档
 
-### 用户文档
-- [快速开始指南](DEVELOPMENT_QUICKSTART.md)
+完整文档索引：[docs/README.md](docs/README.md)
+
+### 快速开始
+- [快速开始指南](docs/getting-started/QUICK_START.md)
+- [项目架构](docs/getting-started/ARCHITECTURE.md)
 - [Gist 设置指南](docs/user-guides/GIST_SETUP_GUIDE.md)
-- [用户使用手册](docs/user-guides/USER_GUIDE_CN.md)
+
+### 功能文档
+- [平台自动填充](docs/features/platform-autofill/) - YouTube、Bilibili、GitHub 自动填充
+- [Gist 集成](docs/features/gist-integration/) - 云端同步功能
+- [模式切换](docs/features/mode-switcher/) - 拥有者/访客模式
+- [UI 组件](docs/features/ui-components/) - 卡片、Toast 等组件
 
 ### 开发文档
 - [开发指南](CONTRIBUTING.md)
@@ -173,10 +184,14 @@ personal-knowledge-website/
 - [离线支持](docs/development/OFFLINE_SUPPORT.md)
 - [增量同步](docs/development/INCREMENTAL_SYNC.md)
 
-### 功能文档
-- [Gist 集成](docs/development/GIST_INTEGRATION.md)
-- [性能优化](PERFORMANCE_OPTIMIZATION.md)
-- [无障碍指南](ACCESSIBILITY_GUIDE.md)
+### 故障排除
+- [Bilibili 相关问题](docs/troubleshooting/bilibili-issues/) - 封面、API 等问题
+- [分类相关问题](docs/troubleshooting/category-issues/) - 分类筛选问题
+
+### 指南
+- [性能优化](docs/guides/PERFORMANCE_OPTIMIZATION.md)
+- [无障碍指南](docs/guides/ACCESSIBILITY_GUIDE.md)
+- [测试指南](docs/guides/TEST_GUIDE.md)
 
 ## 🧪 测试
 

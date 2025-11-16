@@ -35,7 +35,9 @@ const Toast: React.FC<ToastProps> = ({
         switch (type) {
             case 'success':
                 return {
-                    bgColor: 'bg-primary', // 统一使用蓝色背景
+                    bgColor: 'bg-green-600',
+                    textColor: 'text-white',
+                    iconColor: 'text-white',
                     icon: (
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -49,7 +51,9 @@ const Toast: React.FC<ToastProps> = ({
                 };
             case 'error':
                 return {
-                    bgColor: 'bg-primary', // 统一使用蓝色背景
+                    bgColor: 'bg-red-600',
+                    textColor: 'text-white',
+                    iconColor: 'text-white',
                     icon: (
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -63,7 +67,9 @@ const Toast: React.FC<ToastProps> = ({
                 };
             case 'warning':
                 return {
-                    bgColor: 'bg-primary', // 统一使用蓝色背景
+                    bgColor: 'bg-yellow-500',
+                    textColor: 'text-gray-900',
+                    iconColor: 'text-gray-900',
                     icon: (
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -77,14 +83,18 @@ const Toast: React.FC<ToastProps> = ({
                 };
             case 'loading':
                 return {
-                    bgColor: 'bg-primary', // 统一使用蓝色背景
+                    bgColor: 'bg-primary',
+                    textColor: 'text-white',
+                    iconColor: 'text-white',
                     icon: (
                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     ),
                 };
             default: // info
                 return {
-                    bgColor: 'bg-primary', // 统一使用蓝色背景
+                    bgColor: 'bg-primary',
+                    textColor: 'text-white',
+                    iconColor: 'text-white',
                     icon: (
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -104,26 +114,25 @@ const Toast: React.FC<ToastProps> = ({
     return (
         <div
             className={`
-        ${config.bgColor}
-        px-lg py-md rounded-medium
-        shadow-[0_4px_12px_rgba(0,0,0,0.15)]
-        border-2 border-white/20
-        flex items-center gap-md
-        animate-slideInRight
-        min-w-[300px] max-w-[500px]
-        backdrop-blur-sm
-      `}
+                ${config.bgColor}
+                px-4 py-3 rounded-md
+                shadow-lg
+                flex items-center gap-3
+                animate-fadeIn
+                min-w-[300px] max-w-[500px]
+                transition-all duration-200
+            `}
             role="alert"
             aria-live="polite"
         >
-            <div className="flex-shrink-0 text-white">{config.icon}</div>
+            <div className={`flex-shrink-0 ${config.iconColor}`}>{config.icon}</div>
 
-            <p className="flex-1 text-body text-white font-medium">{message}</p>
+            <p className={`flex-1 text-sm ${config.textColor} font-medium`}>{message}</p>
 
             {type !== 'loading' && (
                 <button
                     onClick={() => onClose(id)}
-                    className="flex-shrink-0 text-white hover:opacity-80 transition-opacity"
+                    className={`flex-shrink-0 ${config.iconColor} hover:opacity-80 transition-opacity duration-200`}
                     aria-label="关闭"
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -6,6 +6,7 @@
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { iconButtonStyles } from '@/styles/buttonStyles';
 
 export interface EditorDrawerProps {
     isOpen: boolean;
@@ -125,7 +126,7 @@ export const EditorDrawer: React.FC<EditorDrawerProps> = ({
                         )}
                         <button
                             onClick={handleClose}
-                            className="p-2 rounded hover:bg-[#F5F5F5] transition-fast"
+                            className={iconButtonStyles}
                             aria-label="关闭"
                         >
                             <X size={20} />

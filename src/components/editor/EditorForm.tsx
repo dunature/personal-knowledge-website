@@ -7,10 +7,14 @@ import React, { useState } from 'react';
 import { Input } from '@/components/ui/Input';
 import { Dropdown } from '@/components/ui/Dropdown';
 import type { DropdownOption } from '@/components/ui/Dropdown';
+import { Button } from '@/components/ui/Button';
 import { MarkdownEditor } from './MarkdownEditor';
 import { EditorToolbar } from './EditorToolbar';
 import { ImageUploader } from './ImageUploader';
 import { MarkdownPreview } from '@/components/common/MarkdownPreview';
+import { generatePlaceholder } from '@/utils/placeholderUtils';
+import { getVideoThumbnail, getYouTubeVideoInfo } from '@/utils/videoThumbnailUtils';
+import { getBilibiliVideoInfo, getGitHubRepoInfo } from '@/utils/platformInfoUtils';
 
 export type EditorType = 'resource' | 'question' | 'subQuestion' | 'answer' | 'summary';
 
@@ -22,6 +26,7 @@ export interface EditorFormData {
     // 资源特定字段
     url?: string;
     cover?: string;
+    type?: string;
     category?: string;
     tags?: string[];
     author?: string;
@@ -59,15 +64,130 @@ export const EditorForm: React.FC<EditorFormProps> = ({
         { value: 'solved', label: '已解决' },
     ];
 
-    // 分类选项
-    const categoryOptions: DropdownOption[] = categories.map(cat => ({
-        value: cat,
-        label: cat,
-    }));
+    // 分类选项 - 添加"新建分类"选项
+    const categoryOptions: DropdownOption[] = React.useMemo(() => {
+        console.log('[EditorForm] 生成分类选项:', {
+            categories,
+            currentCategory: data.category,
+            isNewCategory: data.category && !categories.includes(data.category)
+        });
+
+        return [
+            ...categories.map(cat => ({
+                value: cat,
+                label: cat,
+            })),
+            // 如果当前选中的分类不在列表中，添加它
+            ...(data.category && !categories.includes(data.category) ? [{
+                value: data.category,
+                label: `${data.category} (新)`,
+            }] : []),
+            { value: '__new__', label: '+ 新建分类' },
+        ];
+    }, [categories, data.category]);
+
+    // 新建分类状态
+    const [isAddingCategory, setIsAddingCategory] = useState(false);
+    const [newCategoryName, setNewCategoryName] = useState('');
 
     // 更新字段
     const updateField = (field: keyof EditorFormData, value: any) => {
         onChange({ ...data, [field]: value });
+    };
+
+    // 自动获取资源信息
+    const handleAutoFetchCover = async () => {
+        if (!data.url) {
+            console.log('[EditorForm] 没有 URL');
+            return;
+        }
+
+        console.log('[EditorForm] 开始获取资源信息:', { url: data.url, type: data.type });
+
+        if (data.type === 'youtube_video') {
+            // YouTube 视频
+            const videoInfo = await getYouTubeVideoInfo(data.url);
+            console.log('[EditorForm] YouTube 视频信息:', videoInfo);
+
+            if (videoInfo) {
+                const updates: Partial<EditorFormData> = {
+                    cover: videoInfo.thumbnail,
+                };
+
+                if (!data.title || data.title.trim() === '') {
+                    updates.title = videoInfo.title;
+                    console.log('[EditorForm] 将更新标题:', videoInfo.title);
+                }
+                if (!data.author || data.author.trim() === '' || data.author === '未知') {
+                    updates.author = videoInfo.author;
+                    console.log('[EditorForm] 将更新作者:', videoInfo.author);
+                }
+
+                console.log('[EditorForm] 应用更新:', updates);
+                onChange({ ...data, ...updates });
+            } else {
+                console.log('[EditorForm] API 失败，使用缩略图');
+                const thumbnail = getVideoThumbnail(data.url, 'youtube_video');
+                updateField('cover', thumbnail);
+            }
+        } else if (data.type === 'bilibili_video') {
+            // Bilibili 视频
+            const videoInfo = await getBilibiliVideoInfo(data.url);
+            console.log('[EditorForm] Bilibili 视频信息:', videoInfo);
+
+            if (videoInfo) {
+                const updates: Partial<EditorFormData> = {};
+
+                // 使用 API 返回的封面，如果为空则使用占位图
+                if (videoInfo.thumbnail && videoInfo.thumbnail.trim() !== '') {
+                    updates.cover = videoInfo.thumbnail;
+                    console.log('[EditorForm] 将更新封面:', videoInfo.thumbnail);
+                } else {
+                    console.log('[EditorForm] API 返回的封面为空，使用占位图');
+                    updates.cover = getVideoThumbnail(data.url, 'bilibili_video');
+                }
+
+                if (!data.title || data.title.trim() === '') {
+                    updates.title = videoInfo.title;
+                    console.log('[EditorForm] 将更新标题:', videoInfo.title);
+                }
+                if (!data.author || data.author.trim() === '' || data.author === '未知') {
+                    updates.author = videoInfo.author;
+                    console.log('[EditorForm] 将更新作者:', videoInfo.author);
+                }
+
+                console.log('[EditorForm] 应用更新:', updates);
+                onChange({ ...data, ...updates });
+            } else {
+                console.log('[EditorForm] API 失败，使用占位图');
+                const thumbnail = getVideoThumbnail(data.url, 'bilibili_video');
+                updateField('cover', thumbnail);
+            }
+        } else if (data.type === 'github_repo') {
+            // GitHub 仓库
+            const repoInfo = await getGitHubRepoInfo(data.url);
+            console.log('[EditorForm] GitHub 仓库信息:', repoInfo);
+
+            if (repoInfo) {
+                const updates: Partial<EditorFormData> = {};
+
+                if (!data.title || data.title.trim() === '') {
+                    updates.title = repoInfo.title;
+                    console.log('[EditorForm] 将更新标题:', repoInfo.title);
+                }
+                if (!data.author || data.author.trim() === '' || data.author === '未知') {
+                    updates.author = repoInfo.author;
+                    console.log('[EditorForm] 将更新作者:', repoInfo.author);
+                }
+                if (!data.recommendation || data.recommendation.trim() === '') {
+                    updates.recommendation = repoInfo.description;
+                    console.log('[EditorForm] 将更新推荐语:', repoInfo.description);
+                }
+
+                console.log('[EditorForm] 应用更新:', updates);
+                onChange({ ...data, ...updates });
+            }
+        }
     };
 
     // 插入Markdown语法
@@ -100,6 +220,16 @@ export const EditorForm: React.FC<EditorFormProps> = ({
         updateField(currentField, content + '\n' + markdown + '\n');
     };
 
+    // 资源类型选项
+    const resourceTypeOptions: DropdownOption[] = [
+        { value: 'blog', label: '博客文章' },
+        { value: 'youtube_video', label: 'YouTube 视频' },
+        { value: 'bilibili_video', label: 'Bilibili 视频' },
+        { value: 'github_repo', label: 'GitHub 仓库' },
+        { value: 'tool', label: '工具' },
+        { value: 'reddit_post', label: 'Reddit 帖子' },
+    ];
+
     // 渲染资源表单
     const renderResourceForm = () => (
         <div className="space-y-4 p-4">
@@ -117,13 +247,40 @@ export const EditorForm: React.FC<EditorFormProps> = ({
                 placeholder="https://example.com"
                 fullWidth
             />
-            <Input
-                label="封面图片URL"
-                value={data.cover || ''}
-                onChange={(e) => updateField('cover', e.target.value)}
-                placeholder="https://example.com/image.jpg"
-                fullWidth
-            />
+            <div>
+                <label className="block text-sm font-medium text-[#333] mb-1">
+                    类型
+                </label>
+                <Dropdown
+                    options={resourceTypeOptions}
+                    value={data.type || 'blog'}
+                    onChange={(value) => updateField('type', value)}
+                    placeholder="选择资源类型"
+                    className="w-full"
+                />
+            </div>
+            <div className="flex gap-2">
+                <Input
+                    label="封面图片URL"
+                    value={data.cover || ''}
+                    onChange={(e) => updateField('cover', e.target.value)}
+                    placeholder="https://example.com/image.jpg"
+                    fullWidth
+                />
+                {(data.type === 'youtube_video' || data.type === 'bilibili_video' || data.type === 'github_repo') && data.url && (
+                    <div className="flex flex-col justify-end">
+                        <Button
+                            variant="secondary"
+                            onClick={handleAutoFetchCover}
+                            className="whitespace-nowrap h-10"
+                            disabled={!data.url}
+                            title="自动获取资源信息（标题、作者等）"
+                        >
+                            自动填充
+                        </Button>
+                    </div>
+                )}
+            </div>
             {data.cover && (
                 <div className="border border-[#E0E0E0] rounded p-2">
                     <p className="text-xs text-[#666] mb-2">封面预览：</p>
@@ -132,7 +289,11 @@ export const EditorForm: React.FC<EditorFormProps> = ({
                         alt="封面预览"
                         className="w-full h-[180px] object-cover rounded"
                         onError={(e) => {
-                            (e.target as HTMLImageElement).src = 'https://via.placeholder.com/320x180/E0E0E0/666?text=图片加载失败';
+                            (e.target as HTMLImageElement).src = generatePlaceholder({
+                                backgroundColor: '#E0E0E0',
+                                textColor: '#666666',
+                                text: '图片加载失败'
+                            });
                         }}
                     />
                 </div>
@@ -142,13 +303,52 @@ export const EditorForm: React.FC<EditorFormProps> = ({
                     <label className="block text-sm font-medium text-[#333] mb-1">
                         分类
                     </label>
-                    <Dropdown
-                        options={categoryOptions}
-                        value={data.category || ''}
-                        onChange={(value) => updateField('category', value)}
-                        placeholder="选择分类"
-                        className="w-full"
-                    />
+                    {isAddingCategory ? (
+                        <div className="flex gap-2">
+                            <Input
+                                value={newCategoryName}
+                                onChange={(e) => setNewCategoryName(e.target.value)}
+                                placeholder="输入新分类名称"
+                                fullWidth
+                                autoFocus
+                            />
+                            <button
+                                onClick={() => {
+                                    if (newCategoryName.trim()) {
+                                        updateField('category', newCategoryName.trim());
+                                        setIsAddingCategory(false);
+                                        setNewCategoryName('');
+                                    }
+                                }}
+                                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover transition-colors whitespace-nowrap"
+                            >
+                                确定
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setIsAddingCategory(false);
+                                    setNewCategoryName('');
+                                }}
+                                className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors whitespace-nowrap"
+                            >
+                                取消
+                            </button>
+                        </div>
+                    ) : (
+                        <Dropdown
+                            options={categoryOptions}
+                            value={data.category || ''}
+                            onChange={(value) => {
+                                if (value === '__new__') {
+                                    setIsAddingCategory(true);
+                                } else {
+                                    updateField('category', value);
+                                }
+                            }}
+                            placeholder="选择分类"
+                            className="w-full"
+                        />
+                    )}
                 </div>
             )}
             <Input

@@ -614,6 +614,131 @@ class SyncService {
             };
         }
     }
+
+    /**
+     * 执行初始同步（用于首次登录或新设备）
+     * @param gistId Gist ID
+     * @returns 同步结果
+     */
+    async performInitialSync(gistId: string): Promise<SyncResult> {
+        try {
+            this.updateStatus('syncing');
+
+            // 获取 Token（可选，公开 Gist 不需要）
+            const token = await authService.getToken();
+
+            // 从 Gist 下载数据
+            const remoteData = await gistService.getGist(gistId, token || undefined);
+
+            // 验证数据
+            if (!validateGistData(remoteData)) {
+                throw new Error('Gist 数据格式无效');
+            }
+
+            // 检查本地是否有数据
+            const localResources = await cacheService.getData<Resource[]>(STORAGE_KEYS.RESOURCES);
+            const hasLocalData = localResources && localResources.length > 0;
+
+            if (hasLocalData) {
+                // 有本地数据，需要处理冲突
+                throw new Error('LOCAL_DATA_EXISTS');
+            }
+
+            // 保存到本地缓存
+            await cacheService.saveData(STORAGE_KEYS.RESOURCES, remoteData.resources);
+            await cacheService.saveData(STORAGE_KEYS.QUESTIONS, remoteData.questions);
+            await cacheService.saveData(STORAGE_KEYS.SUB_QUESTIONS, remoteData.subQuestions);
+            await cacheService.saveData(STORAGE_KEYS.ANSWERS, remoteData.answers);
+            await cacheService.saveData(STORAGE_KEYS.METADATA, remoteData.metadata);
+
+            // 保存同步时间
+            await cacheService.saveData(STORAGE_KEYS.LAST_SYNC, new Date().toISOString());
+
+            // 更新状态
+            this.updateStatus('success');
+            this.retryCount = 0;
+
+            return {
+                success: true,
+                timestamp: new Date().toISOString(),
+            };
+        } catch (error) {
+            const gistError = toGistError(error, { context: 'performInitialSync' });
+            console.error('初始同步失败:', gistError.toJSON());
+            this.updateStatus('error');
+
+            return {
+                success: false,
+                timestamp: new Date().toISOString(),
+                error: gistError.getUserMessage(),
+            };
+        }
+    }
+
+    /**
+     * 判断应用启动时是否需要同步
+     * @returns 是否需要同步
+     */
+    async shouldSyncOnStartup(): Promise<boolean> {
+        // 检查是否配置了 Token 和 Gist ID
+        if (!authService.isAuthenticated() || !authService.getGistId()) {
+            return false;
+        }
+
+        // 检查网络状态
+        if (!navigator.onLine) {
+            return false;
+        }
+
+        // 检查上次同步时间
+        const lastSync = await this.getLastSyncTime();
+        if (!lastSync) {
+            return true; // 从未同步过
+        }
+
+        const lastSyncTime = new Date(lastSync).getTime();
+        const now = Date.now();
+        const fiveMinutes = 5 * 60 * 1000;
+
+        // 如果距离上次同步超过 5 分钟，则需要同步
+        return now - lastSyncTime > fiveMinutes;
+    }
+
+    /**
+     * 合并本地和云端数据
+     * @param local 本地数据
+     * @param remote 云端数据
+     * @returns 合并后的数据
+     */
+    mergeLocalAndRemoteData(local: GistData, remote: GistData): GistData {
+        // 使用 ID 去重合并
+        const mergeById = <T extends { id: string }>(localItems: T[], remoteItems: T[]): T[] => {
+            const map = new Map<string, T>();
+
+            // 先添加远程数据
+            remoteItems.forEach((item) => map.set(item.id, item));
+
+            // 再添加本地数据（如果 ID 不存在）
+            localItems.forEach((item) => {
+                if (!map.has(item.id)) {
+                    map.set(item.id, item);
+                }
+            });
+
+            return Array.from(map.values());
+        };
+
+        return {
+            resources: mergeById(local.resources, remote.resources),
+            questions: mergeById(local.questions, remote.questions),
+            subQuestions: mergeById(local.subQuestions, remote.subQuestions),
+            answers: mergeById(local.answers, remote.answers),
+            metadata: {
+                ...remote.metadata,
+                lastSync: new Date().toISOString(),
+            },
+        };
+    }
 }
 
 // 导出单例

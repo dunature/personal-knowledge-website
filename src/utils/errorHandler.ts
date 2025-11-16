@@ -305,3 +305,59 @@ export function withErrorHandling<T extends (...args: any[]) => Promise<any>>(
         }
     }) as T;
 }
+
+/**
+ * 处理初始化错误
+ * @param error 错误对象
+ * @param context 错误上下文
+ * @returns 用户友好的错误消息
+ */
+export function handleInitializationError(error: unknown, context?: string): string {
+    console.error(`初始化错误 ${context ? `(${context})` : ''}:`, error);
+
+    if (error instanceof Error) {
+        const message = error.message.toLowerCase();
+
+        if (message.includes('token')) {
+            return 'Token 无效或已过期，请重新配置';
+        }
+        if (message.includes('network') || message.includes('fetch')) {
+            return '网络连接失败，请检查网络设置';
+        }
+        if (message.includes('404') || message.includes('not found')) {
+            return 'Gist 不存在，请检查 ID 是否正确';
+        }
+        if (message.includes('403') || message.includes('private')) {
+            return 'Gist 是私有的，需要权限访问';
+        }
+        if (message.includes('invalid') || message.includes('format')) {
+            return '数据格式无效，可能已损坏';
+        }
+        if (message.includes('conflict')) {
+            return '检测到数据冲突，请选择处理方式';
+        }
+
+        return error.message;
+    }
+
+    return '初始化失败，请稍后重试';
+}
+
+/**
+ * 记录初始化日志
+ * @param action 操作名称
+ * @param details 详细信息
+ */
+export function logInitialization(action: string, details?: Record<string, any>): void {
+    const timestamp = new Date().toISOString();
+    const logEntry = {
+        timestamp,
+        action,
+        ...details,
+    };
+
+    console.log('[初始化]', logEntry);
+
+    // 可以在这里添加持久化日志的逻辑
+    // 例如保存到 localStorage 或发送到服务器
+}

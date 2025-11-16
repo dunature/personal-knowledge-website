@@ -30,10 +30,11 @@ export const QuestionItem: React.FC<QuestionItemProps> = React.memo(({
         <div
             onClick={() => onClick(question.id)}
             className="
-                flex items-center gap-4 p-4 
-                bg-white border border-[#E0E0E0] rounded-lg
-                hover:bg-[#F5F5F5] 
-                transition-fast cursor-pointer
+                flex items-center gap-4 p-6
+                bg-white rounded-lg shadow-card
+                hover:shadow-cardHover hover:bg-gray-50
+                transition-all duration-200 ease-out
+                cursor-pointer
             "
         >
             {/* 状态标签 */}
@@ -45,17 +46,17 @@ export const QuestionItem: React.FC<QuestionItemProps> = React.memo(({
             </Tag>
 
             {/* 标题 */}
-            <h3 className="flex-1 text-base font-semibold text-[#333] truncate">
+            <h3 className="flex-1 text-base font-semibold text-text-primary truncate">
                 {question.title}
             </h3>
 
             {/* 更新时间 */}
-            <span className="text-sm text-[#999]">
+            <span className="text-sm text-text-tertiary">
                 更新: {updateDate}
             </span>
 
             {/* 小问题数量 */}
-            <span className="text-sm text-[#666]">
+            <span className="text-sm text-text-secondary">
                 小问题: {subQuestionCount}
             </span>
         </div>

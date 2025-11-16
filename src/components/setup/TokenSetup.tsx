@@ -5,6 +5,13 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import InitializationWizard from './InitializationWizard';
+import DataConflictDialog from './DataConflictDialog';
+import { initializationService } from '@/services/initializationService';
+import { gistService } from '@/services/gistService';
+import { cacheService, STORAGE_KEYS } from '@/services/cacheService';
+import type { GistData } from '@/types/gist';
+import type { ConflictStrategy } from '@/services/initializationService';
 
 interface TokenSetupProps {
     onBack: () => void;
@@ -17,6 +24,11 @@ const TokenSetup: React.FC<TokenSetupProps> = ({ onBack, onComplete }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [showToken, setShowToken] = useState(false);
+    const [showInitWizard, setShowInitWizard] = useState(false);
+    const [showConflictDialog, setShowConflictDialog] = useState(false);
+    const [conflictGistId, setConflictGistId] = useState<string | null>(null);
+    const [localData, setLocalData] = useState<GistData | null>(null);
+    const [remoteData, setRemoteData] = useState<GistData | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -37,7 +49,8 @@ const TokenSetup: React.FC<TokenSetupProps> = ({ onBack, onComplete }) => {
         try {
             const success = await setToken(token);
             if (success) {
-                onComplete();
+                // Token 验证成功，显示初始化向导
+                setShowInitWizard(true);
             } else {
                 setError('Token 验证失败，请检查 Token 是否正确');
             }
@@ -48,9 +61,108 @@ const TokenSetup: React.FC<TokenSetupProps> = ({ onBack, onComplete }) => {
         }
     };
 
+    const handleInitComplete = (result: any) => {
+        // 初始化完成，跳转到主页面
+        onComplete();
+    };
+
+    const handleInitError = (err: Error) => {
+        // 初始化失败，返回 Token 输入界面
+        setError(err.message);
+        setShowInitWizard(false);
+    };
+
+    const handleConflict = async (gistId: string) => {
+        // 检测到冲突，加载本地和云端数据
+        try {
+            setConflictGistId(gistId);
+
+            // 获取本地数据
+            const resources = (await cacheService.getData(STORAGE_KEYS.RESOURCES)) || [];
+            const questions = (await cacheService.getData(STORAGE_KEYS.QUESTIONS)) || [];
+            const subQuestions = (await cacheService.getData(STORAGE_KEYS.SUB_QUESTIONS)) || [];
+            const answers = (await cacheService.getData(STORAGE_KEYS.ANSWERS)) || [];
+            const metadata = (await cacheService.getData(STORAGE_KEYS.METADATA)) || {
+                version: '1.0.0',
+                lastSync: new Date().toISOString(),
+                owner: 'unknown',
+            };
+
+            setLocalData({
+                resources,
+                questions,
+                subQuestions,
+                answers,
+                metadata,
+            });
+
+            // 获取云端数据
+            const remote = await gistService.getGist(gistId, token);
+            setRemoteData(remote);
+
+            // 显示冲突对话框
+            setShowInitWizard(false);
+            setShowConflictDialog(true);
+        } catch (err) {
+            console.error('加载冲突数据失败:', err);
+            setError('加载数据失败');
+            setShowInitWizard(false);
+        }
+    };
+
+    const handleConflictResolve = async (strategy: ConflictStrategy) => {
+        try {
+            setShowConflictDialog(false);
+            setIsLoading(true);
+
+            // 解决冲突并同步
+            const result = await initializationService.resolveConflictAndSync(strategy);
+
+            if (result.success) {
+                onComplete();
+            } else {
+                setError(result.error || '解决冲突失败');
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : '解决冲突失败');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleConflictCancel = () => {
+        setShowConflictDialog(false);
+        setShowInitWizard(false);
+        setError('已取消初始化');
+    };
+
     const openGitHubTokenPage = () => {
         window.open('https://github.com/settings/tokens/new', '_blank');
     };
+
+    // 显示初始化向导
+    if (showInitWizard) {
+        return (
+            <InitializationWizard
+                token={token}
+                onComplete={handleInitComplete}
+                onError={handleInitError}
+                onConflict={handleConflict}
+            />
+        );
+    }
+
+    // 显示冲突对话框
+    if (showConflictDialog && localData && remoteData) {
+        return (
+            <DataConflictDialog
+                localData={localData}
+                remoteData={remoteData}
+                onResolve={handleConflictResolve}
+                onCancel={handleConflictCancel}
+            />
+        );
+    }
 
     return (
         <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">

@@ -34,11 +34,17 @@ export const VideoCard: React.FC<VideoCardProps> = React.memo(({ resource, onTag
                 />
 
                 {/* 播放按钮 */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center shadow-lg hover:bg-red-700 transition-fast cursor-pointer">
+                <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute inset-0 flex items-center justify-center group"
+                    aria-label={`播放 ${title}`}
+                >
+                    <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center shadow-lg group-hover:bg-red-700 group-hover:scale-110 transition-all duration-200 cursor-pointer">
                         <Play size={24} fill="white" color="white" className="ml-1" />
                     </div>
-                </div>
+                </a>
 
                 {/* 平台Logo */}
                 {platform_logo && (
@@ -48,12 +54,12 @@ export const VideoCard: React.FC<VideoCardProps> = React.memo(({ resource, onTag
                 )}
             </div>
 
-            {/* 内容区 */}
-            <div className="p-4 space-y-2">
+            {/* 内容区 - 固定高度确保卡片统一，移除padding因为外层已有 */}
+            <div className="pt-4 h-[200px] flex flex-col">
                 {/* 内容标签 */}
                 {content_tags && content_tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
-                        {content_tags.map((tag) => (
+                    <div className="flex flex-wrap gap-1.5 mb-2 min-h-[24px]">
+                        {content_tags.slice(0, 3).map((tag) => (
                             <Tag
                                 key={tag}
                                 variant="content"
@@ -66,36 +72,37 @@ export const VideoCard: React.FC<VideoCardProps> = React.memo(({ resource, onTag
                     </div>
                 )}
 
-                {/* 标题 */}
+                {/* 标题 - 限制2行，最多约60个字符 */}
                 <a
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block text-card-title text-primary font-semibold hover:underline line-clamp-2"
+                    className="block text-card-title text-primary font-semibold hover:underline line-clamp-2 mb-2 min-h-[48px]"
+                    title={title}
                 >
                     {title}
                 </a>
 
                 {/* 频道/作者 */}
-                <p className="text-small text-secondary">
+                <p className="text-small text-secondary mb-2 truncate">
                     {author}
                 </p>
 
-                {/* 推荐语 */}
-                <p className="text-secondary text-secondary line-clamp-2">
+                {/* 推荐语 - 限制2行，最多约80个字符 */}
+                <p className="text-secondary text-secondary line-clamp-2 mb-2 flex-1" title={recommendation}>
                     {recommendation}
                 </p>
 
                 {/* 时长和CTA */}
-                <div className="flex items-center justify-between pt-2">
-                    <span className="text-small text-tertiary">
+                <div className="flex items-center justify-between mt-auto">
+                    <span className="text-small text-tertiary truncate max-w-[150px]">
                         {metadata.duration || ''}
                     </span>
                     <a
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-small text-primary hover:underline"
+                        className="inline-flex items-center gap-1 text-small text-primary hover:underline flex-shrink-0"
                     >
                         Watch on
                         <ExternalLink size={12} />

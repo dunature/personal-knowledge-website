@@ -78,9 +78,9 @@ export const ResourceCard: React.FC<ResourceCardProps> = React.memo(({
     }, [resource, onTagClick]);
 
     return (
-        <div className="relative group">
-            {/* 卡片容器 */}
-            <div className="w-[320px] bg-white rounded-card shadow-card hover:shadow-card-hover card-hover overflow-hidden">
+        <div className="relative group mb-6">
+            {/* 卡片容器 - 自适应宽度，最小300px，最大500px */}
+            <div className="w-full min-w-[300px] max-w-[500px] mx-auto bg-white rounded-lg shadow-card hover:shadow-cardHover transition-all duration-200 ease-out hover:-translate-y-1 overflow-hidden p-5">
                 {renderCard}
             </div>
 
@@ -89,7 +89,7 @@ export const ResourceCard: React.FC<ResourceCardProps> = React.memo(({
                 <div className="absolute top-4 right-4 z-10">
                     <button
                         onClick={toggleMenu}
-                        className="p-2 bg-white/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-fast hover:bg-white shadow-sm"
+                        className="p-2 bg-white/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out hover:bg-white shadow-sm hover:scale-110"
                         aria-label="更多操作"
                     >
                         <MoreVertical size={16} />
@@ -104,25 +104,25 @@ export const ResourceCard: React.FC<ResourceCardProps> = React.memo(({
                                 onClick={closeMenu}
                             />
 
-                            <div className="absolute right-0 mt-2 w-32 bg-white rounded shadow-card border border-divider overflow-hidden z-30">
+                            <div className="absolute right-0 mt-2 w-32 bg-white rounded-md shadow-lg border border-gray-200 overflow-hidden z-30 animate-scaleIn">
                                 {canEdit && (
                                     <button
                                         onClick={handleEdit}
-                                        className="w-full px-4 py-2 text-left text-small hover:bg-background-secondary transition-fast"
+                                        className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 transition-colors duration-200"
                                     >
                                         编辑
                                     </button>
                                 )}
                                 <button
                                     onClick={handleCopyLink}
-                                    className="w-full px-4 py-2 text-left text-small hover:bg-background-secondary transition-fast"
+                                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 transition-colors duration-200"
                                 >
                                     复制链接
                                 </button>
                                 {canEdit && (
                                     <button
                                         onClick={handleDelete}
-                                        className="w-full px-4 py-2 text-left text-small text-[#E65100] hover:bg-[#FFF3E0] transition-fast"
+                                        className="w-full px-4 py-2 text-left text-sm text-error hover:bg-error-light transition-colors duration-200"
                                     >
                                         删除
                                     </button>

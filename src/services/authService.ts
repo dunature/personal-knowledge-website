@@ -5,7 +5,7 @@
 
 import { encryptToken, decryptToken, isValidEncryptedData } from '@/utils/cryptoUtils';
 import { gistService } from './gistService';
-import type { User, AppMode } from '@/types/auth';
+import type { User, AppMode, DetectGistResult } from '@/types/auth';
 
 // LocalStorage 键名
 const STORAGE_KEYS = {
@@ -29,36 +29,68 @@ class AuthService {
      */
     async initialize(): Promise<void> {
         try {
-            // 加载模式
+            // Step 1: 设置默认状态（访客模式）
+            this.mode = 'visitor';
+            this.token = null;
+            this.user = null;
+            this.gistId = null;
+
+            // Step 2: 读取持久化数据
             const savedMode = localStorage.getItem(STORAGE_KEYS.MODE);
-            if (savedMode === 'owner' || savedMode === 'visitor') {
-                this.mode = savedMode;
-            }
-
-            // 加载 Gist ID
-            this.gistId = localStorage.getItem(STORAGE_KEYS.GIST_ID);
-
-            // 加载用户信息
+            const savedGistId = localStorage.getItem(STORAGE_KEYS.GIST_ID);
             const savedUser = localStorage.getItem(STORAGE_KEYS.USER);
-            if (savedUser) {
-                this.user = JSON.parse(savedUser);
+            const encryptedToken = localStorage.getItem(STORAGE_KEYS.TOKEN);
+
+            // Step 3: 恢复Gist ID（无需验证）
+            if (savedGistId) {
+                this.gistId = savedGistId;
             }
 
-            // 如果是拥有者模式，尝试加载 Token
-            if (this.mode === 'owner') {
-                const encryptedToken = localStorage.getItem(STORAGE_KEYS.TOKEN);
-                if (encryptedToken && isValidEncryptedData(encryptedToken)) {
-                    try {
+            // Step 4: 如果保存的是拥有者模式，尝试恢复
+            if (savedMode === 'owner' && encryptedToken) {
+                try {
+                    // 解密Token
+                    if (isValidEncryptedData(encryptedToken)) {
                         this.token = await decryptToken(encryptedToken);
-                    } catch (error) {
-                        console.error('Token 解密失败:', error);
-                        // Token 解密失败，清除并切换到访客模式
-                        await this.clearToken();
+
+                        // 验证Token是否仍然有效
+                        const validation = await gistService.validateToken(this.token);
+
+                        if (validation.valid) {
+                            // Token有效，恢复拥有者模式
+                            this.mode = 'owner';
+
+                            // 恢复用户信息
+                            if (savedUser) {
+                                this.user = JSON.parse(savedUser);
+                            } else if (validation.username && validation.avatarUrl) {
+                                // 如果没有保存的用户信息，使用验证返回的信息
+                                this.user = {
+                                    username: validation.username,
+                                    avatarUrl: validation.avatarUrl,
+                                    gistId: this.gistId || undefined,
+                                };
+                                localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(this.user));
+                            }
+                        } else {
+                            // Token无效，清除并保持访客模式
+                            console.warn('保存的Token已失效，切换到访客模式');
+                            await this.clearToken();
+                        }
                     }
+                } catch (error) {
+                    // 解密或验证失败，清除并保持访客模式
+                    console.error('Token恢复失败:', error);
+                    await this.clearToken();
                 }
             }
+
+            // Step 5: 检查URL参数中的Gist ID（分享链接）
+            this.loadGistIdFromUrl();
         } catch (error) {
             console.error('认证服务初始化失败:', error);
+            // 确保出错时也是访客模式
+            this.mode = 'visitor';
         }
     }
 
@@ -182,13 +214,16 @@ class AuthService {
      * @param mode - 目标模式
      */
     switchMode(mode: AppMode): void {
+        // 更新内存状态
         this.mode = mode;
+
+        // 立即持久化
         localStorage.setItem(STORAGE_KEYS.MODE, mode);
 
-        // 如果切换到访客模式，清除 Token（但保留 Gist ID）
+        // 如果切换到访客模式，清除内存中的Token（但保留LocalStorage中的Token，用户可能再次切回）
         if (mode === 'visitor') {
             this.token = null;
-            localStorage.removeItem(STORAGE_KEYS.TOKEN);
+            // 注意：不删除localStorage中的TOKEN，用户可能再次切回拥有者模式
         }
     }
 
@@ -281,6 +316,57 @@ class AuthService {
         }
 
         return false;
+    }
+
+    /**
+     * 检测用户是否已有 Gist
+     * @returns Gist 检测结果
+     */
+    async detectUserGist(): Promise<DetectGistResult> {
+        try {
+            const token = await this.getToken();
+            if (!token) {
+                throw new Error('Token not available');
+            }
+
+            // 获取用户的所有 Gist
+            const response = await fetch('https://api.github.com/gists', {
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                },
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    throw new Error('Token 无效或已过期');
+                }
+                throw new Error(`获取 Gist 列表失败: ${response.status}`);
+            }
+
+            const gists = await response.json();
+
+            // 查找描述匹配的 Gist
+            const targetGist = gists.find(
+                (gist: any) =>
+                    gist.description === 'Personal Knowledge Base Data' ||
+                    gist.description?.includes('Personal Knowledge')
+            );
+
+            if (targetGist) {
+                return {
+                    found: true,
+                    gistId: targetGist.id,
+                    gistUrl: targetGist.html_url,
+                    lastUpdated: targetGist.updated_at,
+                };
+            }
+
+            return { found: false };
+        } catch (error) {
+            console.error('Gist 检测失败:', error);
+            throw error;
+        }
     }
 }
 

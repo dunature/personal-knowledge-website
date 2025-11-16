@@ -11,6 +11,8 @@
 
 ### 功能指南
 - [Gist 设置指南](user-guides/GIST_SETUP_GUIDE.md) - 详细的 Gist 配置步骤
+- [初始同步指南](INITIAL_SYNC_GUIDE.md) - 登录时自动同步功能
+- [数据存储 FAQ](DATA_STORAGE_FAQ.md) - **重要！数据存储常见问题** ⭐
 - [资源封面指南](user-guides/RESOURCE_COVER_GUIDE.md) - 如何设置资源封面
 - [快速测试清单](user-guides/QUICK_TEST_CHECKLIST.md) - 功能测试清单
 

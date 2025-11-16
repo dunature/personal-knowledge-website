@@ -213,8 +213,8 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
                 </div>
             )}
 
-            {/* 资源卡片网格 */}
-            <div className="grid grid-cols-3 gap-x-5 gap-y-6">
+            {/* 资源卡片网格 - 固定3列布局 */}
+            <div className="grid grid-cols-3 gap-6">
                 {filteredAndSortedResources.map((resource) => (
                     <ResourceCard
                         key={resource.id}

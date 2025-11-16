@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilibili API 测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #666;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        button {
+            background: #00a1d6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        button:hover {
+            background: #0090c0;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+
+        .success {
+            background: #e8f5e9;
+            border: 1px solid #4caf50;
+            color: #2e7d32;
+        }
+
+        .error {
+            background: #ffebee;
+            border: 1px solid #f44336;
+            color: #c62828;
+        }
+
+        .info {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            color: #1565c0;
+        }
+
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+
+        .video-list {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .video-item {
+            padding: 8px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .video-item:hover {
+            background: #e3f2fd;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎬 Bilibili API 测试工具</h1>
+
+        <div class="input-group">
+            <label>Bilibili 视频 URL 或 BV 号</label>
+            <input type="text" id="videoUrl" placeholder="https://www.bilibili.com/video/BV1uv411q7Mv 或 BV1uv411q7Mv"
+                value="BV1uv411q7Mv">
+        </div>
+
+        <button onclick="testVideo()" id="testBtn">测试视频</button>
+
+        <div id="result"></div>
+
+        <div class="video-list">
+            <h3>📋 推荐测试视频</h3>
+            <div class="video-item" onclick="setVideo('BV1uv411q7Mv')">
+                <strong>BV1uv411q7Mv</strong> - 哔哩哔哩官方视频
+            </div>
+            <div class="video-item" onclick="setVideo('BV1xx411c7mD')">
+                <strong>BV1xx411c7mD</strong> - 经典音乐视频
+            </div>
+            <div class="video-item" onclick="setVideo('BV1GJ411x7h7')">
+                <strong>BV1GJ411x7h7</strong> - 旧视频（可能失效）
+            </div>
+        </div>
+
+        <div class="result info" style="margin-top: 20px;">
+            <strong>💡 说明:</strong>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>此工具直接调用 Bilibili API（可能遇到 CORS 问题）</li>
+                <li>如果看到 CORS 错误，说明需要使用代理</li>
+                <li>-404 错误表示视频不存在或已被删除</li>
+                <li>建议使用开发服务器的测试页面（已配置代理）</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function setVideo(bvid) {
+            document.getElementById('videoUrl').value = bvid;
+        }
+
+        async function testVideo() {
+            const input = document.getElementById('videoUrl').value.trim();
+            const resultDiv = document.getElementById('result');
+            const testBtn = document.getElementById('testBtn');
+
+            if (!input) {
+                resultDiv.innerHTML = '<div class="result error">请输入视频 URL 或 BV 号</div>';
+                return;
+            }
+
+            // 提取 BV 号
+            const bvMatch = input.match(/(?:bilibili\.com\/video\/)?(BV[a-zA-Z0-9]+)/);
+            if (!bvMatch || !bvMatch[1]) {
+                resultDiv.innerHTML = '<div class="result error">无法提取 BV 号，请检查输入</div>';
+                return;
+            }
+
+            const bvid = bvMatch[1];
+            testBtn.disabled = true;
+            testBtn.textContent = '测试中...';
+
+            resultDiv.innerHTML = '<div class="result info">正在请求 Bilibili API...</div>';
+
+            try {
+                const apiUrl = `https://api.bilibili.com/x/web-interface/view?bvid=${bvid}`;
+                console.log('API URL:', apiUrl);
+
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                console.log('API 响应:', data);
+
+                if (data.code === 0 && data.data) {
+                    // 成功
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ 成功获取视频信息</h3>
+                            <p><strong>标题:</strong> ${data.data.title}</p>
+                            <p><strong>UP主:</strong> ${data.data.owner?.name || '未知'}</p>
+                            <p><strong>BV号:</strong> ${bvid}</p>
+                            <p><strong>封面:</strong></p>
+                            <img src="${data.data.pic}" alt="封面" style="max-width: 100%; border-radius: 4px; margin-top: 10px;">
+                            <details style="margin-top: 10px;">
+                                <summary style="cursor: pointer;">查看完整响应</summary>
+                                <pre>${JSON.stringify(data, null, 2)}</pre>
+                            </details>
+                        </div>
+                    `;
+                } else {
+                    // API 返回错误
+                    let errorMsg = '';
+                    if (data.code === -404) {
+                        errorMsg = '视频不存在或已被删除';
+                    } else if (data.code === -403) {
+                        errorMsg = '权限不足，视频可能需要登录或已被限制';
+                    } else {
+                        errorMsg = data.message || '未知错误';
+                    }
+
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ API 返回错误</h3>
+                            <p><strong>错误码:</strong> ${data.code}</p>
+                            <p><strong>错误信息:</strong> ${errorMsg}</p>
+                            <p><strong>建议:</strong> 尝试使用其他视频的 BV 号</p>
+                            <details style="margin-top: 10px;">
+                                <summary style="cursor: pointer;">查看完整响应</summary>
+                                <pre>${JSON.stringify(data, null, 2)}</pre>
+                            </details>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('请求失败:', error);
+
+                let errorMsg = error.message;
+                let isCORS = errorMsg.includes('CORS') || errorMsg.includes('fetch');
+
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ 请求失败</h3>
+                        <p><strong>错误:</strong> ${errorMsg}</p>
+                        ${isCORS ? `
+                            <div style="margin-top: 10px; padding: 10px; background: #fff3cd; border-radius: 4px;">
+                                <strong>⚠️ CORS 错误</strong>
+                                <p style="margin: 5px 0;">浏览器阻止了跨域请求。这是正常的！</p>
+                                <p style="margin: 5px 0;"><strong>解决方案:</strong></p>
+                                <ul style="margin: 5px 0; padding-left: 20px;">
+                                    <li>使用开发服务器的测试页面（已配置代理）</li>
+                                    <li>访问: <code>http://localhost:5173/platform-autofill-test</code></li>
+                                </ul>
+                            </div>
+                        ` : ''}
+                        <pre style="margin-top: 10px;">${error.stack || error}</pre>
+                    </div>
+                `;
+            } finally {
+                testBtn.disabled = false;
+                testBtn.textContent = '测试视频';
+            }
+        }
+
+        // 支持回车键
+        document.getElementById('videoUrl').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                testVideo();
+            }
+        });
+    </script>
+</body>
+
+</html>

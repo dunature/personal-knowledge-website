@@ -141,22 +141,11 @@ export const GistIntegrationTest: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4 mb-8">
                     <div>
                         <h3 className="text-sm font-medium text-gray-700 mb-2">模式状态</h3>
-                        <ModeIndicator
-                            syncStatus={
-                                syncStatus === 'success' ? 'synced' :
-                                    syncStatus === 'conflict' ? 'error' :
-                                        syncStatus
-                            }
-                            lastSyncTime={lastSyncTime}
-                        />
+                        <ModeIndicator />
                     </div>
                     <div>
                         <h3 className="text-sm font-medium text-gray-700 mb-2">同步状态</h3>
-                        <SyncIndicator
-                            status={syncStatus}
-                            lastSyncTime={lastSyncTime}
-                            onSync={() => runTest('手动同步', testManualSync)}
-                        />
+                        <SyncIndicator showButton={true} />
                     </div>
                 </div>
 

@@ -5,6 +5,7 @@
 
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
+import { iconButtonStyles } from '@/styles/buttonStyles';
 
 export interface ModalProps {
     isOpen: boolean;
@@ -61,16 +62,18 @@ export const Modal: React.FC<ModalProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center animate-fadeIn">
-            {/* 遮罩层 */}
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+            {/* 遮罩层 - 淡入动画 */}
             <div
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fadeIn"
                 onClick={handleOverlayClick}
             />
 
-            {/* 弹窗内容 */}
+            {/* 弹窗内容 - 缩放动画 */}
             <div
-                className={`relative bg-white overflow-hidden ${fullScreen ? 'w-full h-full rounded-none' : 'rounded-xl shadow-modal max-w-2xl w-full mx-4 max-h-[90vh]'
+                className={`relative bg-white overflow-hidden animate-scaleIn ${fullScreen
+                        ? 'w-full h-full rounded-none'
+                        : 'rounded-lg shadow-strong max-w-2xl w-full mx-4 max-h-[90vh]'
                     } ${className}`}
                 role="dialog"
                 aria-modal="true"
@@ -78,16 +81,16 @@ export const Modal: React.FC<ModalProps> = ({
             >
                 {/* 标题栏 - 仅在非全屏模式显示 */}
                 {!fullScreen && (title || showCloseButton) && (
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-divider">
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                         {title && (
-                            <h2 id="modal-title" className="text-h2 font-semibold text-text">
+                            <h2 id="modal-title" className="text-xl font-semibold text-gray-900">
                                 {title}
                             </h2>
                         )}
                         {showCloseButton && (
                             <button
                                 onClick={onClose}
-                                className="p-2 rounded-full hover:bg-background-secondary transition-fast focus:outline-none focus:ring-2 focus:ring-primary"
+                                className={iconButtonStyles}
                                 aria-label="关闭弹窗"
                             >
                                 <X size={20} />

@@ -6,6 +6,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { gistService } from '@/services/gistService';
+import { syncService } from '@/services/syncService';
+import { cacheService, STORAGE_KEYS } from '@/services/cacheService';
+import { validateGistData } from '@/utils/dataValidation';
 
 interface GistIdInputProps {
     onBack: () => void;
@@ -17,6 +20,8 @@ const GistIdInput: React.FC<GistIdInputProps> = ({ onBack, onComplete }) => {
     const [gistIdInput, setGistIdInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [loadingProgress, setLoadingProgress] = useState(0);
+    const [loadingMessage, setLoadingMessage] = useState('');
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -34,17 +39,61 @@ const GistIdInput: React.FC<GistIdInputProps> = ({ onBack, onComplete }) => {
         }
 
         setIsLoading(true);
+        setLoadingProgress(0);
+        setLoadingMessage('正在连接到 GitHub...');
 
         try {
-            // 尝试获取 Gist 数据（不需要 Token，公开 Gist 可以访问）
-            await gistService.getGist(gistIdInput.trim());
+            // Step 1: 获取 Gist 数据
+            setLoadingProgress(20);
+            setLoadingMessage('正在加载知识库数据...');
+            const gistData = await gistService.getGist(gistIdInput.trim());
 
-            // 验证成功，保存 Gist ID 并切换到访客模式
+            // Step 2: 验证数据格式
+            setLoadingProgress(40);
+            setLoadingMessage('正在验证数据...');
+            if (!validateGistData(gistData)) {
+                throw new Error('数据格式无效');
+            }
+
+            // Step 3: 保存到本地缓存
+            setLoadingProgress(60);
+            setLoadingMessage('正在保存数据...');
+            await cacheService.saveData(STORAGE_KEYS.RESOURCES, gistData.resources);
+            await cacheService.saveData(STORAGE_KEYS.QUESTIONS, gistData.questions);
+            await cacheService.saveData(STORAGE_KEYS.SUB_QUESTIONS, gistData.subQuestions);
+            await cacheService.saveData(STORAGE_KEYS.ANSWERS, gistData.answers);
+            await cacheService.saveData(STORAGE_KEYS.METADATA, gistData.metadata);
+
+            // Step 4: 保存 Gist ID 并切换模式
+            setLoadingProgress(80);
+            setLoadingMessage('正在初始化...');
             setGistId(gistIdInput.trim());
             switchMode('visitor');
-            onComplete();
+
+            // Step 5: 完成
+            setLoadingProgress(100);
+            setLoadingMessage('加载完成！');
+
+            // 延迟一下再跳转，让用户看到完成状态
+            setTimeout(() => {
+                onComplete();
+            }, 500);
         } catch (err) {
-            setError('无法访问该 Gist，请检查 ID 是否正确或 Gist 是否为公开');
+            console.error('加载 Gist 失败:', err);
+            setLoadingProgress(0);
+            if (err instanceof Error) {
+                if (err.message.includes('404')) {
+                    setError('Gist 不存在，请检查 ID 是否正确');
+                } else if (err.message.includes('403')) {
+                    setError('Gist 是私有的，需要权限访问');
+                } else if (err.message.includes('数据格式')) {
+                    setError('Gist 数据格式无效，可能不是知识库数据');
+                } else {
+                    setError('无法访问该 Gist，请检查 ID 是否正确或 Gist 是否为公开');
+                }
+            } else {
+                setError('加载失败，请稍后重试');
+            }
         } finally {
             setIsLoading(false);
         }
@@ -117,7 +166,7 @@ const GistIdInput: React.FC<GistIdInputProps> = ({ onBack, onComplete }) => {
                         value={gistIdInput}
                         onChange={(e) => setGistIdInputValue(e.target.value)}
                         placeholder="输入32位 Gist ID"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-sm"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary placeholder:text-gray-400 transition-all duration-200 font-mono text-sm"
                         disabled={isLoading}
                         maxLength={32}
                     />
@@ -126,8 +175,23 @@ const GistIdInput: React.FC<GistIdInputProps> = ({ onBack, onComplete }) => {
                     </p>
                 </div>
 
+                {/* 加载进度 */}
+                {isLoading && (
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="mb-2">
+                            <div className="w-full bg-blue-200 rounded-full h-2">
+                                <div
+                                    className="bg-primary h-2 rounded-full transition-all duration-500"
+                                    style={{ width: `${loadingProgress}%` }}
+                                />
+                            </div>
+                        </div>
+                        <p className="text-sm text-blue-800 text-center">{loadingMessage}</p>
+                    </div>
+                )}
+
                 {/* 错误提示 */}
-                {error && (
+                {error && !isLoading && (
                     <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start">
                         <svg
                             className="w-5 h-5 text-red-600 mr-2 flex-shrink-0 mt-0.5"

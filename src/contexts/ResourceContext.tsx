@@ -75,10 +75,32 @@ export const ResourceProvider: React.FC<ResourceProviderProps> = ({
         loadData();
     }, []);
 
+    // 保存资源数据到 LocalStorage
+    useEffect(() => {
+        if (resources.length > 0) {
+            console.log('[ResourceContext] 准备保存到 LocalStorage:', {
+                resourceCount: resources.length,
+                categories: resources.map(r => r.category)
+            });
+            cacheService.saveData(STORAGE_KEYS.RESOURCES, resources)
+                .then(() => {
+                    console.log('[ResourceContext] 已保存到 LocalStorage');
+                })
+                .catch((error: Error) => {
+                    console.error('保存资源数据失败:', error);
+                });
+        }
+    }, [resources]);
+
     // 获取所有分类
     const categories = React.useMemo(() => {
         const cats = new Set(resources.map(r => r.category));
-        return Array.from(cats);
+        const categoriesArray = Array.from(cats);
+        console.log('[ResourceContext] 计算分类列表:', {
+            resourceCount: resources.length,
+            categories: categoriesArray
+        });
+        return categoriesArray;
     }, [resources]);
 
     // 获取所有标签
@@ -91,8 +113,32 @@ export const ResourceProvider: React.FC<ResourceProviderProps> = ({
     }, [resources]);
 
     // 添加资源
-    const addResource = useCallback((resource: Resource) => {
-        setResources(prev => [...prev, resource]);
+    const addResource = useCallback((resourceInput: Omit<Resource, 'id' | 'created_at' | 'updated_at'> | Resource) => {
+        // 如果传入的资源没有id，则生成一个
+        const resource: Resource = 'id' in resourceInput && resourceInput.id
+            ? resourceInput as Resource
+            : {
+                ...resourceInput,
+                id: `resource-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            };
+
+        console.log('[ResourceContext] 添加资源:', {
+            id: resource.id,
+            title: resource.title,
+            category: resource.category
+        });
+
+        setResources(prev => {
+            const newResources = [...prev, resource];
+            console.log('[ResourceContext] 资源列表更新:', {
+                oldCount: prev.length,
+                newCount: newResources.length
+            });
+            return newResources;
+        });
+
         // 触发同步（仅在拥有者模式）
         if (mode === 'owner') {
             syncService.addPendingChange({

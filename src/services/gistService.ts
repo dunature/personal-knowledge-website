@@ -354,6 +354,82 @@ class GistService {
             throw error;
         }
     }
+
+    /**
+     * 验证用户是否是指定 Gist 的拥有者
+     * @param gistId - Gist ID
+     * @param token - GitHub Personal Access Token
+     * @returns 拥有者验证结果
+     */
+    async verifyGistOwnership(
+        gistId: string,
+        token: string
+    ): Promise<{ isOwner: boolean; ownerUsername?: string; error?: string }> {
+        try {
+            // 1. 获取当前用户信息
+            const userResponse = await fetch(`${GITHUB_API_BASE}/user`, {
+                headers: {
+                    Authorization: `token ${token}`,
+                    Accept: 'application/vnd.github.v3+json',
+                },
+            });
+
+            if (!userResponse.ok) {
+                if (userResponse.status === 401) {
+                    return {
+                        isOwner: false,
+                        error: 'Token 无效或已过期',
+                    };
+                }
+                return {
+                    isOwner: false,
+                    error: 'Token 验证失败',
+                };
+            }
+
+            const currentUser = await userResponse.json();
+            const currentUsername = currentUser.login;
+
+            // 2. 获取 Gist 信息
+            const gistResponse = await fetch(`${GITHUB_API_BASE}/gists/${gistId}`, {
+                headers: {
+                    Authorization: `token ${token}`,
+                    Accept: 'application/vnd.github.v3+json',
+                },
+            });
+
+            if (!gistResponse.ok) {
+                if (gistResponse.status === 404) {
+                    return {
+                        isOwner: false,
+                        error: 'Gist 不存在或无权访问',
+                    };
+                }
+                return {
+                    isOwner: false,
+                    error: `获取 Gist 信息失败: ${gistResponse.status}`,
+                };
+            }
+
+            const gist = await gistResponse.json();
+            const gistOwnerUsername = gist.owner?.login;
+
+            // 3. 比较用户名
+            const isOwner = currentUsername === gistOwnerUsername;
+
+            return {
+                isOwner,
+                ownerUsername: gistOwnerUsername,
+            };
+        } catch (error) {
+            console.error('验证 Gist 拥有者失败:', error);
+            const gistError = toGistError(error, { context: 'verifyGistOwnership' });
+            return {
+                isOwner: false,
+                error: gistError.getUserMessage(),
+            };
+        }
+    }
 }
 
 // 导出单例

@@ -48,6 +48,46 @@ export default defineConfig({
   server: {
     port: 5173,
     open: true,
+    // 代理配置 - 解决 Bilibili API CORS 问题
+    proxy: {
+      '/api/bilibili': {
+        target: 'https://api.bilibili.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/bilibili/, ''),
+        headers: {
+          'Referer': 'https://www.bilibili.com',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+      },
+      // Bilibili 图片代理 - 解决防盗链问题
+      '/bilibili-img': {
+        target: 'https://i0.hdslb.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/bilibili-img/, ''),
+        headers: {
+          'Referer': 'https://www.bilibili.com',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+      },
+      '/bilibili-img2': {
+        target: 'https://i1.hdslb.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/bilibili-img2/, ''),
+        headers: {
+          'Referer': 'https://www.bilibili.com',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+      },
+      '/bilibili-img3': {
+        target: 'https://i2.hdslb.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/bilibili-img3/, ''),
+        headers: {
+          'Referer': 'https://www.bilibili.com',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+      }
+    }
   },
   // 预览服务器配置
   preview: {

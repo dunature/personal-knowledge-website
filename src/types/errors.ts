@@ -184,3 +184,84 @@ export interface ErrorHandlingOptions {
     throwError?: boolean;
     recovery?: ErrorRecoveryStrategy;
 }
+
+/**
+ * 初始化错误类型
+ */
+export type InitializationErrorType =
+    | 'TOKEN_INVALID'
+    | 'NETWORK_ERROR'
+    | 'GIST_NOT_FOUND'
+    | 'GIST_PRIVATE'
+    | 'DATA_INVALID'
+    | 'SYNC_FAILED'
+    | 'CREATE_FAILED'
+    | 'DATA_CONFLICT';
+
+/**
+ * 初始化错误类
+ */
+export class InitializationError extends Error {
+    public readonly type: InitializationErrorType;
+    public readonly recoverable: boolean;
+
+    constructor(type: InitializationErrorType, message: string, recoverable = true) {
+        super(message);
+        this.name = 'InitializationError';
+        this.type = type;
+        this.recoverable = recoverable;
+        Object.setPrototypeOf(this, InitializationError.prototype);
+    }
+
+    /**
+     * 获取用户友好的错误消息
+     */
+    getUserMessage(): string {
+        switch (this.type) {
+            case 'TOKEN_INVALID':
+                return 'Token 无效或已过期，请重新配置';
+            case 'NETWORK_ERROR':
+                return '网络连接失败，请检查网络设置';
+            case 'GIST_NOT_FOUND':
+                return 'Gist 不存在，请检查 ID 是否正确';
+            case 'GIST_PRIVATE':
+                return 'Gist 是私有的，需要权限访问';
+            case 'DATA_INVALID':
+                return '数据格式无效，可能已损坏';
+            case 'SYNC_FAILED':
+                return '同步失败，请稍后重试';
+            case 'CREATE_FAILED':
+                return '创建 Gist 失败，请稍后重试';
+            case 'DATA_CONFLICT':
+                return '检测到数据冲突，请选择处理方式';
+            default:
+                return this.message || '初始化失败';
+        }
+    }
+
+    /**
+     * 获取恢复选项
+     */
+    getRecoveryOptions(): string[] {
+        switch (this.type) {
+            case 'TOKEN_INVALID':
+                return ['重新配置 Token'];
+            case 'NETWORK_ERROR':
+                return ['重试', '使用本地数据'];
+            case 'GIST_NOT_FOUND':
+                return ['创建新 Gist', '重新输入 ID'];
+            case 'GIST_PRIVATE':
+                return ['输入 Token', '返回'];
+            case 'DATA_INVALID':
+                return ['使用本地数据', '重新同步'];
+            case 'SYNC_FAILED':
+                return ['重试', '跳过'];
+            case 'CREATE_FAILED':
+                return ['重试', '稍后创建'];
+            case 'DATA_CONFLICT':
+                return ['使用云端数据', '使用本地数据', '合并数据'];
+            default:
+                return ['重试', '取消'];
+        }
+    }
+}

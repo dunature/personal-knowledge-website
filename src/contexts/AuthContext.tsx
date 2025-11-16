@@ -5,6 +5,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { authService } from '@/services/authService';
+import { syncService } from '@/services/syncService';
 import type { User, AppMode, AuthState } from '@/types/auth';
 
 interface AuthContextValue extends AuthState {
@@ -69,6 +70,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     user,
                     gistId,
                 });
+
+                // 检查是否需要后台同步
+                const shouldSync = await syncService.shouldSyncOnStartup();
+                if (shouldSync) {
+                    console.log('检测到需要同步，开始后台同步...');
+                    // 后台同步，不阻塞 UI
+                    syncService.syncFromGist().then((result) => {
+                        if (result.success) {
+                            console.log('后台同步成功');
+                            // 可以在这里触发数据刷新，但不强制刷新页面
+                        } else {
+                            console.warn('后台同步失败:', result.error);
+                        }
+                    }).catch((error) => {
+                        console.error('后台同步出错:', error);
+                    });
+                }
             } catch (error) {
                 console.error('认证初始化失败:', error);
             } finally {

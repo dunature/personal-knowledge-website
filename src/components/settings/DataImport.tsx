@@ -7,6 +7,7 @@ import { useState, useRef } from 'react';
 import { cacheService, STORAGE_KEYS } from '@/services/cacheService';
 import { validateGistData } from '@/utils/dataValidation';
 import { useToast } from '@/hooks/useToast';
+import { getButtonStyles } from '@/styles/buttonStyles';
 
 export function DataImport() {
     const { showToast } = useToast();
@@ -130,7 +131,7 @@ export function DataImport() {
             <button
                 onClick={handleClick}
                 disabled={isImporting}
-                className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className={getButtonStyles('primary', 'medium', true)}
             >
                 {isImporting ? '导入中...' : '导入数据'}
             </button>

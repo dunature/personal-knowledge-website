@@ -42,12 +42,12 @@ export const RedditCard: React.FC<RedditCardProps> = React.memo(({ resource, onT
                 />
             </div>
 
-            {/* 内容区 */}
-            <div className="p-4 space-y-2">
+            {/* 内容区 - 固定高度确保卡片统一，移除padding因为外层已有 */}
+            <div className="pt-4 h-[200px] flex flex-col">
                 {/* 内容标签 */}
                 {content_tags && content_tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
-                        {content_tags.map((tag) => (
+                    <div className="flex flex-wrap gap-1.5 mb-2 min-h-[24px]">
+                        {content_tags.slice(0, 3).map((tag) => (
                             <Tag
                                 key={tag}
                                 variant="content"
@@ -60,29 +60,30 @@ export const RedditCard: React.FC<RedditCardProps> = React.memo(({ resource, onT
                     </div>
                 )}
 
-                {/* Subreddit名 */}
+                {/* Subreddit名 - 限制2行，最多约60个字符 */}
                 <a
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block text-card-title text-primary font-semibold hover:underline line-clamp-2"
+                    className="block text-card-title text-primary font-semibold hover:underline line-clamp-2 mb-2 min-h-[48px]"
+                    title={title}
                 >
                     {title}
                 </a>
 
                 {/* Reddit URL */}
-                <p className="text-small text-secondary">
+                <p className="text-small text-secondary mb-2 truncate">
                     {author}
                 </p>
 
-                {/* 推荐语 */}
-                <p className="text-secondary text-secondary line-clamp-2">
+                {/* 推荐语 - 限制2行，最多约80个字符 */}
+                <p className="text-secondary text-secondary line-clamp-2 mb-2 flex-1" title={recommendation}>
                     {recommendation}
                 </p>
 
                 {/* 成员数+CTA */}
-                <div className="flex items-center justify-between pt-2">
-                    <span className="inline-flex items-center gap-1 text-small text-tertiary">
+                <div className="flex items-center justify-between mt-auto">
+                    <span className="inline-flex items-center gap-1 text-small text-tertiary flex-shrink-0">
                         <Users size={12} />
                         {formattedMembers} members
                     </span>
@@ -90,7 +91,7 @@ export const RedditCard: React.FC<RedditCardProps> = React.memo(({ resource, onT
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-small text-primary hover:underline"
+                        className="inline-flex items-center gap-1 text-small text-primary hover:underline flex-shrink-0"
                     >
                         Visit
                         <ExternalLink size={12} />

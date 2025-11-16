@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { cacheService, STORAGE_KEYS } from '@/services/cacheService';
 import { useToast } from '@/hooks/useToast';
+import { getButtonStyles } from '@/styles/buttonStyles';
 
 export function DataExport() {
     const { showToast } = useToast();
@@ -71,7 +72,7 @@ export function DataExport() {
             <button
                 onClick={handleExport}
                 disabled={isExporting}
-                className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className={getButtonStyles('primary', 'medium', true)}
             >
                 {isExporting ? '导出中...' : '导出数据'}
             </button>

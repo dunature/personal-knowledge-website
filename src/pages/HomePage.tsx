@@ -16,6 +16,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ModeIndicator } from '@/components/common/ModeIndicator';
 import { SyncIndicator } from '@/components/sync/SyncIndicator';
 import { ShareButton } from '@/components/share/ShareButton';
+import { ModeSwitcherModal } from '@/components/mode/ModeSwitcherModal';
+import { generatePlaceholder } from '@/utils/placeholderUtils';
+import { getVideoThumbnail } from '@/utils/videoThumbnailUtils';
 import type { Resource } from '@/types/resource';
 import type { BigQuestion, SubQuestion, TimelineAnswer } from '@/types/question';
 import type { Category } from '@/components/resource/CategoryFilter';
@@ -25,20 +28,12 @@ const QuestionModalWithEdit = lazy(() => import('@/components/qa/QuestionModalWi
 const EditorDrawer = lazy(() => import('@/components/editor/EditorDrawer').then(module => ({ default: module.EditorDrawer })));
 const EditorForm = lazy(() => import('@/components/editor/EditorForm').then(module => ({ default: module.EditorForm })));
 
-// 分类配置
-const categories: Category[] = [
-    { id: '', name: '全部' },
-    { id: 'AI学习', name: 'AI学习' },
-    { id: '编程', name: '编程' },
-    { id: '设计', name: '设计' },
-];
-
 export const HomePage: React.FC = () => {
     // Toast通知系统
     const { toasts, showToast } = useToast();
 
     // 使用 Context 获取真实数据
-    const { resources, addResource, updateResource, deleteResource } = useResources();
+    const { resources, categories: resourceCategories, addResource, updateResource, deleteResource } = useResources();
     const {
         questions,
         subQuestions,
@@ -53,9 +48,12 @@ export const HomePage: React.FC = () => {
         updateAnswer,
         deleteAnswer,
     } = useQA();
-    const { mode } = useAuth();
+    const { mode, switchMode } = useAuth();
 
     const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
+
+    // 模式切换弹窗状态
+    const [isModeSwitcherOpen, setIsModeSwitcherOpen] = useState(false);
 
     // 编辑器抽屉状态
     const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -135,12 +133,20 @@ export const HomePage: React.FC = () => {
         setEditorData({
             title: '',
             url: '',
-            category: categories[1]?.id || '',
+            category: resourceCategories[0] || '',
             author: '',
             recommendation: '',
         });
         setIsEditorOpen(true);
     };
+
+    // 将动态分类转换为 Category[] 格式
+    const categories: Category[] = React.useMemo(() => {
+        return [
+            { id: '', name: '全部' },
+            ...resourceCategories.map(cat => ({ id: cat, name: cat }))
+        ];
+    }, [resourceCategories]);
 
     // 编辑资源
     const handleEditResource = (id: string) => {
@@ -193,11 +199,21 @@ export const HomePage: React.FC = () => {
             }
         } else {
             // 创建新资源
+            // 如果是视频类型且没有封面，自动获取缩略图
+            let cover = editorData.cover;
+            if (!cover && editorData.type && (editorData.type === 'youtube_video' || editorData.type === 'bilibili_video') && editorData.url) {
+                cover = getVideoThumbnail(editorData.url, editorData.type);
+            }
+
             const newResource: Omit<Resource, 'id' | 'created_at' | 'updated_at'> = {
                 title: editorData.title,
                 url: editorData.url,
-                type: 'blog', // 默认类型
-                cover: editorData.cover || 'https://via.placeholder.com/320x180/0047AB/FFFFFF?text=New+Resource',
+                type: editorData.type || 'blog', // 使用用户选择的类型
+                cover: cover || generatePlaceholder({
+                    backgroundColor: '#0047AB',
+                    textColor: '#FFFFFF',
+                    text: 'New Resource'
+                }),
                 platform: 'Web',
                 content_tags: editorData.tags || [],
                 category: editorData.category || '其他',
@@ -205,7 +221,13 @@ export const HomePage: React.FC = () => {
                 recommendation: editorData.recommendation || '',
                 metadata: {},
             };
+            console.log('[HomePage] 准备添加资源:', {
+                title: newResource.title,
+                category: newResource.category,
+                editorData
+            });
             await addResource(newResource);
+            console.log('[HomePage] 资源已添加');
             showToast('success', '资源已添加');
         }
 
@@ -323,14 +345,25 @@ export const HomePage: React.FC = () => {
         }
     };
 
+    // ========== 模式切换功能 ==========
+
+    const handleModeChange = async (newMode: typeof mode) => {
+        try {
+            await switchMode(newMode);
+            showToast('success', `已切换到${newMode === 'owner' ? '拥有者' : '访客'}模式`);
+        } catch (error) {
+            console.error('模式切换失败:', error);
+            showToast('error', '模式切换失败，请重试');
+        }
+    };
+
     return (
-        <div className="min-h-screen bg-white">
-            {/* 顶部栏 */}
-            <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
-                <div className="max-w-[1400px] mx-auto px-5 py-3 flex items-center justify-between">
+        <div className="min-h-screen bg-gray-50">
+            {/* 顶部栏 - 统一背景色 */}
+            <div className="bg-gray-50 border-b border-gray-200 sticky top-0 z-40 backdrop-blur-sm">
+                <div className="max-w-[1400px] mx-auto px-5 md:px-10 py-3 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <h1 className="text-xl font-bold text-[#0047AB]">个人知识管理</h1>
-                        <ModeIndicator />
+                        <ModeIndicator onClick={() => setIsModeSwitcherOpen(true)} />
                     </div>
                     <div className="flex items-center gap-4">
                         {mode === 'owner' && (
@@ -341,7 +374,7 @@ export const HomePage: React.FC = () => {
                         )}
                         <Link
                             to="/settings"
-                            className="text-gray-600 hover:text-[#0047AB] transition-colors"
+                            className="text-text-secondary hover:text-primary transition-colors duration-200"
                         >
                             设置
                         </Link>
@@ -349,20 +382,59 @@ export const HomePage: React.FC = () => {
                 </div>
             </div>
 
-            {/* 页面标题 */}
-            <header className="bg-[#0047AB] text-white text-center py-10">
-                <h1 className="text-4xl font-bold mb-2">
-                    个人知识管理系统
-                </h1>
-                <p className="text-lg opacity-90">
-                    记录学习、整理知识、持续成长
-                </p>
+            {/* Hero 区域 - 统一背景色 */}
+            <header className="bg-gray-50 text-primary py-12 md:py-16 px-5 md:px-10">
+                <div className="max-w-[1400px] mx-auto">
+                    {/* 主标题 - 大号加粗蓝色文字，左对齐，带描边效果 */}
+                    <h1
+                        className="text-5xl md:text-7xl font-bold mb-6"
+                        style={{
+                            WebkitTextStroke: '2px #0033FF',
+                            WebkitTextFillColor: 'transparent'
+                        }}
+                    >
+                        流浪日记
+                    </h1>
+
+                    {/* 副标题/描述区域 */}
+                    <div className="text-base md:text-lg font-bold mb-6">
+                        <p className="mb-2">
+                            a collection of the best resources for learning
+                        </p>
+                        <p className="mb-2">
+                            from the Internet, hand-picked and curated by{' '}
+                            <a
+                                href="https://github.com/dunature/personal-knowledge-website"
+                                className="underline hover:text-primary-hover transition-colors duration-200"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                dunature
+                            </a>
+                            .
+                        </p>
+                    </div>
+
+                    {/* 关键特性列表 */}
+                    <div className="text-base md:text-lg font-bold">
+                        <p className="mb-3">this all :</p>
+                        <ul className="space-y-2">
+                            <li>- The Collector</li>
+                            <li>- The Journalist</li>
+                            <li>- The Craftsman</li>
+                            <li>- The Storyteller</li>
+                        </ul>
+                    </div>
+                </div>
             </header>
 
-            {/* 主内容区域 */}
-            <main className="max-w-[1400px] mx-auto px-5 py-10">
+            {/* 渐变分割线 */}
+            <div className="h-0.5 bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+
+            {/* 主内容区域 - 统一背景色 */}
+            <main className="bg-gray-50 max-w-[1400px] mx-auto px-5 md:px-10 py-12 md:py-16 space-y-12 md:space-y-16">
                 {/* 资源导航区域 */}
-                <section className="mb-16">
+                <section>
                     <ResourceSection
                         resources={resources}
                         categories={categories}
@@ -373,8 +445,11 @@ export const HomePage: React.FC = () => {
                     />
                 </section>
 
+                {/* 渐变分割线 */}
+                <div className="h-0.5 bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+
                 {/* 问答板区域 */}
-                <section className="mb-16">
+                <section>
                     <QASection
                         questions={questions}
                         subQuestionCounts={subQuestionCounts}
@@ -384,8 +459,11 @@ export const HomePage: React.FC = () => {
                 </section>
             </main>
 
-            {/* 页脚 */}
-            <footer className="bg-[#F5F5F5] text-center py-6 text-sm text-[#666]">
+            {/* 渐变分割线 */}
+            <div className="h-0.5 bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+
+            {/* 页脚 - 统一背景色 */}
+            <footer className="bg-gray-50 text-center py-6 text-sm text-text-secondary">
                 <p>© 2024 个人知识管理系统. All rights reserved.</p>
             </footer>
 
@@ -428,10 +506,18 @@ export const HomePage: React.FC = () => {
                         type={editorType}
                         data={editorData}
                         onChange={setEditorData}
-                        categories={categories.map(c => c.id).filter(id => id)}
+                        categories={resourceCategories}
                     />
                 </EditorDrawer>
             </Suspense>
+
+            {/* 模式切换弹窗 */}
+            <ModeSwitcherModal
+                isOpen={isModeSwitcherOpen}
+                onClose={() => setIsModeSwitcherOpen(false)}
+                currentMode={mode}
+                onModeChange={handleModeChange}
+            />
 
             {/* Toast通知容器 */}
             <div className="fixed top-4 right-4 z-50 space-y-2">

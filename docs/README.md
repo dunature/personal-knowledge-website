@@ -1,215 +1,117 @@
-# 📚 项目文档目录
+# 📚 文档中心
 
-本目录包含项目的所有文档，按类别组织。
+欢迎来到个人知识管理系统的文档中心！这里包含了项目的所有文档。
 
-## 📁 文档结构
+## 🚀 快速导航
+
+### 新手入门
+- [快速开始](getting-started/QUICK_START.md) - 5分钟快速上手
+- [项目架构](getting-started/ARCHITECTURE.md) - 了解项目结构
+- [Gist 设置指南](user-guides/GIST_SETUP_GUIDE.md) - 配置云端同步
+
+### 功能文档
+
+#### 平台自动填充
+自动从各平台获取资源信息
+- [功能概览](features/platform-autofill/README.md)
+- [使用指南](features/platform-autofill/PLATFORM_AUTO_FILL_GUIDE.md)
+- [测试指南](features/platform-autofill/PLATFORM_AUTOFILL_TEST.md)
+
+#### Gist 集成
+GitHub Gist 云端同步功能
+- [所有权验证](features/gist-integration/GIST_OWNERSHIP_TEST_GUIDE.md)
+- [访问测试](features/gist-integration/GIST_TEST_ACCESS.md)
+
+#### 模式切换
+拥有者模式和访客模式
+- [集成指南](features/mode-switcher/MODE_SWITCHER_INTEGRATION.md)
+- [测试指南](features/mode-switcher/MODE_SWITCHER_TEST_GUIDE.md)
+
+#### UI 组件
+界面组件和样式
+- [卡片布局](features/ui-components/CARD_LAYOUT_IMPROVEMENTS.md)
+- [资源卡片](features/ui-components/RESOURCE_CARD_IMPROVEMENTS.md)
+- [视频卡片](features/ui-components/VIDEO_CARD_IMPROVEMENTS.md)
+- [Toast 通知](features/ui-components/TOAST_INTEGRATION.md)
+
+#### YouTube 集成
+- [快速开始](features/youtube/YOUTUBE_QUICK_START.md)
+- [缩略图指南](features/youtube/YOUTUBE_THUMBNAIL_GUIDE.md)
+- [集成测试](features/youtube/YOUTUBE_INTEGRATION_TEST.md)
+
+### 开发文档
+- [Gist 集成开发](development/GIST_INTEGRATION.md)
+- [测试指南](development/TESTING_GUIDE.md)
+- [错误处理](development/ERROR_HANDLING.md)
+- [离线支持](development/OFFLINE_SUPPORT.md)
+- [增量同步](development/INCREMENTAL_SYNC.md)
+
+### 故障排除
+
+#### Bilibili 相关问题
+- [问题概览](troubleshooting/bilibili-issues/README.md) - **推荐先看这个**
+- [图片代理修复](troubleshooting/bilibili-issues/BILIBILI_IMAGE_PROXY_FIX.md) - 封面防盗链解决方案
+- [404 错误修复](troubleshooting/bilibili-issues/BILIBILI_404_FIX.md)
+- [问题已解决](troubleshooting/bilibili-issues/BILIBILI_ISSUE_RESOLVED.md)
+
+#### 分类相关问题
+- [分类筛选修复](troubleshooting/category-issues/CATEGORY_FILTER_FIX.md)
+- [问题分析](troubleshooting/category-issues/CATEGORY_ISSUE_ANALYSIS.md)
+- [修复总结](troubleshooting/category-issues/CATEGORY_FIX_SUMMARY.md)
+
+### 指南
+- [性能优化](guides/PERFORMANCE_OPTIMIZATION.md)
+- [无障碍指南](guides/ACCESSIBILITY_GUIDE.md)
+- [测试指南](guides/TEST_GUIDE.md)
+
+### 测试文档
+- [E2E 测试场景](testing/E2E_TEST_SCENARIOS.md)
+- [性能测试](testing/PERFORMANCE_TEST.md)
+
+### 项目文档
+- [项目状态](project/PROJECT_STATUS.md)
+- [项目总结](project/PROJECT_SUMMARY.md)
+- [最终总结](project/FINAL_SUMMARY.md)
+
+## 🔗 快速链接
+
+- [项目主页](../README.md)
+- [贡献指南](../CONTRIBUTING.md)
+- [更新日志](../CHANGELOG.md)
+
+## 📖 文档结构
 
 ```
 docs/
-├── user-guides/          # 用户使用指南
-├── development/          # 开发相关文档
-├── deployment/           # 部署相关文档
-├── fixes/                # 问题修复记录
-└── archive/              # 历史文档归档
+├── README.md                    # 本文件
+├── getting-started/             # 快速开始
+│   ├── QUICK_START.md
+│   └── ARCHITECTURE.md
+├── features/                    # 功能文档
+│   ├── platform-autofill/      # 平台自动填充
+│   ├── gist-integration/       # Gist 集成
+│   ├── mode-switcher/          # 模式切换
+│   ├── ui-components/          # UI 组件
+│   └── youtube/                # YouTube 集成
+├── development/                 # 开发文档
+├── troubleshooting/             # 故障排除
+│   ├── bilibili-issues/        # Bilibili 问题
+│   └── category-issues/        # 分类问题
+├── guides/                      # 指南
+├── testing/                     # 测试文档
+├── user-guides/                 # 用户指南
+└── project/                     # 项目文档
 ```
 
----
+## 💡 如何使用文档
 
-## 📖 用户使用指南 (user-guides/)
+1. **新用户**：从[快速开始](getting-started/QUICK_START.md)开始
+2. **开发者**：查看[开发文档](development/)
+3. **遇到问题**：查看[故障排除](troubleshooting/)
+4. **了解功能**：查看[功能文档](features/)
 
-面向最终用户的使用文档。
+## 🤝 贡献文档
 
-### 主要文档
-- **USER_GUIDE_CN.md** - 完整的中文使用指南
-  - 快速开始
-  - 资源管理详细教程
-  - 问答管理详细教程
-  - Markdown编辑技巧
-  - 常见问题和使用技巧
+发现文档问题或想要改进？欢迎提交 PR！
 
-- **RESOURCE_COVER_GUIDE.md** - 资源封面图片使用指南
-  - 4种添加封面图片的方法
-  - 推荐的免费图床服务
-  - YouTube/Bilibili缩略图获取
-  - 占位图服务使用
-
-- **TESTING_GUIDE.md** - 测试指南
-  - 功能测试步骤
-  - 测试工具使用
-
-- **QUICK_TEST_CRUD.md** - CRUD功能快速测试
-  - 分模块测试步骤
-  - UI元素识别指南
-  - 测试检查清单
-
-- **QUICK_TEST_CHECKLIST.md** - 快速测试检查清单
-- **QUICK_TEST_SUB_QUESTIONS.md** - 小问题功能测试
-
-- **ERROR_HANDLING_TEST_GUIDE.md** - 错误处理组件测试指南
-  - ErrorBoundary测试
-  - ErrorMessage测试
-  - EmptyState测试
-  - LoadingState测试
-  - 骨架屏测试
-  - 样式和动画检查
-
-- **ERROR_HANDLING_TEST_CHECKLIST.md** - 错误处理测试清单
-  - 详细测试步骤
-  - 测试结果记录表
-
----
-
-## 💻 开发文档 (development/)
-
-面向开发者的技术文档。
-
-### 主要文档
-- **CRUD_COMPLETE.md** - CRUD功能完整说明
-  - 所有增删改查功能详解
-  - 技术实现细节
-  - 数据流说明
-  - 用户体验优化
-
-- **DOCUMENTATION_SUMMARY.md** - 文档总览
-  - 所有文档列表
-  - 文档使用建议
-  - 快速查找指南
-
-- **README_UPDATE_SUMMARY.md** - README更新总结
-  - 更新内容说明
-  - 新增功能列表
-
-- **COMMIT_MESSAGE.md** - 详细的commit说明
-  - 改动内容详解
-  - 技术亮点
-  - 影响范围
-
-- **PUSH_SUMMARY.md** - GitHub推送总结
-  - 推送信息
-  - 变更统计
-  - 后续步骤
-
----
-
-## 🚀 部署文档 (deployment/)
-
-部署和发布相关文档。
-
-### 主要文档
-- **DEPLOYMENT.md** - 完整部署指南
-  - 部署前准备
-  - Vercel部署详细步骤
-  - Netlify部署详细步骤
-  - 自定义域名配置
-  - 环境变量设置
-  - 故障排查
-
-- **QUICK_DEPLOY.md** - 快速部署指南
-  - 5分钟快速部署
-  - Vercel一键部署
-  - Netlify一键部署
-
-- **GITHUB_SETUP.md** - GitHub仓库设置
-  - 创建GitHub仓库
-  - 推送代码步骤
-  - 仓库设置建议
-
-- **READY_TO_DEPLOY.md** - 部署准备清单
-  - 部署前检查
-  - 必要配置
-
----
-
-## 🔧 问题修复记录 (fixes/)
-
-记录项目开发过程中遇到的问题及解决方案。
-
-### 主要文档
-- **ADD_QUESTION_BUTTON_FIX.md** - 添加大问题按钮修复
-  - 问题描述：按钮不可见
-  - 解决方案：移出条件渲染
-  - 修改文件：QASection.tsx
-
-- **IMAGE_DISPLAY_FIX.md** - 图片显示问题修复
-  - 问题描述：外部图片服务不可访问
-  - 解决方案：本地SVG生成
-  - 新增文件：placeholderUtils.ts
-
-- **SAMPLE_DATA_FIX.md** - 示例数据修复
-  - 问题描述：示例图片URL失效
-  - 解决方案：使用占位图服务
-
-- **DROPDOWN_FIX_SIMPLE.md** - 下拉菜单简单修复
-- **DROPDOWN_FINAL_SOLUTION.md** - 下拉菜单最终方案
-- **DROPDOWN_SOLUTIONS.md** - 下拉菜单解决方案集合
-- **DROPDOWN_ULTIMATE_FIX.md** - 下拉菜单终极修复
-
----
-
-## 📦 历史文档归档 (archive/)
-
-已完成任务的记录和历史文档。
-
-### 任务完成记录
-- **TASK11_COMPLETED.md** - 任务11完成记录
-- **TASK12_COMPLETED.md** - 任务12完成记录
-- **TASK13_COMPLETED.md** - 任务13完成记录
-- **TASK14_COMPLETED.md** - 任务14完成记录
-- **TASK15_COMPLETED.md** - 任务15完成记录
-- **TASK_18_23_COMPLETED.md** - 任务18和23完成记录
-
-### 功能开发记录
-- **INLINE_EDIT_COMPLETE.md** - 内联编辑功能完成
-- **INLINE_EDIT_FEATURE.md** - 内联编辑功能说明
-- **INLINE_EDIT_STATUS.md** - 内联编辑状态
-- **INLINE_EDIT_TEST.md** - 内联编辑测试
-- **SUB_QUESTION_EDIT_COMPLETE.md** - 小问题编辑完成
-
-### 修复记录
-- **FIXED.md** - 修复记录1
-- **FIXED_ROUND2.md** - 修复记录2
-
-### 其他
-- **PROJECT_PROGRESS.md** - 项目进度
-- **PROGRESS.md** - 进度记录
-- **FINAL_SUMMARY.md** - 最终总结
-- **COMPONENT_TEST.md** - 组件测试
-- **GETTING_STARTED.md** - 入门指南
-- **REMAINING_TASKS.md** - 剩余任务
-
----
-
-## 🔍 快速查找
-
-### 我想...
-
-- **学习如何使用** → [user-guides/USER_GUIDE_CN.md](./user-guides/USER_GUIDE_CN.md)
-- **添加资源封面** → [user-guides/RESOURCE_COVER_GUIDE.md](./user-guides/RESOURCE_COVER_GUIDE.md)
-- **测试功能** → [user-guides/QUICK_TEST_CRUD.md](./user-guides/QUICK_TEST_CRUD.md)
-- **部署应用** → [deployment/QUICK_DEPLOY.md](./deployment/QUICK_DEPLOY.md)
-- **了解技术细节** → [development/CRUD_COMPLETE.md](./development/CRUD_COMPLETE.md)
-- **查看修复记录** → [fixes/](./fixes/)
-- **查看历史文档** → [archive/](./archive/)
-
----
-
-## 📝 文档维护
-
-### 添加新文档
-1. 确定文档类型（用户指南/开发/部署/修复）
-2. 放入对应的文件夹
-3. 更新本README的相关部分
-
-### 归档文档
-当文档过时或任务完成后，将文档移至 `archive/` 文件夹。
-
----
-
-## 🔗 相关链接
-
-- [项目README](../README.md) - 项目主文档
-- [GitHub仓库](https://github.com/dunature/personal-knowledge-website)
-
----
-
-**文档结构最后更新**: 2024-01-XX
+详见：[贡献指南](../CONTRIBUTING.md)

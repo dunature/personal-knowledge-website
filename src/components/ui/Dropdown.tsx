@@ -89,21 +89,21 @@ export const Dropdown: React.FC<DropdownProps> = ({
                 onKeyDown={handleKeyDown}
                 disabled={disabled}
                 className={`
-                    flex items-center justify-between gap-2 px-4 py-2 w-full
-                    text-body border border-divider rounded bg-white
-                    transition-fast focus:outline-none focus:ring-2 focus:ring-primary
+                    flex items-center justify-between gap-2 px-4 py-3 w-full
+                    text-sm border border-gray-300 rounded-md bg-white
+                    transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/10
                     ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-primary cursor-pointer'}
-                    ${isOpen ? 'border-primary ring-2 ring-primary' : ''}
+                    ${isOpen ? 'border-primary ring-2 ring-primary/10' : ''}
                 `}
                 aria-haspopup="listbox"
                 aria-expanded={isOpen}
             >
-                <span className={`flex-1 text-left ${selectedOption ? 'text-text' : 'text-secondary'}`}>
+                <span className={`flex-1 text-left ${selectedOption ? 'text-gray-900' : 'text-gray-400'}`}>
                     {selectedOption?.label || placeholder}
                 </span>
                 <ChevronDown
                     size={16}
-                    className={`flex-shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                    className={`flex-shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
                 />
             </button>
 
@@ -111,7 +111,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
             {isOpen && buttonRef.current && (
                 <div
                     ref={dropdownRef}
-                    className="z-[9999] bg-white border border-divider rounded shadow-card overflow-hidden animate-fadeIn"
+                    className="z-[9999] bg-white border border-gray-200 rounded-md shadow-medium overflow-hidden animate-scaleIn"
                     style={getMenuStyle()}
                     role="listbox"
                 >
@@ -122,9 +122,9 @@ export const Dropdown: React.FC<DropdownProps> = ({
                             onClick={() => !option.disabled && handleSelect(option.value)}
                             disabled={option.disabled}
                             className={`
-                                w-full px-4 py-2 text-left text-body transition-fast
-                                ${option.disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-background-secondary cursor-pointer'}
-                                ${option.value === value ? 'bg-[#E3F2FD] text-primary font-semibold' : 'text-text'}
+                                w-full px-4 py-2.5 text-left text-sm transition-all duration-200
+                                ${option.disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 cursor-pointer'}
+                                ${option.value === value ? 'bg-blue-50 text-primary font-medium' : 'text-gray-900'}
                             `}
                             role="option"
                             aria-selected={option.value === value}
