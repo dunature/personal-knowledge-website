@@ -32,12 +32,46 @@ export function DataImport() {
 
             const { resources, questions, subQuestions, answers, metadata } = importData.data;
 
+            // 修复缺失的字段
+            const now = new Date().toISOString();
+
+            const fixedResources = (resources || []).map((r: any) => ({
+                ...r,
+                id: r.id || `resource_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                created_at: r.created_at || now,
+                updated_at: r.updated_at || now,
+            }));
+
+            const fixedQuestions = (questions || []).map((q: any) => ({
+                ...q,
+                id: q.id || `question_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                created_at: q.created_at || now,
+                updated_at: q.updated_at || now,
+                sub_questions: q.sub_questions || [],
+            }));
+
+            const fixedSubQuestions = (subQuestions || []).map((sq: any) => ({
+                ...sq,
+                id: sq.id || `subquestion_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                created_at: sq.created_at || now,
+                updated_at: sq.updated_at || now,
+                answers: sq.answers || [],
+            }));
+
+            const fixedAnswers = (answers || []).map((a: any) => ({
+                ...a,
+                id: a.id || `answer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                created_at: a.created_at || now,
+                updated_at: a.updated_at || now,
+                timestamp: a.timestamp || now,
+            }));
+
             // 验证数据
             const dataToValidate = {
-                resources: resources || [],
-                questions: questions || [],
-                subQuestions: subQuestions || [],
-                answers: answers || [],
+                resources: fixedResources,
+                questions: fixedQuestions,
+                subQuestions: fixedSubQuestions,
+                answers: fixedAnswers,
                 metadata: metadata || {
                     version: '1.0.0',
                     lastSync: new Date().toISOString(),
@@ -73,10 +107,10 @@ export function DataImport() {
             if (
                 !confirm(
                     `确定要导入数据吗？\n\n` +
-                    `资源: ${resources?.length || 0} 个\n` +
-                    `问题: ${questions?.length || 0} 个\n` +
-                    `子问题: ${subQuestions?.length || 0} 个\n` +
-                    `答案: ${answers?.length || 0} 个\n\n` +
+                    `资源: ${fixedResources.length} 个\n` +
+                    `问题: ${fixedQuestions.length} 个\n` +
+                    `子问题: ${fixedSubQuestions.length} 个\n` +
+                    `答案: ${fixedAnswers.length} 个\n\n` +
                     `这将覆盖当前的本地数据。`
                 )
             ) {
@@ -84,10 +118,10 @@ export function DataImport() {
             }
 
             // 保存数据
-            await cacheService.saveData(STORAGE_KEYS.RESOURCES, resources || []);
-            await cacheService.saveData(STORAGE_KEYS.QUESTIONS, questions || []);
-            await cacheService.saveData(STORAGE_KEYS.SUB_QUESTIONS, subQuestions || []);
-            await cacheService.saveData(STORAGE_KEYS.ANSWERS, answers || []);
+            await cacheService.saveData(STORAGE_KEYS.RESOURCES, fixedResources);
+            await cacheService.saveData(STORAGE_KEYS.QUESTIONS, fixedQuestions);
+            await cacheService.saveData(STORAGE_KEYS.SUB_QUESTIONS, fixedSubQuestions);
+            await cacheService.saveData(STORAGE_KEYS.ANSWERS, fixedAnswers);
             if (metadata) {
                 await cacheService.saveData(STORAGE_KEYS.METADATA, metadata);
             }

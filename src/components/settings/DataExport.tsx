@@ -44,7 +44,7 @@ export function DataExport() {
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `personal-knowledge-backup-${new Date().toISOString().split('T')[0]}.json`;
+            link.download = `liuliuliuliulang-backup-${new Date().toISOString().split('T')[0]}.json`;
 
             // 触发下载
             document.body.appendChild(link);
