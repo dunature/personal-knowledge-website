@@ -106,12 +106,12 @@ export const QASection: React.FC<QASectionProps> = ({
     return (
         <section className="w-full">
             {/* 标题栏 */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h2 className="text-3xl font-bold text-[#0047AB]">
+                    <h2 className="text-4xl font-bold text-primary">
                         我的QAQ
                     </h2>
-                    <p className="text-lg text-[#666] mt-2">
+                    <p className="text-xl text-text-secondary mt-2 font-normal">
                         {getSubtitle()}
                     </p>
                 </div>
@@ -155,8 +155,8 @@ export const QASection: React.FC<QASectionProps> = ({
 
             {/* 空状态 */}
             {displayedQuestions.length === 0 && (
-                <div className="text-center py-12 bg-[#F5F5F5] rounded-lg">
-                    <p className="text-lg text-[#999]">
+                <div className="text-center py-12 bg-gray-50 rounded-lg">
+                    <p className="text-base text-text-tertiary font-normal">
                         {isExpanded ? '暂无符合条件的问题' : '暂无解决中的问题'}
                     </p>
                 </div>

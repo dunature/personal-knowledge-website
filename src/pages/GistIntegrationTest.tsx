@@ -13,26 +13,15 @@ import { ModeIndicator } from '@/components/common/ModeIndicator';
 import { SyncIndicator } from '@/components/sync/SyncIndicator';
 import SetupWizard from '@/components/setup/SetupWizard';
 import { MigrationWizard } from '@/components/setup/MigrationWizard';
-import type { SyncStatus } from '@/types/sync';
-
 export const GistIntegrationTest: React.FC = () => {
     const [testResults, setTestResults] = useState<Record<string, any>>({});
     const [loading, setLoading] = useState(false);
     const [showSetup, setShowSetup] = useState(false);
     const [showMigration, setShowMigration] = useState(false);
-    const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
-    const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
 
     useEffect(() => {
         // 初始化 AuthService
         authService.initialize();
-
-        // 监听同步状态
-        const unsubscribe = syncService.onSyncStatusChange((status) => {
-            setSyncStatus(status);
-        });
-
-        return unsubscribe;
     }, []);
 
     const runTest = async (testName: string, testFn: () => Promise<any>) => {
@@ -105,17 +94,16 @@ export const GistIntegrationTest: React.FC = () => {
     const testSyncService = async () => {
         const status = syncService.getSyncStatus();
         const lastSync = await syncService.getLastSyncTime();
-        setLastSyncTime(lastSync);
         return { status, lastSync };
     };
 
     // 手动同步测试
-    const testManualSync = async () => {
-        const result = await syncService.syncNow();
-        const newLastSync = await syncService.getLastSyncTime();
-        setLastSyncTime(newLastSync);
-        return result;
-    };
+    // const testManualSync = async () => {
+    //     const result = await syncService.syncNow();
+    //     const newLastSync = await syncService.getLastSyncTime();
+    //     setLastSyncTime(newLastSync);
+    //     return result;
+    // };
 
     const clearAllTests = () => {
         setTestResults({});

@@ -26,7 +26,6 @@ const TokenSetup: React.FC<TokenSetupProps> = ({ onBack, onComplete }) => {
     const [showToken, setShowToken] = useState(false);
     const [showInitWizard, setShowInitWizard] = useState(false);
     const [showConflictDialog, setShowConflictDialog] = useState(false);
-    const [conflictGistId, setConflictGistId] = useState<string | null>(null);
     const [localData, setLocalData] = useState<GistData | null>(null);
     const [remoteData, setRemoteData] = useState<GistData | null>(null);
 
@@ -61,32 +60,24 @@ const TokenSetup: React.FC<TokenSetupProps> = ({ onBack, onComplete }) => {
         }
     };
 
-    const handleInitComplete = (result: any) => {
+    const handleInitComplete = () => {
         // 初始化完成，跳转到主页面
         onComplete();
-    };
-
-    const handleInitError = (err: Error) => {
-        // 初始化失败，返回 Token 输入界面
-        setError(err.message);
-        setShowInitWizard(false);
     };
 
     const handleConflict = async (gistId: string) => {
         // 检测到冲突，加载本地和云端数据
         try {
-            setConflictGistId(gistId);
-
             // 获取本地数据
-            const resources = (await cacheService.getData(STORAGE_KEYS.RESOURCES)) || [];
-            const questions = (await cacheService.getData(STORAGE_KEYS.QUESTIONS)) || [];
-            const subQuestions = (await cacheService.getData(STORAGE_KEYS.SUB_QUESTIONS)) || [];
-            const answers = (await cacheService.getData(STORAGE_KEYS.ANSWERS)) || [];
-            const metadata = (await cacheService.getData(STORAGE_KEYS.METADATA)) || {
+            const resources = ((await cacheService.getData(STORAGE_KEYS.RESOURCES)) || []) as any[];
+            const questions = ((await cacheService.getData(STORAGE_KEYS.QUESTIONS)) || []) as any[];
+            const subQuestions = ((await cacheService.getData(STORAGE_KEYS.SUB_QUESTIONS)) || []) as any[];
+            const answers = ((await cacheService.getData(STORAGE_KEYS.ANSWERS)) || []) as any[];
+            const metadata = ((await cacheService.getData(STORAGE_KEYS.METADATA)) || {
                 version: '1.0.0',
                 lastSync: new Date().toISOString(),
                 owner: 'unknown',
-            };
+            }) as any;
 
             setLocalData({
                 resources,
@@ -146,7 +137,6 @@ const TokenSetup: React.FC<TokenSetupProps> = ({ onBack, onComplete }) => {
             <InitializationWizard
                 token={token}
                 onComplete={handleInitComplete}
-                onError={handleInitError}
                 onConflict={handleConflict}
             />
         );

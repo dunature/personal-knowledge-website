@@ -78,7 +78,8 @@ export const EditorDrawer: React.FC<EditorDrawerProps> = ({
         <div className="fixed inset-0 z-50 flex">
             {/* 遮罩层 */}
             <div
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fadeIn"
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-out"
+                style={{ animation: 'fadeIn 300ms ease-out' }}
                 onClick={handleClose}
             />
 
@@ -89,10 +90,10 @@ export const EditorDrawer: React.FC<EditorDrawerProps> = ({
                     w-[60%] bg-white
                     shadow-2xl
                     flex flex-col
-                    animate-slideInRight
+                    transition-transform duration-300 ease-out
                 "
                 style={{
-                    animation: 'slideInRight 0.3s ease-out',
+                    animation: 'slideInRight 300ms ease-out',
                 }}
             >
                 {/* 顶部栏 */}

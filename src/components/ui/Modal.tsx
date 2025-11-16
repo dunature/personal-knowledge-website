@@ -65,16 +65,18 @@ export const Modal: React.FC<ModalProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center">
             {/* 遮罩层 - 淡入动画 */}
             <div
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fadeIn"
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-200 ease-out"
+                style={{ animation: 'fadeIn 200ms ease-out' }}
                 onClick={handleOverlayClick}
             />
 
             {/* 弹窗内容 - 缩放动画 */}
             <div
-                className={`relative bg-white overflow-hidden animate-scaleIn ${fullScreen
-                        ? 'w-full h-full rounded-none'
-                        : 'rounded-lg shadow-strong max-w-2xl w-full mx-4 max-h-[90vh]'
+                className={`relative bg-white overflow-hidden transition-all duration-200 ease-out ${fullScreen
+                    ? 'w-full h-full rounded-none'
+                    : 'rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh]'
                     } ${className}`}
+                style={{ animation: 'scaleIn 200ms ease-out' }}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby={title ? 'modal-title' : undefined}

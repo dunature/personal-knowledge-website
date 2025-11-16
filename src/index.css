@@ -329,13 +329,77 @@ select {
    卡片悬停效果
    ============================================ */
 .card-hover {
-  transition: transform var(--duration-normal) var(--ease-out),
-    box-shadow var(--duration-normal) var(--ease-out);
+  transition: transform var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out);
 }
 
 .card-hover:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-card-hover);
+}
+
+/* ============================================
+   按钮悬停效果
+   ============================================ */
+.button-hover {
+  transition: all var(--duration-base) var(--ease-out);
+}
+
+.button-hover:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.button-hover:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* 按钮缩放效果 */
+.button-scale {
+  transition: transform var(--duration-base) var(--ease-out);
+}
+
+.button-scale:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.button-scale:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* ============================================
+   链接悬停效果
+   ============================================ */
+.link-hover {
+  position: relative;
+  transition: color var(--duration-base) var(--ease-out);
+}
+
+.link-hover::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: currentColor;
+  transition: width var(--duration-base) var(--ease-out);
+}
+
+.link-hover:hover::after {
+  width: 100%;
+}
+
+/* ============================================
+   输入框焦点效果
+   ============================================ */
+.input-focus {
+  transition: border-color var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out);
+}
+
+.input-focus:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
 }
 
 /* ============================================

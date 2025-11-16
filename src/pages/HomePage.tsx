@@ -105,7 +105,7 @@ export const HomePage: React.FC = () => {
             answers: [],
         };
 
-        await addSubQuestion(newSubQuestion);
+        await addSubQuestion(newSubQuestion as SubQuestion);
     };
 
     // 保存回答
@@ -121,7 +121,7 @@ export const HomePage: React.FC = () => {
             timestamp: new Date().toISOString(),
         };
 
-        await addAnswer(newAnswer);
+        await addAnswer(newAnswer as TimelineAnswer);
     };
 
     // ========== 资源CRUD功能 ==========
@@ -226,7 +226,7 @@ export const HomePage: React.FC = () => {
                 category: newResource.category,
                 editorData
             });
-            await addResource(newResource);
+            await addResource(newResource as Resource);
             console.log('[HomePage] 资源已添加');
             showToast('success', '资源已添加');
         }
@@ -305,7 +305,7 @@ export const HomePage: React.FC = () => {
                 summary: '',
                 sub_questions: [],
             };
-            await addQuestion(newQuestion);
+            await addQuestion(newQuestion as BigQuestion);
             showToast('success', '问题已添加');
         }
 

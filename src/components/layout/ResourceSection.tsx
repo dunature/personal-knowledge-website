@@ -149,12 +149,12 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
     return (
         <section className="w-full">
             {/* 标题栏 */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h2 className="text-3xl font-bold text-[#0047AB]">
+                    <h2 className="text-4xl font-bold text-primary">
                         我的流浪记录
                     </h2>
-                    <p className="text-lg text-[#666] mt-2">
+                    <p className="text-xl text-text-secondary mt-2 font-normal">
                         {getSubtitle()}
                     </p>
                 </div>
@@ -229,7 +229,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
             {/* 空状态 */}
             {filteredAndSortedResources.length === 0 && (
                 <div className="text-center py-12">
-                    <p className="text-lg text-[#999]">
+                    <p className="text-base text-text-tertiary font-normal">
                         {searchQuery.trim()
                             ? '未找到相关资源，请尝试其他关键词'
                             : '暂无资源'}

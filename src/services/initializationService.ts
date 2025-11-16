@@ -9,7 +9,6 @@ import { gistService } from './gistService';
 import { cacheService, STORAGE_KEYS } from './cacheService';
 import type { InitializationResult } from '@/types/auth';
 import type { GistData } from '@/types/gist';
-import { GistError, GistErrorTypes } from '@/types/errors';
 
 /**
  * 冲突解决策略
@@ -19,27 +18,34 @@ export type ConflictStrategy = 'use-remote' | 'use-local' | 'merge';
 /**
  * 初始化错误类型
  */
-export enum InitializationErrorType {
-    TOKEN_INVALID = 'TOKEN_INVALID',
-    NETWORK_ERROR = 'NETWORK_ERROR',
-    GIST_NOT_FOUND = 'GIST_NOT_FOUND',
-    GIST_PRIVATE = 'GIST_PRIVATE',
-    DATA_INVALID = 'DATA_INVALID',
-    SYNC_FAILED = 'SYNC_FAILED',
-    CREATE_FAILED = 'CREATE_FAILED',
-    DATA_CONFLICT = 'DATA_CONFLICT',
-}
+export const InitializationErrorType = {
+    TOKEN_INVALID: 'TOKEN_INVALID',
+    NETWORK_ERROR: 'NETWORK_ERROR',
+    GIST_NOT_FOUND: 'GIST_NOT_FOUND',
+    GIST_PRIVATE: 'GIST_PRIVATE',
+    DATA_INVALID: 'DATA_INVALID',
+    SYNC_FAILED: 'SYNC_FAILED',
+    CREATE_FAILED: 'CREATE_FAILED',
+    DATA_CONFLICT: 'DATA_CONFLICT',
+} as const;
+
+export type InitializationErrorType = typeof InitializationErrorType[keyof typeof InitializationErrorType];
 
 /**
  * 初始化错误类
  */
 export class InitializationError extends Error {
+    type: InitializationErrorType;
+    recoverable: boolean;
+
     constructor(
-        public type: InitializationErrorType,
+        type: InitializationErrorType,
         message: string,
-        public recoverable: boolean = true
+        recoverable: boolean = true
     ) {
         super(message);
+        this.type = type;
+        this.recoverable = recoverable;
         this.name = 'InitializationError';
         Object.setPrototypeOf(this, InitializationError.prototype);
     }
@@ -237,15 +243,15 @@ class InitializationService {
      * @returns 本地数据
      */
     private async getLocalData(): Promise<GistData> {
-        const resources = (await cacheService.getData(STORAGE_KEYS.RESOURCES)) || [];
-        const questions = (await cacheService.getData(STORAGE_KEYS.QUESTIONS)) || [];
-        const subQuestions = (await cacheService.getData(STORAGE_KEYS.SUB_QUESTIONS)) || [];
-        const answers = (await cacheService.getData(STORAGE_KEYS.ANSWERS)) || [];
-        const metadata = (await cacheService.getData(STORAGE_KEYS.METADATA)) || {
+        const resources = ((await cacheService.getData(STORAGE_KEYS.RESOURCES)) || []) as any[];
+        const questions = ((await cacheService.getData(STORAGE_KEYS.QUESTIONS)) || []) as any[];
+        const subQuestions = ((await cacheService.getData(STORAGE_KEYS.SUB_QUESTIONS)) || []) as any[];
+        const answers = ((await cacheService.getData(STORAGE_KEYS.ANSWERS)) || []) as any[];
+        const metadata = ((await cacheService.getData(STORAGE_KEYS.METADATA)) || {
             version: '1.0.0',
             lastSync: new Date().toISOString(),
             owner: 'unknown',
-        };
+        }) as any;
 
         return {
             resources,

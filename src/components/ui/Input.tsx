@@ -28,11 +28,11 @@ export const Input: React.FC<InputProps> = ({
     const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
     const hasError = !!error;
 
-    const baseStyles = 'px-4 py-2 text-body border rounded transition-fast focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 disabled:bg-background-secondary disabled:cursor-not-allowed';
+    const baseStyles = 'px-4 py-3 text-body border rounded-md transition-all duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:bg-background-secondary disabled:cursor-not-allowed disabled:opacity-50';
 
     const errorStyles = hasError
-        ? 'border-[#E65100] bg-[#FFF3E0] focus:ring-[#E65100]'
-        : 'border-divider bg-background focus:border-primary';
+        ? 'border-error bg-error-light focus:ring-error/20 focus:border-error'
+        : 'border-gray-300 bg-background hover:border-gray-400 focus:border-primary';
 
     const widthStyles = fullWidth ? 'w-full' : '';
     const paddingStyles = leftIcon ? 'pl-10' : rightIcon ? 'pr-10' : '';

@@ -6,7 +6,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { gistService } from '@/services/gistService';
-import { syncService } from '@/services/syncService';
 import { cacheService, STORAGE_KEYS } from '@/services/cacheService';
 import { validateGistData } from '@/utils/dataValidation';
 

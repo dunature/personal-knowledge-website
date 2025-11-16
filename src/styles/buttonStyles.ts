@@ -24,7 +24,11 @@ export const baseButtonStyles = [
     'focus:ring-offset-2',
     'disabled:opacity-50',
     'disabled:cursor-not-allowed',
-    'disabled:pointer-events-none'
+    'disabled:pointer-events-none',
+    // 悬停动画效果
+    'hover:transform',
+    'hover:-translate-y-0.5',
+    'active:translate-y-0'
 ].join(' ');
 
 /**
@@ -81,7 +85,10 @@ export const iconButtonStyles = [
     'focus:ring-primary/30',
     'focus:ring-offset-2',
     'disabled:opacity-50',
-    'disabled:cursor-not-allowed'
+    'disabled:cursor-not-allowed',
+    // 缩放动画效果
+    'hover:scale-110',
+    'active:scale-95'
 ].join(' ');
 
 /**

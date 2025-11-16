@@ -6,7 +6,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { authService } from '@/services/authService';
 import { syncService } from '@/services/syncService';
-import type { User, AppMode, AuthState } from '@/types/auth';
+import type { AppMode, AuthState } from '@/types/auth';
 
 interface AuthContextValue extends AuthState {
     // Token 管理

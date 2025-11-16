@@ -12,14 +12,12 @@ type InitStep = 'detecting' | 'syncing' | 'conflict' | 'complete' | 'error';
 interface InitializationWizardProps {
     token: string;
     onComplete: (result: InitializationResult) => void;
-    onError: (error: Error) => void;
     onConflict?: (gistId: string) => void;
 }
 
 const InitializationWizard: React.FC<InitializationWizardProps> = ({
     token,
     onComplete,
-    onError,
     onConflict,
 }) => {
     const [step, setStep] = useState<InitStep>('detecting');
@@ -133,8 +131,8 @@ const InitializationWizard: React.FC<InitializationWizardProps> = ({
                 <div className="flex items-center space-x-3">
                     <div
                         className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${step === 'detecting' || step === 'syncing' || step === 'complete'
-                                ? 'bg-primary text-white'
-                                : 'bg-gray-200 text-gray-500'
+                            ? 'bg-primary text-white'
+                            : 'bg-gray-200 text-gray-500'
                             }`}
                     >
                         {step === 'complete' ? (
@@ -175,10 +173,10 @@ const InitializationWizard: React.FC<InitializationWizardProps> = ({
                 <div className="flex items-center space-x-3">
                     <div
                         className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${step === 'detecting'
+                            ? 'bg-primary text-white'
+                            : step === 'syncing' || step === 'complete'
                                 ? 'bg-primary text-white'
-                                : step === 'syncing' || step === 'complete'
-                                    ? 'bg-primary text-white'
-                                    : 'bg-gray-200 text-gray-500'
+                                : 'bg-gray-200 text-gray-500'
                             }`}
                     >
                         {step === 'syncing' || step === 'complete' ? (
@@ -219,10 +217,10 @@ const InitializationWizard: React.FC<InitializationWizardProps> = ({
                 <div className="flex items-center space-x-3">
                     <div
                         className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${step === 'syncing'
+                            ? 'bg-primary text-white'
+                            : step === 'complete'
                                 ? 'bg-primary text-white'
-                                : step === 'complete'
-                                    ? 'bg-primary text-white'
-                                    : 'bg-gray-200 text-gray-500'
+                                : 'bg-gray-200 text-gray-500'
                             }`}
                     >
                         {step === 'complete' ? (
