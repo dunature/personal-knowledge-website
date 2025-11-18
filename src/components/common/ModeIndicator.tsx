@@ -35,6 +35,10 @@ export const ModeIndicator: React.FC<ModeIndicatorProps> = ({ onClick, className
             });
 
             return unsubscribe;
+        } else {
+            // Reset sync status when switching to guest mode
+            setSyncStatus('idle');
+            setLastSyncTime(null);
         }
     }, [mode]);
 

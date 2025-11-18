@@ -71,22 +71,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     gistId,
                 });
 
-                // 检查是否需要后台同步
-                const shouldSync = await syncService.shouldSyncOnStartup();
-                if (shouldSync) {
-                    console.log('检测到需要同步，开始后台同步...');
-                    // 后台同步，不阻塞 UI
-                    syncService.syncFromGist().then((result) => {
-                        if (result.success) {
-                            console.log('后台同步成功');
-                            // 可以在这里触发数据刷新，但不强制刷新页面
-                        } else {
-                            console.warn('后台同步失败:', result.error);
-                        }
-                    }).catch((error) => {
-                        console.error('后台同步出错:', error);
-                    });
-                }
+                // 手动同步模式：不自动同步
+                // 用户需要手动点击同步按钮来同步数据
+                console.log('手动同步模式已启用，不会自动同步数据');
             } catch (error) {
                 console.error('认证初始化失败:', error);
             } finally {

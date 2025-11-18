@@ -13,6 +13,8 @@ import { gistService } from '@/services/gistService';
 import { useToast } from '@/hooks/useToast';
 import { DataExport } from '@/components/settings/DataExport';
 import { DataImport } from '@/components/settings/DataImport';
+import { DataComparisonView } from '@/components/settings/DataComparisonView';
+import { SyncResultModal } from '@/components/common/SyncResultModal';
 
 export default function SettingsPage() {
     const { user, mode, gistId, clearAll, setToken } = useAuth();
@@ -27,6 +29,19 @@ export default function SettingsPage() {
     const [hasToken, setHasToken] = useState(false);
     const [showTokenInput, setShowTokenInput] = useState(false);
     const [newToken, setNewToken] = useState('');
+    const [isUploading, setIsUploading] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false);
+    const [syncResult, setSyncResult] = useState<{
+        show: boolean;
+        type: 'success' | 'error';
+        title: string;
+        message: string;
+    }>({
+        show: false,
+        type: 'success',
+        title: '',
+        message: '',
+    });
 
     // 加载设置信息
     useEffect(() => {
@@ -107,42 +122,105 @@ export default function SettingsPage() {
         }
     };
 
-    const handleManualSync = async () => {
-        try {
-            showToast('info', '开始同步...');
-            const result = await syncService.syncNow();
-
-            if (result.success) {
-                showToast('success', '同步成功');
-                await loadSettings();
-            } else {
-                showToast('error', `同步失败: ${result.error}`);
-            }
-        } catch (error) {
-            showToast('error', '同步失败');
-        }
-    };
-
-    const handleForceSync = async () => {
-        if (!confirm('强制同步将上传所有本地数据到 Gist，覆盖云端数据。确定继续吗？')) {
+    const handleUploadToCloud = async () => {
+        if (!confirm('确定要将本地数据上传到云端吗？这将覆盖云端的数据。')) {
             return;
         }
 
+        setIsUploading(true);
         try {
-            showToast('info', '开始强制同步...');
+            showToast('info', '正在上传数据到云端...');
 
-            // 清除待同步变更，强制完整同步
+            // 获取本地数据统计
+            const resources = (await cacheService.getData<any[]>('pkw_resources')) || [];
+            const questions = (await cacheService.getData<any[]>('pkw_questions')) || [];
+
+            // 清除待同步变更，强制完整上传
             await syncService.clearAllPendingChanges();
-            const result = await syncService.syncNow();
+            const result = await syncService.syncToGist();
 
             if (result.success) {
-                showToast('success', '强制同步成功');
+                // 显示大而明显的成功模态框
+                setSyncResult({
+                    show: true,
+                    type: 'success',
+                    title: '上传成功！',
+                    message: `已成功将 ${resources.length} 个资源和 ${questions.length} 个问题同步到云端`,
+                });
                 await loadSettings();
+                // 触发数据对比刷新
+                window.dispatchEvent(new Event('sync-completed'));
             } else {
-                showToast('error', `强制同步失败: ${result.error}`);
+                // 显示大而明显的失败模态框
+                setSyncResult({
+                    show: true,
+                    type: 'error',
+                    title: '上传失败',
+                    message: result.error || '上传失败，请检查网络连接和Token配置',
+                });
             }
         } catch (error) {
-            showToast('error', '强制同步失败');
+            console.error('上传错误:', error);
+            setSyncResult({
+                show: true,
+                type: 'error',
+                title: '上传失败',
+                message: '上传失败，请检查网络连接和Token配置',
+            });
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    const handleDownloadFromCloud = async () => {
+        if (!confirm('确定要从云端下载数据吗？这将覆盖本地的数据。')) {
+            return;
+        }
+
+        setIsDownloading(true);
+        try {
+            showToast('info', '正在从云端下载数据...');
+
+            const result = await syncService.syncFromGist();
+
+            if (result.success) {
+                // 获取下载后的数据统计
+                const resources = (await cacheService.getData<any[]>('pkw_resources')) || [];
+                const questions = (await cacheService.getData<any[]>('pkw_questions')) || [];
+
+                // 显示大而明显的成功模态框
+                setSyncResult({
+                    show: true,
+                    type: 'success',
+                    title: '下载成功！',
+                    message: `已成功获取 ${resources.length} 个资源和 ${questions.length} 个问题，页面即将刷新...`,
+                });
+                await loadSettings();
+                // 触发数据对比刷新
+                window.dispatchEvent(new Event('sync-completed'));
+                // 刷新页面以显示最新数据
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
+            } else {
+                // 显示大而明显的失败模态框
+                setSyncResult({
+                    show: true,
+                    type: 'error',
+                    title: '下载失败',
+                    message: result.error || '下载失败，请检查网络连接和Gist ID配置',
+                });
+            }
+        } catch (error) {
+            console.error('下载错误:', error);
+            setSyncResult({
+                show: true,
+                type: 'error',
+                title: '下载失败',
+                message: '下载失败，请检查网络连接和Gist ID配置',
+            });
+        } finally {
+            setIsDownloading(false);
         }
     };
 
@@ -334,10 +412,13 @@ export default function SettingsPage() {
                     </div>
                 )}
 
+                {/* 数据对比 */}
+                {mode === 'owner' && <DataComparisonView />}
+
                 {/* 同步状态 */}
                 {mode === 'owner' && (
-                    <div className="bg-white rounded-lg shadow p-6 mb-6">
-                        <h2 className="text-xl font-semibold text-gray-900 mb-4">同步状态</h2>
+                    <div className="bg-white rounded-lg shadow p-6 mb-6 mt-6">
+                        <h2 className="text-xl font-semibold text-gray-900 mb-4">同步操作</h2>
 
                         <div className="space-y-3">
                             <div className="flex items-center justify-between">
@@ -356,20 +437,112 @@ export default function SettingsPage() {
                         </div>
 
                         <div className="mt-4 space-y-2">
+                            {/* 上传到云端 */}
                             <button
-                                onClick={handleManualSync}
-                                className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                                onClick={handleUploadToCloud}
+                                disabled={isUploading || isDownloading}
+                                className={`w-full py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 ${isUploading || isDownloading
+                                    ? 'bg-gray-400 cursor-not-allowed'
+                                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                    }`}
                             >
-                                立即同步
+                                {isUploading ? (
+                                    <>
+                                        <svg
+                                            className="w-5 h-5 animate-spin"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                className="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                            />
+                                            <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                            />
+                                        </svg>
+                                        正在上传...
+                                    </>
+                                ) : (
+                                    <>
+                                        <svg
+                                            className="w-5 h-5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                                            />
+                                        </svg>
+                                        上传到云端
+                                    </>
+                                )}
                             </button>
+
+                            {/* 从云端下载 */}
                             <button
-                                onClick={handleForceSync}
-                                className="w-full bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-700 transition-colors"
+                                onClick={handleDownloadFromCloud}
+                                disabled={isUploading || isDownloading}
+                                className={`w-full py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 ${isUploading || isDownloading
+                                    ? 'bg-gray-400 cursor-not-allowed'
+                                    : 'bg-green-600 hover:bg-green-700 text-white'
+                                    }`}
                             >
-                                强制完整同步
+                                {isDownloading ? (
+                                    <>
+                                        <svg
+                                            className="w-5 h-5 animate-spin"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                className="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                            />
+                                            <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                            />
+                                        </svg>
+                                        正在下载...
+                                    </>
+                                ) : (
+                                    <>
+                                        <svg
+                                            className="w-5 h-5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"
+                                            />
+                                        </svg>
+                                        从云端下载
+                                    </>
+                                )}
                             </button>
+
                             <p className="text-xs text-gray-500">
-                                💡 如果导入数据后同步没有上传，请使用"强制完整同步"
+                                💡 提示：上传会将本地数据同步到云端，下载会从云端获取最新数据
                             </p>
                         </div>
                     </div>
@@ -443,6 +616,17 @@ export default function SettingsPage() {
                     </div>
                 )}
             </div>
+
+            {/* 同步结果模态框 */}
+            <SyncResultModal
+                isOpen={syncResult.show}
+                type={syncResult.type}
+                title={syncResult.title}
+                message={syncResult.message}
+                onClose={() => setSyncResult({ ...syncResult, show: false })}
+                autoClose={true}
+                autoCloseDelay={3000}
+            />
         </div>
     );
 }

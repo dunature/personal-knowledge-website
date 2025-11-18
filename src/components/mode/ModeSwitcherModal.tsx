@@ -201,7 +201,7 @@ export const ModeSwitcherModal: React.FC<ModeSwitcherModalProps> = ({
 
     // 生成确认对话框的消息
     const getConfirmMessage = () => {
-        const parts = ['切换后你将拥有完整的编辑权限，所有修改会自动同步到云端。'];
+        const parts = ['切换后你将拥有完整的编辑权限。\n\n修改后需要手动点击同步按钮将数据同步到云端。'];
 
         if (confirmDialogData.username) {
             parts.unshift(`当前用户：${confirmDialogData.username}`);

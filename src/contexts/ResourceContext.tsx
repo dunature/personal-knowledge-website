@@ -139,7 +139,7 @@ export const ResourceProvider: React.FC<ResourceProviderProps> = ({
             return newResources;
         });
 
-        // 触发同步（仅在拥有者模式）
+        // 记录变更（仅在拥有者模式）
         if (mode === 'owner') {
             syncService.addPendingChange({
                 type: 'create',
@@ -148,7 +148,7 @@ export const ResourceProvider: React.FC<ResourceProviderProps> = ({
                 data: resource,
                 timestamp: new Date().toISOString(),
             }).then(() => {
-                console.log('资源创建变更已记录，将自动同步');
+                console.log('[ResourceContext] 资源创建变更已记录到待同步列表');
             });
         }
     }, [mode]);
@@ -157,7 +157,7 @@ export const ResourceProvider: React.FC<ResourceProviderProps> = ({
     const updateResource = useCallback((id: string, updates: Partial<Resource>) => {
         setResources(prev => {
             const updated = prev.map(r => (r.id === id ? { ...r, ...updates } : r));
-            // 触发同步（仅在拥有者模式）
+            // 记录变更（仅在拥有者模式）
             if (mode === 'owner') {
                 const updatedResource = updated.find(r => r.id === id);
                 if (updatedResource) {
@@ -168,7 +168,7 @@ export const ResourceProvider: React.FC<ResourceProviderProps> = ({
                         data: updatedResource,
                         timestamp: new Date().toISOString(),
                     }).then(() => {
-                        console.log('资源更新变更已记录，将自动同步');
+                        console.log('[ResourceContext] 资源更新变更已记录到待同步列表');
                     });
                 }
             }
@@ -179,7 +179,7 @@ export const ResourceProvider: React.FC<ResourceProviderProps> = ({
     // 删除资源
     const deleteResource = useCallback((id: string) => {
         setResources(prev => prev.filter(r => r.id !== id));
-        // 触发同步（仅在拥有者模式）
+        // 记录变更（仅在拥有者模式）
         if (mode === 'owner') {
             syncService.addPendingChange({
                 type: 'delete',
@@ -187,7 +187,7 @@ export const ResourceProvider: React.FC<ResourceProviderProps> = ({
                 id,
                 timestamp: new Date().toISOString(),
             }).then(() => {
-                console.log('资源删除变更已记录，将自动同步');
+                console.log('[ResourceContext] 资源删除变更已记录到待同步列表');
             });
         }
     }, [mode]);

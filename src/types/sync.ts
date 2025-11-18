@@ -5,7 +5,7 @@
 /**
  * 同步状态
  */
-export type SyncStatus = 'idle' | 'syncing' | 'success' | 'error' | 'conflict';
+export type SyncStatus = 'idle' | 'checking' | 'syncing' | 'success' | 'error' | 'conflict';
 
 /**
  * 冲突解决策略
@@ -24,6 +24,8 @@ export interface SyncResult {
         deleted: number;
     };
     error?: string;
+    skipped?: boolean; // 是否跳过同步
+    skipReason?: string; // 跳过原因
 }
 
 /**
@@ -85,3 +87,102 @@ export type InitStep = 'detecting' | 'syncing' | 'conflict' | 'complete' | 'erro
  * 进度回调函数
  */
 export type ProgressCallback = (progress: number, message: string) => void;
+
+/**
+ * 数据统计信息（扩展版）
+ */
+export interface DataStatistics {
+    resourceCount: number;
+    questionCount: number;
+    subQuestionCount: number;
+    answerCount: number;
+    lastModified: string;
+}
+
+/**
+ * 数据对比结果
+ */
+export interface DataComparisonResult {
+    hasChanges: boolean;
+    local: DataStatistics;
+    remote: DataStatistics;
+    differences: {
+        resources: number; // 差异数量（可正可负）
+        questions: number;
+        subQuestions: number;
+        answers: number;
+    };
+    recommendation: 'pull' | 'push' | 'merge' | 'skip';
+}
+
+/**
+ * 同步检查结果
+ */
+export interface SyncCheckResult {
+    hasUpdates: boolean;
+    comparison?: DataComparisonResult;
+    error?: string;
+    isIdentical?: boolean; // 数据是否完全一致
+    lastChecked?: string; // 最后检查时间
+}
+
+/**
+ * Pull 同步选项
+ */
+export interface PullSyncOptions {
+    force?: boolean; // 强制同步，忽略冲突
+    strategy?: ConflictStrategy; // 冲突解决策略
+    showProgress?: boolean; // 显示进度
+}
+
+/**
+ * 冲突信息
+ */
+export interface ConflictInfo {
+    hasConflict: boolean;
+    localChanges: number; // 本地待同步变更数
+    remoteChanges: boolean; // 云端是否有更新
+    conflictItems: Array<{
+        type: 'resource' | 'question' | 'subQuestion' | 'answer';
+        id: string;
+        localVersion?: any;
+        remoteVersion?: any;
+    }>;
+}
+
+/**
+ * 同步历史记录条目
+ */
+export interface SyncHistoryEntry {
+    id: string;
+    timestamp: string;
+    type: 'pull' | 'push' | 'bidirectional';
+    status: 'success' | 'failed' | 'partial';
+    changes?: {
+        added: number;
+        updated: number;
+        deleted: number;
+    };
+    error?: string;
+    duration: number; // 毫秒
+}
+
+/**
+ * 同步历史记录
+ */
+export interface SyncHistory {
+    entries: SyncHistoryEntry[];
+    maxEntries: number; // 默认 50
+}
+
+/**
+ * 同步偏好设置
+ */
+export interface SyncPreferences {
+    autoSync: boolean; // 自动同步
+    autoSyncOnStartup: boolean; // 启动时自动同步
+    periodicCheckEnabled: boolean; // 定期检查
+    periodicCheckInterval: number; // 检查间隔（毫秒）
+    conflictStrategy: ConflictStrategy; // 默认冲突策略
+    showDataComparison: boolean; // 显示数据对比对话框
+}

@@ -107,3 +107,30 @@ export interface GistCreateResult {
     url: string;
     htmlUrl: string;
 }
+
+/**
+ * Gist 元数据（扩展版，用于轻量级检查）
+ */
+export interface GistMetadataExtended {
+    id: string;
+    description: string;
+    updated_at: string; // ISO 8601 格式
+    owner: {
+        login: string;
+        avatar_url: string;
+    };
+    files: {
+        [filename: string]: {
+            size: number;
+            raw_url: string;
+        };
+    };
+    // 从文件内容解析的统计信息
+    statistics?: {
+        resourceCount: number;
+        questionCount: number;
+        subQuestionCount: number;
+        answerCount: number;
+        lastModified: string;
+    };
+}

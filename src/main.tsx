@@ -22,6 +22,11 @@ import SyncDebugPage from './pages/SyncDebugPage.tsx'
 import ModeSwitcherTest from './pages/ModeSwitcherTest.tsx'
 import GistOwnershipTest from './pages/GistOwnershipTest.tsx'
 import PlatformAutoFillTest from './pages/PlatformAutoFillTest.tsx'
+import BidirectionalSyncTest from './pages/BidirectionalSyncTest.tsx'
+import SyncAlreadySyncedTest from './pages/SyncAlreadySyncedTest.tsx'
+import DataComparisonDialogTest from './pages/DataComparisonDialogTest.tsx'
+import DataComparisonTest from './pages/DataComparisonTest.tsx'
+import ManualSyncTest from './pages/ManualSyncTest.tsx'
 import App from './App.tsx'
 import SetupWizard from './components/setup/SetupWizard.tsx'
 
@@ -56,6 +61,11 @@ createRoot(document.getElementById('root')!).render(
                       <Route path="/mode-switcher-test" element={<ModeSwitcherTest />} />
                       <Route path="/gist-ownership-test" element={<GistOwnershipTest />} />
                       <Route path="/platform-autofill-test" element={<PlatformAutoFillTest />} />
+                      <Route path="/bidirectional-sync-test" element={<BidirectionalSyncTest />} />
+                      <Route path="/sync-already-synced-test" element={<SyncAlreadySyncedTest />} />
+                      <Route path="/data-comparison-dialog-test" element={<DataComparisonDialogTest />} />
+                      <Route path="/data-comparison-test" element={<DataComparisonTest />} />
+                      <Route path="/manual-sync-test" element={<ManualSyncTest />} />
                     </>
                   )}
                 </Routes>

@@ -25,6 +25,10 @@ export const STORAGE_KEYS = {
 
     // 缓存元数据
     CACHE_TIMESTAMPS: 'pkw_cache_timestamps',
+
+    // 同步偏好设置和历史
+    SYNC_PREFERENCES: 'pkw_sync_preferences',
+    SYNC_HISTORY: 'pkw_sync_history',
 } as const;
 
 /**
@@ -265,6 +269,56 @@ class CacheService {
         } catch {
             return 0;
         }
+    }
+
+    /**
+     * 获取同步偏好设置
+     */
+    async getSyncPreferences(): Promise<any | null> {
+        return this.getData(STORAGE_KEYS.SYNC_PREFERENCES);
+    }
+
+    /**
+     * 保存同步偏好设置
+     */
+    async saveSyncPreferences(preferences: any): Promise<void> {
+        return this.saveData(STORAGE_KEYS.SYNC_PREFERENCES, preferences);
+    }
+
+    /**
+     * 获取同步历史记录
+     */
+    async getSyncHistory(): Promise<any | null> {
+        return this.getData(STORAGE_KEYS.SYNC_HISTORY);
+    }
+
+    /**
+     * 保存同步历史记录
+     */
+    async saveSyncHistory(history: any): Promise<void> {
+        return this.saveData(STORAGE_KEYS.SYNC_HISTORY, history);
+    }
+
+    /**
+     * 添加同步历史记录条目
+     */
+    async addSyncHistoryEntry(entry: any): Promise<void> {
+        const history = (await this.getSyncHistory()) || { entries: [], maxEntries: 50 };
+        history.entries.unshift(entry);
+
+        // 限制最大条目数
+        if (history.entries.length > history.maxEntries) {
+            history.entries = history.entries.slice(0, history.maxEntries);
+        }
+
+        await this.saveSyncHistory(history);
+    }
+
+    /**
+     * 清除同步历史记录
+     */
+    async clearSyncHistory(): Promise<void> {
+        await this.clearData(STORAGE_KEYS.SYNC_HISTORY);
     }
 }
 

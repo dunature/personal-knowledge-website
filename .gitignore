@@ -34,6 +34,27 @@ dist-ssr
 # Test files (keep in repo for reference)
 # test-import-*.json
 
+# 只推送用户指南、项目文档和指南，其他文档不推送
+docs/features/
+docs/development/
+docs/troubleshooting/
+docs/testing/
+docs/deployment/
+docs/fixes/
+docs/archive/
+docs/getting-started/
+
+# 排除 docs 根目录下的功能相关文档
+docs/GIST_*.md
+docs/HOMEPAGE_INTEGRATION.md
+docs/INITIAL_SYNC_*.md
+docs/SETTINGS_PAGE_TEST.md
+docs/URL_GIST_LOADING.md
+docs/DEPLOYMENT_READY.md
+docs/FILE_ORGANIZATION.md
+docs/DOCUMENTATION_REORGANIZATION.md
+docs/IMPORTANT_NOTES.md
+
 # OS files
 Thumbs.db
 .DS_Store
