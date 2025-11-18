@@ -56,6 +56,8 @@ export interface Resource {
     metadata: ResourceMetadata;       // 元数据
     custom_note?: string;             // 自定义备注（Markdown格式）
 
+    isWandering?: boolean;            // 是否为"流浪"资源（首页展示），默认false
+
     created_at: string;               // 创建时间 ISO 8601格式
     updated_at: string;               // 更新时间 ISO 8601格式
 }

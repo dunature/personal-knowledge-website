@@ -144,6 +144,7 @@ export const HomePage: React.FC = () => {
             category: resourceCategories[0] || '',
             author: '',
             recommendation: '',
+            isWandering: false,
         });
         setIsEditorOpen(true);
     };
@@ -171,6 +172,7 @@ export const HomePage: React.FC = () => {
             author: resource.author,
             recommendation: resource.recommendation,
             tags: resource.content_tags,
+            isWandering: resource.isWandering || false,
         });
         setIsEditorOpen(true);
     };
@@ -202,6 +204,7 @@ export const HomePage: React.FC = () => {
                     author: editorData.author || resource.author,
                     recommendation: editorData.recommendation || resource.recommendation,
                     content_tags: editorData.tags || resource.content_tags,
+                    isWandering: editorData.isWandering !== undefined ? editorData.isWandering : resource.isWandering,
                 });
                 showToast('success', '资源已更新');
             }
@@ -230,12 +233,14 @@ export const HomePage: React.FC = () => {
                 author: editorData.author || '未知',
                 recommendation: editorData.recommendation || '',
                 metadata: {},
+                isWandering: editorData.isWandering || false,
                 created_at: now,
                 updated_at: now,
             };
             console.log('[HomePage] 准备添加资源:', {
                 title: newResource.title,
                 category: newResource.category,
+                isWandering: newResource.isWandering,
                 editorData
             });
             await addResource(newResource);
@@ -480,7 +485,7 @@ export const HomePage: React.FC = () => {
 
             {/* 页脚 - 统一背景色 */}
             <footer className="bg-gray-50 text-center py-6 text-sm text-text-secondary">
-                <p>© 2024 个人知识管理系统. All rights reserved.</p>
+                <p>© 2025 流浪日记. All rights reserved.</p>
             </footer>
 
             {/* 问题详情弹窗（带编辑功能） - 使用Suspense包裹懒加载组件 */}

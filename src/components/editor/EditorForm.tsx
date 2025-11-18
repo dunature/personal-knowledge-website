@@ -31,6 +31,7 @@ export interface EditorFormData {
     tags?: string[];
     author?: string;
     recommendation?: string;
+    isWandering?: boolean;
 
     // 问题特定字段
     status?: string;
@@ -233,6 +234,23 @@ export const EditorForm: React.FC<EditorFormProps> = ({
     // 渲染资源表单
     const renderResourceForm = () => (
         <div className="space-y-4 p-4">
+            {/* 流浪状态复选框 - 放在第一行 */}
+            <div className="flex items-start gap-3 p-4 bg-[#FFF9E6] border-2 border-[#FFD700] rounded-lg">
+                <input
+                    type="checkbox"
+                    id="isWandering"
+                    checked={data.isWandering || false}
+                    onChange={(e) => updateField('isWandering', e.target.checked)}
+                    className="mt-1.5 w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer"
+                />
+                <label htmlFor="isWandering" className="flex-1 cursor-pointer">
+                    <div className="text-lg font-bold text-[#333]">去流浪</div>
+                    <div className="text-xs text-[#666] mt-1">
+                        仅最新6个流浪资源会在首页展示。超出的旧资源会自动取消流浪状态。
+                    </div>
+                </label>
+            </div>
+
             <Input
                 label="标题 *"
                 value={data.title || ''}

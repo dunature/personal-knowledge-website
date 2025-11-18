@@ -31,6 +31,7 @@ class SyncService {
     private statusListeners: Array<(status: SyncStatus) => void> = [];
     private syncTimer: ReturnType<typeof setTimeout> | null = null;
     private retryCount = 0;
+    private initialized = false;
 
     // 缓存相关
     private lastCheckResult: { synced: boolean; reason?: string } | null = null;
@@ -44,6 +45,30 @@ class SyncService {
         maxRetries: 3,
         retryDelay: 5000, // 5秒重试延迟
     };
+
+    /**
+     * 初始化同步服务
+     * 从 LocalStorage 恢复同步状态
+     */
+    async initialize(): Promise<void> {
+        if (this.initialized) {
+            return;
+        }
+
+        try {
+            // 恢复同步状态
+            const savedStatus = await cacheService.getData<SyncStatus>(STORAGE_KEYS.SYNC_STATUS);
+            if (savedStatus && ['idle', 'syncing', 'success', 'error', 'conflict'].includes(savedStatus)) {
+                this.syncStatus = savedStatus;
+                console.log('[SyncService] 恢复同步状态:', savedStatus);
+            }
+
+            this.initialized = true;
+        } catch (error) {
+            console.error('[SyncService] 初始化失败:', error);
+            // 初始化失败不影响使用，保持默认状态
+        }
+    }
 
     /**
      * 上传数据到 Gist
@@ -256,7 +281,15 @@ class SyncService {
     /**
      * 获取当前同步状态
      */
+    /**
+     * 获取当前同步状态
+     * 确保在返回前已初始化
+     */
     getSyncStatus(): SyncStatus {
+        // 如果还没初始化，触发初始化（异步，但不等待）
+        if (!this.initialized) {
+            this.initialize();
+        }
         return this.syncStatus;
     }
 
@@ -264,6 +297,17 @@ class SyncService {
      * 监听同步状态变化
      */
     onSyncStatusChange(callback: (status: SyncStatus) => void): () => void {
+        // 确保初始化
+        if (!this.initialized) {
+            this.initialize().then(() => {
+                // 初始化完成后立即调用回调，传递当前状态
+                callback(this.syncStatus);
+            });
+        } else {
+            // 已初始化，立即调用回调传递当前状态
+            callback(this.syncStatus);
+        }
+
         this.statusListeners.push(callback);
 
         // 返回取消监听的函数

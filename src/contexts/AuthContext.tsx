@@ -55,6 +55,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             try {
                 await authService.initialize();
 
+                // 初始化同步服务
+                await syncService.initialize();
+
                 // 检查 URL 参数中的 Gist ID
                 authService.loadGistIdFromUrl();
 

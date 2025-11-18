@@ -22,19 +22,35 @@ export const ModeIndicator: React.FC<ModeIndicatorProps> = ({ onClick, className
     useEffect(() => {
         // Only track sync status in owner mode
         if (mode === 'owner') {
-            // Get initial status
-            setSyncStatus(syncService.getSyncStatus());
-            syncService.getLastSyncTime().then(setLastSyncTime);
+            // 强制刷新：先重置状态，然后获取最新状态
+            setSyncStatus('idle');
+            setLastSyncTime(null);
+
+            // 使用 setTimeout 确保状态更新在下一个事件循环中执行
+            const timeoutId = setTimeout(() => {
+                // Get initial status
+                const currentStatus = syncService.getSyncStatus();
+                console.log('[ModeIndicator] 获取同步状态:', currentStatus);
+                setSyncStatus(currentStatus);
+                syncService.getLastSyncTime().then(time => {
+                    console.log('[ModeIndicator] 获取最后同步时间:', time);
+                    setLastSyncTime(time);
+                });
+            }, 0);
 
             // Listen for status changes
             const unsubscribe = syncService.onSyncStatusChange((newStatus) => {
+                console.log('[ModeIndicator] 同步状态变化:', newStatus);
                 setSyncStatus(newStatus);
                 if (newStatus === 'success') {
                     syncService.getLastSyncTime().then(setLastSyncTime);
                 }
             });
 
-            return unsubscribe;
+            return () => {
+                clearTimeout(timeoutId);
+                unsubscribe();
+            };
         } else {
             // Reset sync status when switching to guest mode
             setSyncStatus('idle');

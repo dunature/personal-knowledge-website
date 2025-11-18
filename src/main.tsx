@@ -27,8 +27,8 @@ import SyncAlreadySyncedTest from './pages/SyncAlreadySyncedTest.tsx'
 import DataComparisonDialogTest from './pages/DataComparisonDialogTest.tsx'
 import DataComparisonTest from './pages/DataComparisonTest.tsx'
 import ManualSyncTest from './pages/ManualSyncTest.tsx'
+import UserInfoDebugPage from './pages/UserInfoDebugPage.tsx'
 import App from './App.tsx'
-import SetupWizard from './components/setup/SetupWizard.tsx'
 
 // 迁移旧的占位图 URL
 migrateLocalStorageResources();
@@ -45,7 +45,6 @@ createRoot(document.getElementById('root')!).render(
                 <Routes>
                   <Route path="/" element={<HomePage />} />
                   <Route path="/settings" element={<SettingsPage />} />
-                  <Route path="/setup" element={<SetupWizard onComplete={() => window.location.href = '/'} />} />
                   {/* 开发测试路由 - 生产环境可以移除 */}
                   {import.meta.env.DEV && (
                     <>
@@ -66,6 +65,7 @@ createRoot(document.getElementById('root')!).render(
                       <Route path="/data-comparison-dialog-test" element={<DataComparisonDialogTest />} />
                       <Route path="/data-comparison-test" element={<DataComparisonTest />} />
                       <Route path="/manual-sync-test" element={<ManualSyncTest />} />
+                      <Route path="/user-info-debug" element={<UserInfoDebugPage />} />
                     </>
                   )}
                 </Routes>

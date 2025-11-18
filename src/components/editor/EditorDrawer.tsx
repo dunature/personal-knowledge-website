@@ -136,7 +136,7 @@ export const EditorDrawer: React.FC<EditorDrawerProps> = ({
                 </div>
 
                 {/* 内容区域 */}
-                <div className="flex-1 overflow-visible">
+                <div className="flex-1 overflow-auto">
                     {children}
                 </div>
             </div>

@@ -97,7 +97,23 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
 
     // 根据选中的分类、标签和搜索关键词筛选并排序资源
     const filteredAndSortedResources = useMemo(() => {
-        // 1. 筛选
+        // 1. 收起模式（now）：只显示标记为"流浪"的资源
+        if (!isExpanded) {
+            const wanderingResources = resources
+                .filter(r => r.isWandering === true)
+                .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                .slice(0, 6);
+
+            console.log('[ResourceSection] 收起模式，显示流浪资源:', {
+                total: resources.length,
+                wandering: resources.filter(r => r.isWandering).length,
+                displayed: wanderingResources.length
+            });
+
+            return wanderingResources;
+        }
+
+        // 2. 展开模式（ALL TIME）：显示所有资源，支持筛选和排序
         let filtered = resources.filter((resource) => {
             // 分类筛选
             if (selectedCategory && resource.category !== selectedCategory) {
@@ -129,7 +145,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
             return true;
         });
 
-        // 2. 排序
+        // 3. 排序
         filtered.sort((a, b) => {
             switch (sortOption) {
                 case 'newest':
@@ -144,7 +160,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
         });
 
         return filtered;
-    }, [resources, selectedCategory, selectedTags, searchQuery, sortOption]);
+    }, [resources, selectedCategory, selectedTags, searchQuery, sortOption, isExpanded]);
 
     return (
         <section className="w-full">
@@ -159,13 +175,13 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
                     </p>
                 </div>
 
-                {/* all time / ALL TIME 切换按钮 */}
+                {/* now / ALL TIME 切换按钮 */}
                 <Button
                     variant={isExpanded ? 'primary' : 'outline'}
                     onClick={handleToggleExpand}
                     className="min-w-[120px] transition-normal"
                 >
-                    {isExpanded ? 'ALL TIME' : 'all time'}
+                    {isExpanded ? 'ALL TIME' : 'now'}
                 </Button>
             </div>
 
@@ -232,7 +248,9 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
                     <p className="text-base text-text-tertiary font-normal">
                         {searchQuery.trim()
                             ? '未找到相关资源，请尝试其他关键词'
-                            : '暂无资源'}
+                            : !isExpanded
+                                ? '该去探索新的领域了，少年'
+                                : '暂无资源'}
                     </p>
                 </div>
             )}

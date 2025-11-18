@@ -119,7 +119,7 @@ export const ResourceProvider: React.FC<ResourceProviderProps> = ({
             ? resourceInput as Resource
             : {
                 ...resourceInput,
-                id: `resource-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                id: `resource-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
             };
@@ -127,14 +127,41 @@ export const ResourceProvider: React.FC<ResourceProviderProps> = ({
         console.log('[ResourceContext] 添加资源:', {
             id: resource.id,
             title: resource.title,
-            category: resource.category
+            category: resource.category,
+            isWandering: resource.isWandering
         });
 
         setResources(prev => {
-            const newResources = [...prev, resource];
+            let newResources = [...prev, resource];
+
+            // 如果新资源标记为"流浪"，自动管理流浪资源数量
+            if (resource.isWandering) {
+                // 获取所有流浪资源，按创建时间排序（最新的在前）
+                const wanderingResources = newResources
+                    .filter(r => r.isWandering)
+                    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+                // 如果超过6个，将超出的资源改为不流浪
+                if (wanderingResources.length > 6) {
+                    const resourcesToUnwander = wanderingResources.slice(6);
+                    console.log('[ResourceContext] 流浪资源超过6个，自动取消旧资源的流浪状态:', {
+                        total: wanderingResources.length,
+                        toUnwander: resourcesToUnwander.map(r => r.title)
+                    });
+
+                    newResources = newResources.map(r => {
+                        if (resourcesToUnwander.find(ur => ur.id === r.id)) {
+                            return { ...r, isWandering: false };
+                        }
+                        return r;
+                    });
+                }
+            }
+
             console.log('[ResourceContext] 资源列表更新:', {
                 oldCount: prev.length,
-                newCount: newResources.length
+                newCount: newResources.length,
+                wanderingCount: newResources.filter(r => r.isWandering).length
             });
             return newResources;
         });
@@ -156,16 +183,42 @@ export const ResourceProvider: React.FC<ResourceProviderProps> = ({
     // 更新资源
     const updateResource = useCallback((id: string, updates: Partial<Resource>) => {
         setResources(prev => {
-            const updated = prev.map(r => (r.id === id ? { ...r, ...updates } : r));
+            let updated = prev.map(r => (r.id === id ? { ...r, ...updates } : r));
+
+            // 如果更新后的资源标记为"流浪"，自动管理流浪资源数量
+            const updatedResource = updated.find(r => r.id === id);
+            if (updatedResource && updates.isWandering === true) {
+                // 获取所有流浪资源，按创建时间排序（最新的在前）
+                const wanderingResources = updated
+                    .filter(r => r.isWandering)
+                    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+                // 如果超过6个，将超出的资源改为不流浪
+                if (wanderingResources.length > 6) {
+                    const resourcesToUnwander = wanderingResources.slice(6);
+                    console.log('[ResourceContext] 流浪资源超过6个，自动取消旧资源的流浪状态:', {
+                        total: wanderingResources.length,
+                        toUnwander: resourcesToUnwander.map(r => r.title)
+                    });
+
+                    updated = updated.map(r => {
+                        if (resourcesToUnwander.find(ur => ur.id === r.id)) {
+                            return { ...r, isWandering: false };
+                        }
+                        return r;
+                    });
+                }
+            }
+
             // 记录变更（仅在拥有者模式）
             if (mode === 'owner') {
-                const updatedResource = updated.find(r => r.id === id);
-                if (updatedResource) {
+                const finalUpdatedResource = updated.find(r => r.id === id);
+                if (finalUpdatedResource) {
                     syncService.addPendingChange({
                         type: 'update',
                         entity: 'resource',
                         id,
-                        data: updatedResource,
+                        data: finalUpdatedResource,
                         timestamp: new Date().toISOString(),
                     }).then(() => {
                         console.log('[ResourceContext] 资源更新变更已记录到待同步列表');
