@@ -155,7 +155,7 @@ export const QASection: React.FC<QASectionProps> = ({
 
             {/* 空状态 */}
             {displayedQuestions.length === 0 && (
-                <div className="text-center py-12 bg-gray-50 rounded-lg">
+                <div className={`text-center py-12 ${isExpanded ? 'bg-gray-50 rounded-lg' : ''}`}>
                     <p className="text-base text-text-tertiary font-normal">
                         {isExpanded ? '暂无符合条件的问题' : '请对世界充满好奇心'}
                     </p>
