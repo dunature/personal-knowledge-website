@@ -4,14 +4,11 @@
  * 包含性能优化：防抖验证、缓存等
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { gistService } from '@/services/gistService';
 import { cacheService, STORAGE_KEYS } from '@/services/cacheService';
 import { validateGistData } from '@/utils/dataValidation';
-
-// 防抖延迟时间（毫秒）
-const DEBOUNCE_DELAY = 300;
 
 interface UseGistIdInputOptions {
     onSuccess?: () => void;
