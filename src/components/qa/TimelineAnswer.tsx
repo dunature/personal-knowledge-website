@@ -13,6 +13,8 @@ interface TimelineAnswerProps {
     onEdit?: (id: string) => void;
     onDelete?: (id: string) => void;
     showDivider?: boolean;
+    canEdit?: boolean;
+    canDelete?: boolean;
 }
 
 export const TimelineAnswer: React.FC<TimelineAnswerProps> = React.memo(({
@@ -20,6 +22,8 @@ export const TimelineAnswer: React.FC<TimelineAnswerProps> = React.memo(({
     onEdit,
     onDelete,
     showDivider = true,
+    canEdit = true,
+    canDelete = true,
 }) => {
     // 格式化时间戳为 YYYY.MM.DD HH:MM - 使用useMemo优化
     const formattedTimestamp = React.useMemo(() => {
@@ -41,7 +45,7 @@ export const TimelineAnswer: React.FC<TimelineAnswerProps> = React.memo(({
                         {formattedTimestamp}
                     </span>
                     <div className="flex items-center gap-2">
-                        {onEdit && (
+                        {onEdit && canEdit && (
                             <Button
                                 variant="text"
                                 size="small"
@@ -51,7 +55,7 @@ export const TimelineAnswer: React.FC<TimelineAnswerProps> = React.memo(({
                                 编辑
                             </Button>
                         )}
-                        {onDelete && (
+                        {onDelete && canDelete && (
                             <Button
                                 variant="text"
                                 size="small"

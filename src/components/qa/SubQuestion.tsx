@@ -19,6 +19,9 @@ interface SubQuestionProps {
     onAddAnswer?: (subQuestionId: string) => void;
     onEditAnswer?: (answerId: string) => void;
     onDeleteAnswer?: (answerId: string) => void;
+    canEdit?: boolean;
+    canDelete?: boolean;
+    canCreate?: boolean;
 }
 
 export const SubQuestion: React.FC<SubQuestionProps> = React.memo(({
@@ -29,6 +32,9 @@ export const SubQuestion: React.FC<SubQuestionProps> = React.memo(({
     onAddAnswer,
     onEditAnswer,
     onDeleteAnswer,
+    canEdit = true,
+    canDelete = true,
+    canCreate = true,
 }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const statusConfig = STATUS_COLORS[subQuestion.status];
@@ -81,42 +87,48 @@ export const SubQuestion: React.FC<SubQuestionProps> = React.memo(({
                 </span>
 
                 {/* 编辑按钮 */}
-                <Button
-                    variant="text"
-                    size="small"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onEdit?.(subQuestion.id);
-                    }}
-                    className="text-[#0047AB]"
-                >
-                    编辑
-                </Button>
+                {canEdit && (
+                    <Button
+                        variant="text"
+                        size="small"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onEdit?.(subQuestion.id);
+                        }}
+                        className="text-[#0047AB]"
+                    >
+                        编辑
+                    </Button>
+                )}
 
                 {/* 删除按钮 */}
-                <Button
-                    variant="text"
-                    size="small"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete?.(subQuestion.id);
-                    }}
-                    className="text-[#E65100]"
-                >
-                    删除
-                </Button>
+                {canDelete && (
+                    <Button
+                        variant="text"
+                        size="small"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete?.(subQuestion.id);
+                        }}
+                        className="text-[#E65100]"
+                    >
+                        删除
+                    </Button>
+                )}
 
                 {/* 添加回答按钮 */}
-                <Button
-                    variant="outline"
-                    size="small"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onAddAnswer?.(subQuestion.id);
-                    }}
-                >
-                    添加回答
-                </Button>
+                {canCreate && (
+                    <Button
+                        variant="outline"
+                        size="small"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onAddAnswer?.(subQuestion.id);
+                        }}
+                    >
+                        添加回答
+                    </Button>
+                )}
             </div>
 
             {/* 时间线回答区域 - 展开时显示 */}
@@ -135,6 +147,8 @@ export const SubQuestion: React.FC<SubQuestionProps> = React.memo(({
                                     onEdit={onEditAnswer}
                                     onDelete={onDeleteAnswer}
                                     showDivider={index < sortedAnswers.length - 1}
+                                    canEdit={canEdit}
+                                    canDelete={canDelete}
                                 />
                             ))}
                         </div>

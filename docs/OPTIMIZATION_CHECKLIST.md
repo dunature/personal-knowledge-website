@@ -340,4 +340,4 @@ async function compressData(data: string): Promise<string> {
 
 ---
 
-**最后更新**: 2024-01-20
+**最后更新**: 2025-01-20

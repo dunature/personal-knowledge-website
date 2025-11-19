@@ -13,6 +13,7 @@ import HomePage from './pages/HomePage.tsx'
 import MarkdownEditorTest from './pages/MarkdownEditorTest.tsx'
 import EditorDrawerTest from './pages/EditorDrawerTest.tsx'
 import QuestionModalTest from './pages/QuestionModalTest.tsx'
+import DropdownTest from './pages/DropdownTest.tsx'
 import ErrorHandlingTest from './pages/ErrorHandlingTest.tsx'
 import NotificationTest from './pages/NotificationTest.tsx'
 import GistServiceTest from './pages/GistServiceTest.tsx'
@@ -28,6 +29,7 @@ import DataComparisonDialogTest from './pages/DataComparisonDialogTest.tsx'
 import DataComparisonTest from './pages/DataComparisonTest.tsx'
 import ManualSyncTest from './pages/ManualSyncTest.tsx'
 import UserInfoDebugPage from './pages/UserInfoDebugPage.tsx'
+import { PermissionTest } from './pages/PermissionTest.tsx'
 import App from './App.tsx'
 
 // 迁移旧的占位图 URL
@@ -50,6 +52,7 @@ createRoot(document.getElementById('root')!).render(
                     <>
                       <Route path="/components" element={<App />} />
                       <Route path="/question-modal-test" element={<QuestionModalTest />} />
+                      <Route path="/dropdown-test" element={<DropdownTest />} />
                       <Route path="/markdown-test" element={<MarkdownEditorTest />} />
                       <Route path="/drawer-test" element={<EditorDrawerTest />} />
                       <Route path="/error-test" element={<ErrorHandlingTest />} />
@@ -66,6 +69,7 @@ createRoot(document.getElementById('root')!).render(
                       <Route path="/data-comparison-test" element={<DataComparisonTest />} />
                       <Route path="/manual-sync-test" element={<ManualSyncTest />} />
                       <Route path="/user-info-debug" element={<UserInfoDebugPage />} />
+                      <Route path="/permission-test" element={<PermissionTest />} />
                     </>
                   )}
                 </Routes>

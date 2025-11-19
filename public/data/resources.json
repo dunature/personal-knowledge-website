@@ -19,13 +19,13 @@
             "views": "125K"
         },
         "isWandering": false,
-        "created_at": "2024-01-15T10:00:00Z",
-        "updated_at": "2024-01-15T10:00:00Z"
+        "created_at": "2025-01-15T10:00:00Z",
+        "updated_at": "2025-01-15T10:00:00Z"
     },
     {
         "id": "res_002",
-        "title": "TypeScript 最佳实践 2024",
-        "url": "https://blog.logrocket.com/typescript-best-practices-2024/",
+        "title": "TypeScript 最佳实践 2025",
+        "url": "https://blog.logrocket.com/typescript-best-practices-2025/",
         "type": "blog",
         "cover": "https://via.placeholder.com/320x180/2E7D32/FFFFFF?text=TypeScript",
         "platform": "LogRocket Blog",
@@ -39,11 +39,11 @@
         "recommendation": "总结了 TypeScript 开发中的常见陷阱和最佳实践，值得收藏",
         "metadata": {
             "read_time": 12,
-            "published_date": "2024-01-10"
+            "published_date": "2025-01-10"
         },
         "isWandering": false,
-        "created_at": "2024-01-10T10:00:00Z",
-        "updated_at": "2024-01-10T10:00:00Z"
+        "created_at": "2025-01-10T10:00:00Z",
+        "updated_at": "2025-01-10T10:00:00Z"
     },
     {
         "id": "res_003",
@@ -63,11 +63,11 @@
         "metadata": {
             "stars": 58000,
             "language": "JavaScript",
-            "last_updated": "2024-01-20"
+            "last_updated": "2025-01-20"
         },
         "isWandering": false,
-        "created_at": "2024-01-05T10:00:00Z",
-        "updated_at": "2024-01-05T10:00:00Z"
+        "created_at": "2025-01-05T10:00:00Z",
+        "updated_at": "2025-01-05T10:00:00Z"
     },
     {
         "id": "res_004",
@@ -89,8 +89,8 @@
             "views": "45K"
         },
         "isWandering": false,
-        "created_at": "2024-01-12T10:00:00Z",
-        "updated_at": "2024-01-12T10:00:00Z"
+        "created_at": "2025-01-12T10:00:00Z",
+        "updated_at": "2025-01-12T10:00:00Z"
     },
     {
         "id": "res_005",
@@ -112,8 +112,8 @@
             "rating": 4.8
         },
         "isWandering": false,
-        "created_at": "2024-01-08T10:00:00Z",
-        "updated_at": "2024-01-08T10:00:00Z"
+        "created_at": "2025-01-08T10:00:00Z",
+        "updated_at": "2025-01-08T10:00:00Z"
     },
     {
         "id": "res_006",
@@ -135,8 +135,8 @@
             "views": "230K"
         },
         "isWandering": false,
-        "created_at": "2024-01-18T10:00:00Z",
-        "updated_at": "2024-01-18T10:00:00Z"
+        "created_at": "2025-01-18T10:00:00Z",
+        "updated_at": "2025-01-18T10:00:00Z"
     },
     {
         "id": "res_007",
@@ -155,11 +155,11 @@
         "recommendation": "从零开始的机器学习笔记，配合代码示例，易于理解",
         "metadata": {
             "read_time": 15,
-            "published_date": "2024-01-14"
+            "published_date": "2025-01-14"
         },
         "isWandering": false,
-        "created_at": "2024-01-14T10:00:00Z",
-        "updated_at": "2024-01-14T10:00:00Z"
+        "created_at": "2025-01-14T10:00:00Z",
+        "updated_at": "2025-01-14T10:00:00Z"
     },
     {
         "id": "res_008",
@@ -181,7 +181,7 @@
             "rating": 4.9
         },
         "isWandering": false,
-        "created_at": "2024-01-16T10:00:00Z",
-        "updated_at": "2024-01-16T10:00:00Z"
+        "created_at": "2025-01-16T10:00:00Z",
+        "updated_at": "2025-01-16T10:00:00Z"
     }
 ]

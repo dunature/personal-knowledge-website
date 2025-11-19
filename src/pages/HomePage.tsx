@@ -379,9 +379,18 @@ export const HomePage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* 顶部栏 - 统一背景色 */}
-            <div className="bg-gray-50 border-b border-gray-200 sticky top-0 z-40 backdrop-blur-sm">
+        <div
+            className="min-h-screen"
+            style={{
+                backgroundImage: 'url(/images/background.jpg)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundAttachment: 'fixed',
+                backgroundRepeat: 'no-repeat'
+            }}
+        >
+            {/* 顶部栏 - 半透明背景 */}
+            <div className="bg-white/80 border-b border-gray-200 sticky top-0 z-40 backdrop-blur-sm">
                 <div className="max-w-[1400px] mx-auto px-5 md:px-10 py-3 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <ModeIndicator onClick={() => setIsModeSwitcherOpen(true)} />
@@ -403,22 +412,28 @@ export const HomePage: React.FC = () => {
                 </div>
             </div>
 
-            {/* Hero 区域 - 统一背景色 */}
-            <header className="bg-gray-50 text-primary py-12 md:py-16 px-5 md:px-10">
+            {/* Hero 区域 - 透明背景 */}
+            <header className="bg-transparent text-primary py-12 md:py-16 px-5 md:px-10">
                 <div className="max-w-[1400px] mx-auto">
-                    {/* 主标题 - 大号加粗蓝色文字，左对齐，带描边效果 */}
+                    {/* 主标题 - 大号加粗蓝色文字，左对齐，带阴影效果 */}
                     <h1
-                        className="text-5xl md:text-7xl font-bold mb-6"
+                        className="[&_a]:underline [&_em]:italic [&_strong]:font-bold text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-bold text-[#002BFF] leading-[0.9] tracking-tight mb-6"
                         style={{
-                            WebkitTextStroke: '2px #0033FF',
-                            WebkitTextFillColor: 'transparent'
+                            letterSpacing: '-0.06em',
+                            textShadow: 'rgba(0, 43, 255, 0.15) 0px 4px 20px'
                         }}
                     >
-                        流浪日记
+                        流浪日记————————————
                     </h1>
 
                     {/* 副标题/描述区域 */}
-                    <div className="text-base md:text-lg font-bold mb-6">
+                    <div
+                        className="[&_a]:underline [&_em]:italic [&_strong]:font-bold text-sm sm:text-base md:text-xl lg:text-2xl xl:text-3xl font-semibold text-[#002BFF] leading-tight max-w-5xl"
+                        style={{
+                            letterSpacing: '-0.04em',
+                            textShadow: 'rgba(0, 43, 255, 0.15) 0px 4px 20px'
+                        }}
+                    >
                         <p className="mb-2">
                             a collection of the best resources for learning
                         </p>
@@ -426,7 +441,6 @@ export const HomePage: React.FC = () => {
                             from the Internet, hand-picked and curated by{' '}
                             <a
                                 href="https://github.com/dunature/personal-knowledge-website"
-                                className="underline hover:text-primary-hover transition-colors duration-200"
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
@@ -434,12 +448,8 @@ export const HomePage: React.FC = () => {
                             </a>
                             .
                         </p>
-                    </div>
-
-                    {/* 关键特性列表 */}
-                    <div className="text-base md:text-lg font-bold">
-                        <p className="mb-3">this all :</p>
-                        <ul className="space-y-2">
+                        <p className="mt-4">this all :</p>
+                        <ul className="mt-2 space-y-1">
                             <li>- The Collector</li>
                             <li>- The Journalist</li>
                             <li>- The Craftsman</li>
@@ -452,8 +462,8 @@ export const HomePage: React.FC = () => {
             {/* 渐变分割线 */}
             <div className="h-0.5 bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
 
-            {/* 主内容区域 - 统一背景色 */}
-            <main className="bg-gray-50 max-w-[1400px] mx-auto px-5 md:px-10 py-12 md:py-16 space-y-12 md:space-y-16">
+            {/* 主内容区域 - 透明背景 */}
+            <main className="bg-transparent max-w-[1400px] mx-auto px-5 md:px-10 py-12 md:py-16 space-y-12 md:space-y-16">
                 {/* 资源导航区域 */}
                 <section>
                     <ResourceSection
@@ -483,8 +493,8 @@ export const HomePage: React.FC = () => {
             {/* 渐变分割线 */}
             <div className="h-0.5 bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
 
-            {/* 页脚 - 统一背景色 */}
-            <footer className="bg-gray-50 text-center py-6 text-sm text-text-secondary">
+            {/* 页脚 - 半透明背景 */}
+            <footer className="bg-white/60 text-center py-6 text-sm text-text-secondary">
                 <p>© 2025 流浪日记. All rights reserved.</p>
             </footer>
 

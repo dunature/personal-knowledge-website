@@ -72,8 +72,8 @@ export const Modal: React.FC<ModalProps> = ({
 
             {/* 弹窗内容 - 缩放动画 */}
             <div
-                className={`relative bg-white overflow-hidden transition-all duration-200 ease-out ${fullScreen
-                    ? 'w-full h-full rounded-none'
+                className={`relative bg-white transition-all duration-200 ease-out ${fullScreen
+                    ? 'w-full h-full rounded-none overflow-hidden'
                     : 'rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh]'
                     } ${className}`}
                 style={{ animation: 'scaleIn 200ms ease-out' }}

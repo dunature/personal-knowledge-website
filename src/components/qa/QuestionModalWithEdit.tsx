@@ -3,7 +3,7 @@
  * 支持在弹窗内直接编辑，无需打开抽屉
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { BigQuestion, SubQuestion, TimelineAnswer, QuestionStatus } from '@/types/question';
 import { STATUS_COLORS } from '@/types/question';
 import { Modal } from '@/components/ui/Modal';
@@ -17,6 +17,10 @@ import { ImageUploader } from '@/components/editor/ImageUploader';
 import { SubQuestion as SubQuestionComponent } from './SubQuestion';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import { AutoSaveIndicator } from '@/components/common/AutoSaveIndicator';
+import { ValidationErrorDialog } from './ValidationErrorDialog';
+import { SubQuestionStatusBadge } from './SubQuestionStatusBadge';
+import { QuestionStatusValidator } from '@/utils/questionStatusValidator';
+import { permissionService } from '@/services/permissionService';
 
 interface QuestionModalWithEditProps {
     question: BigQuestion;
@@ -71,12 +75,19 @@ export const QuestionModalWithEdit: React.FC<QuestionModalWithEditProps> = ({
     onCreateSubQuestion,
     onCreateAnswer,
 }) => {
+    // 权限检查
+    const canEdit = permissionService.canEdit();
+    const canDelete = permissionService.canDelete();
+    const canCreate = permissionService.canCreate();
+
     const [editMode, setEditMode] = useState<EditMode>('view');
     const [editingData, setEditingData] = useState<EditingData>({});
     const [editedDescription, setEditedDescription] = useState(question.description);
     const [editedSummary, setEditedSummary] = useState(question.summary || '');
     const [showImageUploader, setShowImageUploader] = useState(false);
     const [currentEditField, setCurrentEditField] = useState<'description' | 'summary'>('description');
+    const [showValidationError, setShowValidationError] = useState(false);
+    const [validationResult, setValidationResult] = useState<ReturnType<typeof QuestionStatusValidator.validateStatusChange> | null>(null);
 
     // 自动保存
     const { isSaving, lastSaved } = useAutoSave({
@@ -93,11 +104,46 @@ export const QuestionModalWithEdit: React.FC<QuestionModalWithEditProps> = ({
         enabled: editMode !== 'view',
     });
 
-    const statusOptions: DropdownOption[] = [
-        { value: 'unsolved', label: STATUS_COLORS.unsolved.label },
-        { value: 'solving', label: STATUS_COLORS.solving.label },
-        { value: 'solved', label: STATUS_COLORS.solved.label },
-    ];
+    // 验证状态变更
+    const handleStatusChange = (newStatus: QuestionStatus) => {
+        const result = QuestionStatusValidator.validateStatusChange(
+            newStatus,
+            question.status,
+            subQuestions,
+            editedSummary || question.summary || ''
+        );
+
+        if (!result.isValid) {
+            setValidationResult(result);
+            setShowValidationError(true);
+            return;
+        }
+
+        onStatusChange?.(newStatus);
+    };
+
+    // 动态生成状态选项，根据验证结果禁用"已解决"选项
+    const statusOptions: DropdownOption[] = useMemo(() => {
+        const solvedValidation = QuestionStatusValidator.validateStatusChange(
+            'solved',
+            question.status,
+            subQuestions,
+            editedSummary || question.summary || ''
+        );
+
+        return [
+            { value: 'unsolved', label: STATUS_COLORS.unsolved.label },
+            { value: 'solving', label: STATUS_COLORS.solving.label },
+            {
+                value: 'solved',
+                label: STATUS_COLORS.solved.label,
+                disabled: !solvedValidation.isValid,
+                disabledReason: solvedValidation.errors.length > 0
+                    ? solvedValidation.errors[0].message
+                    : undefined,
+            },
+        ];
+    }, [question.status, subQuestions, editedSummary, question.summary]);
 
     // 开始编辑描述
     const startEditDescription = () => {
@@ -355,14 +401,16 @@ export const QuestionModalWithEdit: React.FC<QuestionModalWithEditProps> = ({
             <section className="bg-white p-6 rounded-lg border border-[#E0E0E0]">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold text-[#333]">问题描述</h3>
-                    <Button
-                        variant="text"
-                        size="small"
-                        onClick={startEditDescription}
-                        className="text-[#0047AB]"
-                    >
-                        编辑
-                    </Button>
+                    {canEdit && (
+                        <Button
+                            variant="text"
+                            size="small"
+                            onClick={startEditDescription}
+                            className="text-[#0047AB]"
+                        >
+                            编辑
+                        </Button>
+                    )}
                 </div>
                 <MarkdownPreview content={question.description} />
             </section>
@@ -374,6 +422,12 @@ export const QuestionModalWithEdit: React.FC<QuestionModalWithEditProps> = ({
         if (editMode === 'summary') {
             return (
                 <section className="bg-[#FFF9E6] rounded-lg border-2 border-[#FFD700] overflow-hidden">
+                    {/* 小问题状态统计 */}
+                    {subQuestions.length > 0 && (
+                        <div className="p-4 bg-[#FFF9E6] border-b border-[#FFD700]">
+                            <SubQuestionStatusBadge subQuestions={subQuestions} />
+                        </div>
+                    )}
                     <div className="flex items-center justify-between p-4 bg-[#FFF9E6] border-b border-[#FFD700]">
                         <h3 className="text-lg font-semibold text-[#333]">编辑最终总结</h3>
                         <div className="flex gap-2">
@@ -423,21 +477,37 @@ export const QuestionModalWithEdit: React.FC<QuestionModalWithEditProps> = ({
         }
 
         return (
-            <section className="bg-[#FFF9E6] p-6 rounded-lg border-2 border-[#FFD700]">
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-[#333]">
-                        THE END - 最终总结
-                    </h3>
-                    <Button
-                        variant="text"
-                        size="small"
-                        onClick={startEditSummary}
-                        className="text-[#0047AB]"
-                    >
-                        编辑
-                    </Button>
+            <section className="bg-[#FFF9E6] rounded-lg border-2 border-[#FFD700]">
+                {/* 小问题状态统计 */}
+                {subQuestions.length > 0 && (
+                    <div className="p-4 border-b border-[#FFD700]">
+                        <SubQuestionStatusBadge subQuestions={subQuestions} />
+                    </div>
+                )}
+                <div className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-[#333]">
+                            THE END - 最终总结
+                        </h3>
+                        {canEdit && (
+                            <Button
+                                variant="text"
+                                size="small"
+                                onClick={startEditSummary}
+                                className="text-[#0047AB]"
+                            >
+                                编辑
+                            </Button>
+                        )}
+                    </div>
+                    {question.summary ? (
+                        <MarkdownPreview content={question.summary} />
+                    ) : (
+                        <div className="text-center text-sm text-gray-500 italic py-4">
+                            不去解决问题不是逃避，是一种恰到好处的生活，但在这里你需要解决它
+                        </div>
+                    )}
                 </div>
-                <MarkdownPreview content={question.summary || '暂无总结'} />
             </section>
         );
     };
@@ -452,7 +522,7 @@ export const QuestionModalWithEdit: React.FC<QuestionModalWithEditProps> = ({
             >
                 <div className="h-full flex flex-col">
                     {/* 顶部栏 */}
-                    <div className="flex items-center justify-between p-6 border-b border-[#E0E0E0] bg-white sticky top-0 z-10">
+                    <div className="relative flex items-center justify-between p-6 border-b border-[#E0E0E0] bg-white sticky top-0 z-10">
                         {/* 左侧：返回按钮 */}
                         <Button
                             variant="text"
@@ -462,20 +532,20 @@ export const QuestionModalWithEdit: React.FC<QuestionModalWithEditProps> = ({
                             ← 返回
                         </Button>
 
-                        {/* 中间：标题 */}
-                        <h2 className="text-2xl font-bold text-[#333] flex-1 text-center px-8">
+                        {/* 中间：标题 - 使用绝对定位实现真正居中 */}
+                        <h2 className="absolute left-1/2 -translate-x-1/2 text-2xl font-bold text-[#333] max-w-[50%] truncate">
                             {question.title}
                         </h2>
 
                         {/* 右侧：编辑、删除、状态、关闭按钮 */}
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 ml-auto">
                             {editMode !== 'view' && (
                                 <span className="text-sm text-[#666]">
                                     编辑模式
                                 </span>
                             )}
 
-                            {editMode === 'view' && onEdit && (
+                            {editMode === 'view' && onEdit && canEdit && (
                                 <Button
                                     variant="outline"
                                     size="small"
@@ -485,7 +555,7 @@ export const QuestionModalWithEdit: React.FC<QuestionModalWithEditProps> = ({
                                 </Button>
                             )}
 
-                            {editMode === 'view' && onDelete && (
+                            {editMode === 'view' && onDelete && canDelete && (
                                 <Button
                                     variant="outline"
                                     size="small"
@@ -496,11 +566,13 @@ export const QuestionModalWithEdit: React.FC<QuestionModalWithEditProps> = ({
                                 </Button>
                             )}
 
-                            <Dropdown
-                                options={statusOptions}
-                                value={question.status}
-                                onChange={(value) => onStatusChange?.(value as QuestionStatus)}
-                            />
+                            {canEdit && (
+                                <Dropdown
+                                    options={statusOptions}
+                                    value={question.status}
+                                    onChange={(value) => handleStatusChange(value as QuestionStatus)}
+                                />
+                            )}
 
                             <Button
                                 variant="text"
@@ -549,19 +621,6 @@ export const QuestionModalWithEdit: React.FC<QuestionModalWithEditProps> = ({
                                     <div className="p-6 space-y-4">
                                         <div>
                                             <label className="block text-sm font-medium text-[#333] mb-2">
-                                                小问题标题
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={editingData.title || ''}
-                                                onChange={(e) => setEditingData(prev => ({ ...prev, title: e.target.value }))}
-                                                placeholder="输入小问题标题..."
-                                                className="w-full px-4 py-2 border border-[#E0E0E0] rounded focus:outline-none focus:ring-2 focus:ring-[#0047AB]"
-                                                autoFocus
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-[#333] mb-2">
                                                 状态
                                             </label>
                                             <div className="w-full">
@@ -572,6 +631,19 @@ export const QuestionModalWithEdit: React.FC<QuestionModalWithEditProps> = ({
                                                     className="w-full"
                                                 />
                                             </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-[#333] mb-2">
+                                                小问题标题
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={editingData.title || ''}
+                                                onChange={(e) => setEditingData(prev => ({ ...prev, title: e.target.value }))}
+                                                placeholder="输入小问题标题..."
+                                                className="w-full px-4 py-2 border border-[#E0E0E0] rounded focus:outline-none focus:ring-2 focus:ring-[#0047AB]"
+                                                autoFocus
+                                            />
                                         </div>
                                     </div>
                                 </section>
@@ -636,7 +708,7 @@ export const QuestionModalWithEdit: React.FC<QuestionModalWithEditProps> = ({
                                     <div className="space-y-3">
                                         {subQuestions.length === 0 ? (
                                             <div className="text-center py-8 bg-[#F5F5F5] rounded-lg">
-                                                <p className="text-[#999]">暂无小问题</p>
+                                                <p className="text-sm text-gray-500 italic">请大量的记录，无论是否直接相关，在这里没有包袱</p>
                                             </div>
                                         ) : (
                                             subQuestions.map((subQuestion) => (
@@ -652,20 +724,25 @@ export const QuestionModalWithEdit: React.FC<QuestionModalWithEditProps> = ({
                                                         if (answer) startEditAnswer(answer);
                                                     }}
                                                     onDeleteAnswer={onDeleteAnswer}
+                                                    canEdit={canEdit}
+                                                    canDelete={canDelete}
+                                                    canCreate={canCreate}
                                                 />
                                             ))
                                         )}
                                     </div>
 
                                     {/* 添加小问题按钮 */}
-                                    <div className="mt-4 flex justify-center">
-                                        <Button
-                                            variant="outline"
-                                            onClick={startAddSubQuestion}
-                                        >
-                                            + 添加小问题
-                                        </Button>
-                                    </div>
+                                    {canCreate && (
+                                        <div className="mt-4 flex justify-center">
+                                            <Button
+                                                variant="outline"
+                                                onClick={startAddSubQuestion}
+                                            >
+                                                + 添加小问题
+                                            </Button>
+                                        </div>
+                                    )}
                                 </section>
                             )}
                         </div>
@@ -688,6 +765,13 @@ export const QuestionModalWithEdit: React.FC<QuestionModalWithEditProps> = ({
                     onClose={() => setShowImageUploader(false)}
                 />
             )}
+
+            {/* 验证错误对话框 */}
+            <ValidationErrorDialog
+                isOpen={showValidationError}
+                onClose={() => setShowValidationError(false)}
+                errors={validationResult?.errors || []}
+            />
         </>
     );
 };

@@ -3,7 +3,7 @@
  * 全屏显示大问题的详细信息、小问题和时间线回答
  */
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import type { BigQuestion, SubQuestion, TimelineAnswer, QuestionStatus } from '@/types/question';
 import { STATUS_COLORS } from '@/types/question';
 import { Modal } from '@/components/ui/Modal';
@@ -12,6 +12,8 @@ import { Dropdown } from '@/components/ui/Dropdown';
 import type { DropdownOption } from '@/components/ui/Dropdown';
 import { MarkdownPreview } from '@/components/common/MarkdownPreview';
 import { SubQuestion as SubQuestionComponent } from './SubQuestion';
+import { ValidationErrorDialog } from './ValidationErrorDialog';
+import { QuestionStatusValidator } from '@/utils/questionStatusValidator';
 
 interface QuestionModalProps {
     question: BigQuestion;
@@ -48,11 +50,49 @@ export const QuestionModal: React.FC<QuestionModalProps> = ({
     onDeleteAnswer,
     onAddSubQuestion,
 }) => {
-    const statusOptions: DropdownOption[] = [
-        { value: 'unsolved', label: STATUS_COLORS.unsolved.label },
-        { value: 'solving', label: STATUS_COLORS.solving.label },
-        { value: 'solved', label: STATUS_COLORS.solved.label },
-    ];
+    const [showValidationError, setShowValidationError] = useState(false);
+    const [validationResult, setValidationResult] = useState<ReturnType<typeof QuestionStatusValidator.validateStatusChange> | null>(null);
+
+    // 验证状态变更
+    const handleStatusChange = (newStatus: QuestionStatus) => {
+        const result = QuestionStatusValidator.validateStatusChange(
+            newStatus,
+            question.status,
+            subQuestions,
+            question.summary || ''
+        );
+
+        if (!result.isValid) {
+            setValidationResult(result);
+            setShowValidationError(true);
+            return;
+        }
+
+        onStatusChange?.(newStatus);
+    };
+
+    // 动态生成状态选项，根据验证结果禁用"已解决"选项
+    const statusOptions: DropdownOption[] = useMemo(() => {
+        const solvedValidation = QuestionStatusValidator.validateStatusChange(
+            'solved',
+            question.status,
+            subQuestions,
+            question.summary || ''
+        );
+
+        return [
+            { value: 'unsolved', label: STATUS_COLORS.unsolved.label },
+            { value: 'solving', label: STATUS_COLORS.solving.label },
+            {
+                value: 'solved',
+                label: STATUS_COLORS.solved.label,
+                disabled: !solvedValidation.isValid,
+                disabledReason: solvedValidation.errors.length > 0
+                    ? solvedValidation.errors[0].message
+                    : undefined,
+            },
+        ];
+    }, [question, subQuestions]);
 
     return (
         <Modal
@@ -100,7 +140,7 @@ export const QuestionModal: React.FC<QuestionModalProps> = ({
                         <Dropdown
                             options={statusOptions}
                             value={question.status}
-                            onChange={(value) => onStatusChange?.(value as QuestionStatus)}
+                            onChange={(value) => handleStatusChange(value as QuestionStatus)}
                         />
 
                         <Button
@@ -189,6 +229,13 @@ export const QuestionModal: React.FC<QuestionModalProps> = ({
                     </div>
                 </div>
             </div>
+
+            {/* 验证错误对话框 */}
+            <ValidationErrorDialog
+                isOpen={showValidationError}
+                onClose={() => setShowValidationError(false)}
+                errors={validationResult?.errors || []}
+            />
         </Modal>
     );
 };

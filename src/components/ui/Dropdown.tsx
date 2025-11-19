@@ -4,12 +4,14 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { ChevronDown, AlertCircle } from 'lucide-react';
 
 export interface DropdownOption {
     value: string;
     label: string;
     disabled?: boolean;
+    disabledReason?: string;
 }
 
 export interface DropdownProps {
@@ -30,6 +32,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
     className = '',
 }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [hoveredOption, setHoveredOption] = useState<string | null>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -107,32 +110,55 @@ export const Dropdown: React.FC<DropdownProps> = ({
                 />
             </button>
 
-            {/* 下拉菜单 - 使用 fixed 定位 */}
-            {isOpen && buttonRef.current && (
+            {/* 下拉菜单 - 使用 Portal 渲染到 body，避免被父元素裁剪 */}
+            {isOpen && buttonRef.current && createPortal(
                 <div
                     ref={dropdownRef}
-                    className="z-[9999] bg-white border border-gray-200 rounded-md shadow-medium overflow-hidden animate-scaleIn"
+                    className="z-[9999] bg-white border border-gray-200 rounded-md shadow-medium overflow-y-auto max-h-[300px] animate-scaleIn"
                     style={getMenuStyle()}
                     role="listbox"
                 >
                     {options.map((option) => (
-                        <button
+                        <div
                             key={option.value}
-                            type="button"
-                            onClick={() => !option.disabled && handleSelect(option.value)}
-                            disabled={option.disabled}
-                            className={`
-                                w-full px-4 py-2.5 text-left text-sm transition-all duration-200
-                                ${option.disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 cursor-pointer'}
-                                ${option.value === value ? 'bg-blue-50 text-primary font-medium' : 'text-gray-900'}
-                            `}
-                            role="option"
-                            aria-selected={option.value === value}
+                            className="relative"
+                            onMouseEnter={() => setHoveredOption(option.value)}
+                            onMouseLeave={() => setHoveredOption(null)}
                         >
-                            {option.label}
-                        </button>
+                            <button
+                                type="button"
+                                onClick={() => !option.disabled && handleSelect(option.value)}
+                                disabled={option.disabled}
+                                className={`
+                                    w-full px-4 py-2.5 text-left text-sm transition-all duration-200
+                                    flex items-center justify-between gap-2
+                                    ${option.disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 cursor-pointer'}
+                                    ${option.value === value ? 'bg-blue-50 text-primary font-medium' : 'text-gray-900'}
+                                `}
+                                role="option"
+                                aria-selected={option.value === value}
+                                aria-disabled={option.disabled}
+                                title={option.disabled && option.disabledReason ? option.disabledReason : undefined}
+                            >
+                                <span className="flex-1">{option.label}</span>
+                                {option.disabled && option.disabledReason && (
+                                    <AlertCircle size={16} className="flex-shrink-0 text-amber-500" />
+                                )}
+                            </button>
+
+                            {/* 工具提示 */}
+                            {option.disabled && option.disabledReason && hoveredOption === option.value && (
+                                <div className="absolute left-full top-0 ml-2 z-[10000] animate-fadeIn">
+                                    <div className="bg-gray-900 text-white text-xs rounded-md px-3 py-2 shadow-lg max-w-xs whitespace-normal">
+                                        {option.disabledReason}
+                                        <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900"></div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     ))}
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );

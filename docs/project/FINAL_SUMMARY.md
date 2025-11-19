@@ -4,7 +4,7 @@
 
 - **项目名称**：个人知识管理系统
 - **版本**：v1.0.0
-- **完成日期**：2024-11-14
+- **完成日期**：2025-11-14
 - **GitHub 仓库**：https://github.com/dunature/personal-knowledge-website
 - **状态**：✅ 生产就绪，已推送到 GitHub
 
@@ -362,4 +362,4 @@ personal-knowledge-website/
 
 如有问题或建议，欢迎在 GitHub Issues 中反馈。
 
-**最后更新**：2024-11-14
+**最后更新**：2025-11-14

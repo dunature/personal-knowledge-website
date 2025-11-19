@@ -16,8 +16,8 @@ const testQuestion: BigQuestion = {
     category: '技术',
     summary: '通过官方文档和实践项目，逐步掌握React核心概念。',
     sub_questions: ['test_sq_001', 'test_sq_002'],
-    created_at: '2024-01-01T10:00:00Z',
-    updated_at: '2024-01-15T10:00:00Z',
+    created_at: '2025-01-01T10:00:00Z',
+    updated_at: '2025-01-15T10:00:00Z',
 };
 
 const testSubQuestions: SubQuestion[] = [
@@ -27,8 +27,8 @@ const testSubQuestions: SubQuestion[] = [
         title: 'React的核心概念有哪些？',
         status: 'solved',
         answers: ['test_ans_001', 'test_ans_002'],
-        created_at: '2024-01-01T10:00:00Z',
-        updated_at: '2024-01-05T10:00:00Z',
+        created_at: '2025-01-01T10:00:00Z',
+        updated_at: '2025-01-05T10:00:00Z',
     },
     {
         id: 'test_sq_002',
@@ -36,8 +36,8 @@ const testSubQuestions: SubQuestion[] = [
         title: '如何搭建React开发环境？',
         status: 'solving',
         answers: ['test_ans_003'],
-        created_at: '2024-01-05T10:00:00Z',
-        updated_at: '2024-01-10T10:00:00Z',
+        created_at: '2025-01-05T10:00:00Z',
+        updated_at: '2025-01-10T10:00:00Z',
     },
 ];
 
@@ -46,25 +46,25 @@ const testAnswers: TimelineAnswer[] = [
         id: 'test_ans_001',
         question_id: 'test_sq_001',
         content: 'React的核心概念包括：组件、Props、State、生命周期、Hooks等。',
-        timestamp: '2024-01-02T10:00:00Z',
-        created_at: '2024-01-02T10:00:00Z',
-        updated_at: '2024-01-02T10:00:00Z',
+        timestamp: '2025-01-02T10:00:00Z',
+        created_at: '2025-01-02T10:00:00Z',
+        updated_at: '2025-01-02T10:00:00Z',
     },
     {
         id: 'test_ans_002',
         question_id: 'test_sq_001',
         content: '最重要的是理解**组件化思想**和**单向数据流**。',
-        timestamp: '2024-01-05T10:00:00Z',
-        created_at: '2024-01-05T10:00:00Z',
-        updated_at: '2024-01-05T10:00:00Z',
+        timestamp: '2025-01-05T10:00:00Z',
+        created_at: '2025-01-05T10:00:00Z',
+        updated_at: '2025-01-05T10:00:00Z',
     },
     {
         id: 'test_ans_003',
         question_id: 'test_sq_002',
         content: '推荐使用Vite创建项目：`npm create vite@latest my-app -- --template react-ts`',
-        timestamp: '2024-01-10T10:00:00Z',
-        created_at: '2024-01-10T10:00:00Z',
-        updated_at: '2024-01-10T10:00:00Z',
+        timestamp: '2025-01-10T10:00:00Z',
+        created_at: '2025-01-10T10:00:00Z',
+        updated_at: '2025-01-10T10:00:00Z',
     },
 ];
 

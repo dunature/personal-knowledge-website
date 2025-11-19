@@ -332,10 +332,18 @@ export const EditorForm: React.FC<EditorFormProps> = ({
                             />
                             <button
                                 onClick={() => {
+                                    console.log('[EditorForm] 新建分类 - 确定按钮点击:', {
+                                        newCategoryName,
+                                        trimmed: newCategoryName.trim(),
+                                        isEmpty: !newCategoryName.trim()
+                                    });
                                     if (newCategoryName.trim()) {
+                                        console.log('[EditorForm] 设置新分类:', newCategoryName.trim());
                                         updateField('category', newCategoryName.trim());
                                         setIsAddingCategory(false);
                                         setNewCategoryName('');
+                                    } else {
+                                        console.warn('[EditorForm] 分类名称为空，无法创建');
                                     }
                                 }}
                                 className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover transition-colors whitespace-nowrap"
@@ -357,9 +365,16 @@ export const EditorForm: React.FC<EditorFormProps> = ({
                             options={categoryOptions}
                             value={data.category || ''}
                             onChange={(value) => {
+                                console.log('[EditorForm] 分类选择变更:', {
+                                    value,
+                                    isNew: value === '__new__',
+                                    currentCategory: data.category
+                                });
                                 if (value === '__new__') {
+                                    console.log('[EditorForm] 切换到新建分类模式');
                                     setIsAddingCategory(true);
                                 } else {
+                                    console.log('[EditorForm] 选择已有分类:', value);
                                     updateField('category', value);
                                 }
                             }}
@@ -402,13 +417,52 @@ export const EditorForm: React.FC<EditorFormProps> = ({
                         <label className="block text-sm font-medium text-[#333] mb-1">
                             分类
                         </label>
-                        <Dropdown
-                            options={categoryOptions}
-                            value={data.category || ''}
-                            onChange={(value) => updateField('category', value)}
-                            placeholder="选择分类"
-                            className="w-full"
-                        />
+                        {isAddingCategory ? (
+                            <div className="flex gap-2">
+                                <Input
+                                    value={newCategoryName}
+                                    onChange={(e) => setNewCategoryName(e.target.value)}
+                                    placeholder="输入新分类名称"
+                                    fullWidth
+                                    autoFocus
+                                />
+                                <button
+                                    onClick={() => {
+                                        if (newCategoryName.trim()) {
+                                            updateField('category', newCategoryName.trim());
+                                            setIsAddingCategory(false);
+                                            setNewCategoryName('');
+                                        }
+                                    }}
+                                    className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover transition-colors whitespace-nowrap"
+                                >
+                                    确定
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setIsAddingCategory(false);
+                                        setNewCategoryName('');
+                                    }}
+                                    className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors whitespace-nowrap"
+                                >
+                                    取消
+                                </button>
+                            </div>
+                        ) : (
+                            <Dropdown
+                                options={categoryOptions}
+                                value={data.category || ''}
+                                onChange={(value) => {
+                                    if (value === '__new__') {
+                                        setIsAddingCategory(true);
+                                    } else {
+                                        updateField('category', value);
+                                    }
+                                }}
+                                placeholder="选择分类"
+                                className="w-full"
+                            />
+                        )}
                     </div>
                 )}
                 <div>

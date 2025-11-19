@@ -171,19 +171,19 @@ export default function BidirectionalSyncTest() {
 
         try {
             const mockLocalData = {
-                resources: [{ id: '1', title: 'Local Resource', updatedAt: '2024-01-01' }],
+                resources: [{ id: '1', title: 'Local Resource', updatedAt: '2025-01-01' }],
                 questions: [],
                 subQuestions: [],
                 answers: [],
-                metadata: { version: '1.0.0', lastSync: '2024-01-01', owner: 'test' },
+                metadata: { version: '1.0.0', lastSync: '2025-01-01', owner: 'test' },
             };
 
             const mockRemoteData = {
-                resources: [{ id: '1', title: 'Remote Resource', updatedAt: '2024-01-02' }],
+                resources: [{ id: '1', title: 'Remote Resource', updatedAt: '2025-01-02' }],
                 questions: [],
                 subQuestions: [],
                 answers: [],
-                metadata: { version: '1.0.0', lastSync: '2024-01-02', owner: 'test' },
+                metadata: { version: '1.0.0', lastSync: '2025-01-02', owner: 'test' },
             };
 
             addLog('检测冲突...');

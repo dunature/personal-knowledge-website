@@ -175,9 +175,9 @@ LocalStorage
 
 // 3. 版本历史（GitHub）
 Gist Commits
-  ├─ Version 1 (2024-01-01)
-  ├─ Version 2 (2024-01-02)
-  └─ Version 3 (2024-01-03)
+  ├─ Version 1 (2025-01-01)
+  ├─ Version 2 (2025-01-02)
+  └─ Version 3 (2025-01-03)
 ```
 
 ## ⚠️ 重要注意事项

@@ -27,8 +27,8 @@ function App() {
       author: 'Tech Channel',
       recommendation: '深入讲解React Hooks的最佳实践',
       metadata: { duration: '45:30' },
-      created_at: '2024-01-15T10:00:00Z',
-      updated_at: '2024-01-15T10:00:00Z',
+      created_at: '2025-01-15T10:00:00Z',
+      updated_at: '2025-01-15T10:00:00Z',
     },
     {
       id: 'res_002',
@@ -42,8 +42,8 @@ function App() {
       author: 'John Doe',
       recommendation: 'TypeScript开发必读文章',
       metadata: { read_time: 10 },
-      created_at: '2024-01-10T10:00:00Z',
-      updated_at: '2024-01-10T10:00:00Z',
+      created_at: '2025-01-10T10:00:00Z',
+      updated_at: '2025-01-10T10:00:00Z',
     },
     {
       id: 'res_003',
@@ -57,8 +57,8 @@ function App() {
       author: 'awesome-react',
       recommendation: '精选React组件库集合',
       metadata: { stars: 15000, language: 'TypeScript' },
-      created_at: '2024-01-05T10:00:00Z',
-      updated_at: '2024-01-05T10:00:00Z',
+      created_at: '2025-01-05T10:00:00Z',
+      updated_at: '2025-01-05T10:00:00Z',
     },
   ]
 
@@ -80,8 +80,8 @@ function App() {
       category: '技术',
       summary: '最终选择了Hugo + GitHub Pages方案，简单高效。',
       sub_questions: ['sq_001', 'sq_002'],
-      created_at: '2024-01-01T10:00:00Z',
-      updated_at: '2024-01-15T10:00:00Z',
+      created_at: '2025-01-01T10:00:00Z',
+      updated_at: '2025-01-15T10:00:00Z',
     },
     {
       id: 'q_002',
@@ -92,7 +92,7 @@ function App() {
       summary: '通过React.memo、useMemo、useCallback等方法成功优化。',
       sub_questions: ['sq_003'],
       created_at: '2023-12-20T10:00:00Z',
-      updated_at: '2024-01-10T10:00:00Z',
+      updated_at: '2025-01-10T10:00:00Z',
     },
     {
       id: 'q_003',
@@ -102,8 +102,8 @@ function App() {
       category: '技术',
       summary: '',
       sub_questions: [],
-      created_at: '2024-01-20T10:00:00Z',
-      updated_at: '2024-01-20T10:00:00Z',
+      created_at: '2025-01-20T10:00:00Z',
+      updated_at: '2025-01-20T10:00:00Z',
     },
   ]
 
@@ -115,8 +115,8 @@ function App() {
       title: '选择什么技术栈',
       status: 'solved',
       answers: ['ans_001', 'ans_002'],
-      created_at: '2024-01-01T10:00:00Z',
-      updated_at: '2024-01-05T10:00:00Z',
+      created_at: '2025-01-01T10:00:00Z',
+      updated_at: '2025-01-05T10:00:00Z',
     },
     {
       id: 'sq_002',
@@ -124,8 +124,8 @@ function App() {
       title: '如何部署到GitHub Pages',
       status: 'solving',
       answers: ['ans_003'],
-      created_at: '2024-01-05T10:00:00Z',
-      updated_at: '2024-01-10T10:00:00Z',
+      created_at: '2025-01-05T10:00:00Z',
+      updated_at: '2025-01-10T10:00:00Z',
     },
   ]
 
@@ -135,25 +135,25 @@ function App() {
       id: 'ans_001',
       question_id: 'sq_001',
       content: '考虑了Jekyll、Hugo、Hexo三个静态网站生成器。',
-      timestamp: '2024-01-02T10:00:00Z',
-      created_at: '2024-01-02T10:00:00Z',
-      updated_at: '2024-01-02T10:00:00Z',
+      timestamp: '2025-01-02T10:00:00Z',
+      created_at: '2025-01-02T10:00:00Z',
+      updated_at: '2025-01-02T10:00:00Z',
     },
     {
       id: 'ans_002',
       question_id: 'sq_001',
       content: '最终选择了Hugo，因为构建速度快，主题丰富。',
-      timestamp: '2024-01-05T10:00:00Z',
-      created_at: '2024-01-05T10:00:00Z',
-      updated_at: '2024-01-05T10:00:00Z',
+      timestamp: '2025-01-05T10:00:00Z',
+      created_at: '2025-01-05T10:00:00Z',
+      updated_at: '2025-01-05T10:00:00Z',
     },
     {
       id: 'ans_003',
       question_id: 'sq_002',
       content: '使用GitHub Actions自动部署，配置workflow文件。',
-      timestamp: '2024-01-10T10:00:00Z',
-      created_at: '2024-01-10T10:00:00Z',
-      updated_at: '2024-01-10T10:00:00Z',
+      timestamp: '2025-01-10T10:00:00Z',
+      created_at: '2025-01-10T10:00:00Z',
+      updated_at: '2025-01-10T10:00:00Z',
     },
   ]
 
