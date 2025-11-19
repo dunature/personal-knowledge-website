@@ -379,16 +379,19 @@ export const HomePage: React.FC = () => {
     };
 
     return (
-        <div
-            className="min-h-screen"
-            style={{
-                backgroundImage: 'url(/images/background.jpg)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundAttachment: 'fixed',
-                backgroundRepeat: 'no-repeat'
-            }}
-        >
+        <div className="min-h-screen relative">
+            {/* 背景图片层 - 50%不透明度 */}
+            <div
+                className="fixed inset-0 -z-10"
+                style={{
+                    backgroundImage: 'url(/images/background.jpg)',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundAttachment: 'fixed',
+                    backgroundRepeat: 'no-repeat',
+                    opacity: 0.7
+                }}
+            />
             {/* 顶部栏 - 半透明背景 */}
             <div className="bg-white/80 border-b border-gray-200 sticky top-0 z-40 backdrop-blur-sm">
                 <div className="max-w-[1400px] mx-auto px-5 md:px-10 py-3 flex items-center justify-between">
