@@ -5,7 +5,6 @@
 
 import { useState } from 'react';
 import { cacheService, STORAGE_KEYS } from '@/services/cacheService';
-import { useToast } from '@/hooks/useToast';
 import { SyncResultModal } from '@/components/common/SyncResultModal';
 
 export function DataExport() {

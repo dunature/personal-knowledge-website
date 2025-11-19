@@ -6,7 +6,6 @@
 import { useState, useRef } from 'react';
 import { cacheService, STORAGE_KEYS } from '@/services/cacheService';
 import { validateGistData } from '@/utils/dataValidation';
-import { useToast } from '@/hooks/useToast';
 import { SyncResultModal } from '@/components/common/SyncResultModal';
 
 export function DataImport() {

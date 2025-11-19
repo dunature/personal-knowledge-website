@@ -6,7 +6,6 @@
 import type { ReactNode } from 'react';
 import { useAutoSync } from '@/hooks/useAutoSync';
 import { useBidirectionalSync } from '@/hooks/useBidirectionalSync';
-import { useAuth } from '@/contexts/AuthContext';
 import { DataComparisonDialog } from './DataComparisonDialog';
 
 interface AutoSyncProviderProps {
