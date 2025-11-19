@@ -8,7 +8,6 @@ import { RefreshCw, Check, AlertCircle, Cloud } from 'lucide-react';
 import { syncService } from '@/services/syncService';
 import { syncCoordinator } from '@/services/syncCoordinator';
 import { useToast } from '@/hooks/useToast';
-import Toast from '@/components/common/Toast';
 import type { SyncStatus } from '@/types/sync';
 
 interface SyncIndicatorProps {
@@ -25,7 +24,7 @@ export const SyncIndicator: React.FC<SyncIndicatorProps> = ({
     const [lastClickTime, setLastClickTime] = useState(0);
     const [hasPendingChanges, setHasPendingChanges] = useState(false);
     const [pendingCount, setPendingCount] = useState(0);
-    const { toasts, showSuccess, showError, showWarning } = useToast();
+    const { showSuccess, showError, showWarning } = useToast();
 
     useEffect(() => {
         // 获取初始状态
@@ -207,13 +206,6 @@ export const SyncIndicator: React.FC<SyncIndicatorProps> = ({
 
     return (
         <>
-            {/* Toast 容器 */}
-            <div className="fixed top-4 right-4 z-50 space-y-2">
-                {toasts.map((toast) => (
-                    <Toast key={toast.id} {...toast} />
-                ))}
-            </div>
-
             <div className={`flex items-center gap-3 px-4 py-2 rounded-lg border ${config.bgColor} ${config.borderColor}`}>
                 {/* 状态图标和文本 */}
                 <div className="flex items-center gap-2">

@@ -7,7 +7,6 @@ import React, { useState } from 'react';
 import { SyncIndicator } from '@/components/sync/SyncIndicator';
 import { syncService } from '@/services/syncService';
 import { useToast } from '@/hooks/useToast';
-import Toast from '@/components/common/Toast';
 
 const SyncAlreadySyncedTest: React.FC = () => {
     const [checkResult, setCheckResult] = useState<{
@@ -15,7 +14,7 @@ const SyncAlreadySyncedTest: React.FC = () => {
         reason?: string;
     } | null>(null);
     const [isChecking, setIsChecking] = useState(false);
-    const { toasts, showSuccess, showError, showWarning } = useToast();
+    const { showSuccess, showError, showWarning } = useToast();
 
     const handleCheckSync = async () => {
         setIsChecking(true);
@@ -56,13 +55,6 @@ const SyncAlreadySyncedTest: React.FC = () => {
         <div className="min-h-screen bg-gray-50 p-8">
             <div className="max-w-4xl mx-auto">
                 <h1 className="text-3xl font-bold mb-8">同步已同步提示功能测试</h1>
-
-                {/* Toast 容器 */}
-                <div className="fixed top-4 right-4 z-50 space-y-2">
-                    {toasts.map((toast) => (
-                        <Toast key={toast.id} {...toast} />
-                    ))}
-                </div>
 
                 {/* 测试说明 */}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">

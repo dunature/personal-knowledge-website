@@ -268,6 +268,9 @@ class AuthService {
             this.user.gistId = undefined;
             localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(this.user));
         }
+
+        // 断开连接后切换到访客模式
+        this.switchMode('visitor');
     }
 
     /**
@@ -308,10 +311,9 @@ class AuthService {
 
         if (gistId) {
             this.setGistId(gistId);
-            // 自动切换到访客模式
-            if (this.mode !== 'owner') {
-                this.switchMode('visitor');
-            }
+            // URL 参数的 Gist 总是以访客模式加载（分享链接场景）
+            // 即使用户之前在拥有者模式，也应该切换到访客模式
+            this.switchMode('visitor');
             return true;
         }
 

@@ -15,6 +15,7 @@ import { DataExport } from '@/components/settings/DataExport';
 import { DataImport } from '@/components/settings/DataImport';
 import { DataComparisonView } from '@/components/settings/DataComparisonView';
 import { SyncResultModal } from '@/components/common/SyncResultModal';
+import GistManagementSection from '@/components/settings/GistManagementSection';
 
 export default function SettingsPage() {
     const { user, mode, gistId, clearAll, setToken } = useAuth();
@@ -326,6 +327,9 @@ export default function SettingsPage() {
                         )}
                     </div>
                 </div>
+
+                {/* Gist 数据管理 */}
+                <GistManagementSection />
 
                 {/* Token 管理 */}
                 {mode === 'owner' && (

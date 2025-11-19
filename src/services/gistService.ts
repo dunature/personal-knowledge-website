@@ -17,6 +17,19 @@ import { compressData, decompressData, shouldCompress, formatDataSize } from '@/
 const GITHUB_API_BASE = 'https://api.github.com';
 
 /**
+ * Gist 元数据缓存
+ */
+interface GistMetadataCache {
+    [gistId: string]: {
+        data: any;
+        timestamp: number;
+    };
+}
+
+const METADATA_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const metadataCache: GistMetadataCache = {};
+
+/**
  * GitHub Gist 服务类
  */
 class GistService {
@@ -351,6 +364,71 @@ class GistService {
             };
         } catch (error) {
             console.error('获取历史版本失败:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 获取 Gist 元数据（不加载完整数据）
+     * @param gistId - Gist ID
+     * @param token - GitHub Personal Access Token (可选)
+     * @returns Gist 元数据
+     */
+    async getGistMetadata(gistId: string, token?: string): Promise<any> {
+        try {
+            // 检查缓存
+            const cached = metadataCache[gistId];
+            if (cached && Date.now() - cached.timestamp < METADATA_CACHE_TTL) {
+                console.log('使用缓存的 Gist 元数据');
+                return cached.data;
+            }
+
+            const headers: HeadersInit = {
+                Accept: 'application/vnd.github.v3+json',
+            };
+
+            if (token) {
+                headers.Authorization = `token ${token}`;
+            }
+
+            const response = await fetch(`${GITHUB_API_BASE}/gists/${gistId}`, {
+                headers,
+            });
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error('Gist 不存在或无权访问');
+                }
+                throw new Error(`获取 Gist 元数据失败: ${response.status}`);
+            }
+
+            const gist: GitHubGist = await response.json();
+
+            // 提取元数据（不包含文件内容）
+            const metadata = {
+                id: gist.id,
+                description: gist.description,
+                created_at: gist.created_at,
+                updated_at: gist.updated_at,
+                public: gist.public,
+                owner: gist.owner
+                    ? {
+                        login: gist.owner.login,
+                        avatar_url: gist.owner.avatar_url,
+                    }
+                    : null,
+                html_url: gist.html_url,
+            };
+
+            // 缓存元数据
+            metadataCache[gistId] = {
+                data: metadata,
+                timestamp: Date.now(),
+            };
+
+            return metadata;
+        } catch (error) {
+            console.error('获取 Gist 元数据失败:', error);
             throw error;
         }
     }

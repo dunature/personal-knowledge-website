@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext.tsx'
 import { ResourceProvider } from './contexts/ResourceContext.tsx'
 import { QAProvider } from './contexts/QAContext.tsx'
+import { ToastProvider } from './contexts/ToastContext.tsx'
 import { AutoSyncProvider } from './components/sync/AutoSyncProvider.tsx'
 import { SetupGuard } from './components/setup/SetupGuard.tsx'
 import { UrlGistHandler } from './components/setup/UrlGistHandler.tsx'
@@ -30,6 +31,7 @@ import DataComparisonTest from './pages/DataComparisonTest.tsx'
 import ManualSyncTest from './pages/ManualSyncTest.tsx'
 import UserInfoDebugPage from './pages/UserInfoDebugPage.tsx'
 import { PermissionTest } from './pages/PermissionTest.tsx'
+import ToastTest from './pages/ToastTest.tsx'
 import App from './App.tsx'
 
 // 迁移旧的占位图 URL
@@ -37,47 +39,50 @@ migrateLocalStorageResources();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <AuthProvider>
-      <ResourceProvider>
-        <QAProvider>
-          <AutoSyncProvider>
-            <BrowserRouter>
-              <UrlGistHandler />
-              <SetupGuard>
-                <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/settings" element={<SettingsPage />} />
-                  {/* 开发测试路由 - 生产环境可以移除 */}
-                  {import.meta.env.DEV && (
-                    <>
-                      <Route path="/components" element={<App />} />
-                      <Route path="/question-modal-test" element={<QuestionModalTest />} />
-                      <Route path="/dropdown-test" element={<DropdownTest />} />
-                      <Route path="/markdown-test" element={<MarkdownEditorTest />} />
-                      <Route path="/drawer-test" element={<EditorDrawerTest />} />
-                      <Route path="/error-test" element={<ErrorHandlingTest />} />
-                      <Route path="/notification-test" element={<NotificationTest />} />
-                      <Route path="/gist-test" element={<GistServiceTest />} />
-                      <Route path="/gist-integration-test" element={<GistIntegrationTest />} />
-                      <Route path="/sync-debug" element={<SyncDebugPage />} />
-                      <Route path="/mode-switcher-test" element={<ModeSwitcherTest />} />
-                      <Route path="/gist-ownership-test" element={<GistOwnershipTest />} />
-                      <Route path="/platform-autofill-test" element={<PlatformAutoFillTest />} />
-                      <Route path="/bidirectional-sync-test" element={<BidirectionalSyncTest />} />
-                      <Route path="/sync-already-synced-test" element={<SyncAlreadySyncedTest />} />
-                      <Route path="/data-comparison-dialog-test" element={<DataComparisonDialogTest />} />
-                      <Route path="/data-comparison-test" element={<DataComparisonTest />} />
-                      <Route path="/manual-sync-test" element={<ManualSyncTest />} />
-                      <Route path="/user-info-debug" element={<UserInfoDebugPage />} />
-                      <Route path="/permission-test" element={<PermissionTest />} />
-                    </>
-                  )}
-                </Routes>
-              </SetupGuard>
-            </BrowserRouter>
-          </AutoSyncProvider>
-        </QAProvider>
-      </ResourceProvider>
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <ResourceProvider>
+          <QAProvider>
+            <AutoSyncProvider>
+              <BrowserRouter>
+                <UrlGistHandler />
+                <SetupGuard>
+                  <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
+                    {/* 开发测试路由 - 生产环境可以移除 */}
+                    {import.meta.env.DEV && (
+                      <>
+                        <Route path="/components" element={<App />} />
+                        <Route path="/question-modal-test" element={<QuestionModalTest />} />
+                        <Route path="/dropdown-test" element={<DropdownTest />} />
+                        <Route path="/markdown-test" element={<MarkdownEditorTest />} />
+                        <Route path="/drawer-test" element={<EditorDrawerTest />} />
+                        <Route path="/error-test" element={<ErrorHandlingTest />} />
+                        <Route path="/notification-test" element={<NotificationTest />} />
+                        <Route path="/gist-test" element={<GistServiceTest />} />
+                        <Route path="/gist-integration-test" element={<GistIntegrationTest />} />
+                        <Route path="/sync-debug" element={<SyncDebugPage />} />
+                        <Route path="/mode-switcher-test" element={<ModeSwitcherTest />} />
+                        <Route path="/gist-ownership-test" element={<GistOwnershipTest />} />
+                        <Route path="/platform-autofill-test" element={<PlatformAutoFillTest />} />
+                        <Route path="/bidirectional-sync-test" element={<BidirectionalSyncTest />} />
+                        <Route path="/sync-already-synced-test" element={<SyncAlreadySyncedTest />} />
+                        <Route path="/data-comparison-dialog-test" element={<DataComparisonDialogTest />} />
+                        <Route path="/data-comparison-test" element={<DataComparisonTest />} />
+                        <Route path="/manual-sync-test" element={<ManualSyncTest />} />
+                        <Route path="/user-info-debug" element={<UserInfoDebugPage />} />
+                        <Route path="/permission-test" element={<PermissionTest />} />
+                        <Route path="/toast-test" element={<ToastTest />} />
+                      </>
+                    )}
+                  </Routes>
+                </SetupGuard>
+              </BrowserRouter>
+            </AutoSyncProvider>
+          </QAProvider>
+        </ResourceProvider>
+      </AuthProvider>
+    </ToastProvider>
   </StrictMode>,
 )

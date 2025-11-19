@@ -15,7 +15,7 @@ interface AuthContextValue extends AuthState {
     clearToken: () => Promise<void>;
 
     // 模式管理
-    switchMode: (mode: AppMode) => void;
+    switchMode: (mode: AppMode) => Promise<void>;
 
     // Gist ID 管理
     setGistId: (gistId: string) => void;
@@ -125,14 +125,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }, []);
 
     // 切换模式
-    const switchMode = useCallback((mode: AppMode): void => {
+    const switchMode = useCallback(async (mode: AppMode): Promise<void> => {
         authService.switchMode(mode);
 
-        setAuthState((prev) => ({
-            ...prev,
-            mode,
-            isAuthenticated: mode === 'owner' && prev.isAuthenticated,
-        }));
+        // 如果切换到 owner 模式，检查是否有有效的 Token
+        if (mode === 'owner') {
+            const token = await authService.getToken();
+            const user = await authService.getCurrentUser();
+
+            setAuthState((prev) => ({
+                ...prev,
+                mode,
+                isAuthenticated: !!token && !!user,
+                user,
+            }));
+        } else {
+            // 切换到 visitor 模式
+            setAuthState((prev) => ({
+                ...prev,
+                mode,
+                isAuthenticated: false,
+            }));
+        }
     }, []);
 
     // 设置 Gist ID

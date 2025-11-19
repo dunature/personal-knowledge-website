@@ -8,7 +8,6 @@ import { Link } from 'react-router-dom';
 import { ResourceSection } from '@/components/layout/ResourceSection';
 import { QASection } from '@/components/layout/QASection';
 import LoadingState from '@/components/common/LoadingState';
-import Toast from '@/components/common/Toast';
 import { useToast } from '@/hooks/useToast';
 import { useResources } from '@/contexts/ResourceContext';
 import { useQA } from '@/contexts/QAContext';
@@ -30,7 +29,7 @@ const EditorForm = lazy(() => import('@/components/editor/EditorForm').then(modu
 
 export const HomePage: React.FC = () => {
     // Toast通知系统
-    const { toasts, showToast } = useToast();
+    const { showToast } = useToast();
 
     // 使用 Context 获取真实数据
     const { resources, categories: resourceCategories, addResource, updateResource, deleteResource } = useResources();
@@ -553,19 +552,6 @@ export const HomePage: React.FC = () => {
                 onModeChange={handleModeChange}
             />
 
-            {/* Toast通知容器 */}
-            <div className="fixed top-4 right-4 z-50 space-y-2">
-                {toasts.map((toast) => (
-                    <Toast
-                        key={toast.id}
-                        id={toast.id}
-                        message={toast.message}
-                        type={toast.type}
-                        duration={toast.duration}
-                        onClose={toast.onClose}
-                    />
-                ))}
-            </div>
         </div>
     );
 };
