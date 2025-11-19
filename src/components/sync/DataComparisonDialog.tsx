@@ -17,7 +17,6 @@ export function DataComparisonDialog({
     open,
     comparison,
     onConfirm,
-    onClose,
 }: DataComparisonDialogProps) {
     const [dontShowAgain, setDontShowAgain] = useState(false);
 

@@ -9,7 +9,6 @@ import { useToast } from '@/hooks/useToast';
 import { SyncResultModal } from '@/components/common/SyncResultModal';
 
 export function DataExport() {
-    const { showToast } = useToast();
     const [isExporting, setIsExporting] = useState(false);
     const [exportResult, setExportResult] = useState<{
         show: boolean;
@@ -98,8 +97,8 @@ export function DataExport() {
                 onClick={handleExport}
                 disabled={isExporting}
                 className={`w-full py-2 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${isExporting
-                        ? 'bg-gray-400 cursor-not-allowed text-white'
-                        : 'bg-purple-600 hover:bg-purple-700 text-white'
+                    ? 'bg-gray-400 cursor-not-allowed text-white'
+                    : 'bg-purple-600 hover:bg-purple-700 text-white'
                     }`}
             >
                 {isExporting ? (

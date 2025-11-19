@@ -19,11 +19,8 @@ interface AutoSyncProviderProps {
  * 同时处理应用启动时的云端更新检查和定期检查
  */
 export const AutoSyncProvider = ({ children }: AutoSyncProviderProps): React.ReactElement => {
-    const { mode } = useAuth();
-
     // 手动同步模式：禁用所有自动同步功能
     // 用户需要手动点击同步按钮来同步数据
-    const enabled = false; // 强制禁用自动同步
 
     // 禁用单向自动同步（Push）
     useAutoSync({

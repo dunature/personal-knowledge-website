@@ -10,7 +10,6 @@ import { useToast } from '@/hooks/useToast';
 import { SyncResultModal } from '@/components/common/SyncResultModal';
 
 export function DataImport() {
-    const { showToast } = useToast();
     const [isImporting, setIsImporting] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [importResult, setImportResult] = useState<{
@@ -189,8 +188,8 @@ export function DataImport() {
                 onClick={handleClick}
                 disabled={isImporting}
                 className={`w-full py-2 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${isImporting
-                        ? 'bg-gray-400 cursor-not-allowed text-white'
-                        : 'bg-orange-600 hover:bg-orange-700 text-white'
+                    ? 'bg-gray-400 cursor-not-allowed text-white'
+                    : 'bg-orange-600 hover:bg-orange-700 text-white'
                     }`}
             >
                 {isImporting ? (
