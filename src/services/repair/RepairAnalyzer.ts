@@ -45,12 +45,14 @@ export class RepairAnalyzer {
 
         // 估计数据丢失风险
         const estimatedDataLoss = this.estimateDataLoss(repairs);
+        const dataLossRisk = this.calculateDataLossRisk(repairs);
 
         return {
             repairs,
             autoRepairableCount,
             manualRepairCount,
             estimatedDataLoss,
+            dataLossRisk,
         };
     }
 
@@ -97,6 +99,7 @@ export class RepairAnalyzer {
             },
             autoApplicable,
             selected: autoApplicable, // 默认选中可自动应用的修复
+            riskLevel: risk,
         };
     }
 
@@ -193,6 +196,49 @@ export class RepairAnalyzer {
         } else {
             return 'none';
         }
+    }
+
+    /**
+     * 计算数据丢失风险级别
+     */
+    private calculateDataLossRisk(repairs: RepairAction[]): 'none' | 'low' | 'medium' | 'high' {
+        if (repairs.length === 0) {
+            return 'none';
+        }
+
+        // 统计不同风险级别的修复数量
+        let highRiskCount = 0;
+        let mediumRiskCount = 0;
+        let lowRiskCount = 0;
+
+        for (const repair of repairs) {
+            const risk = repair.strategy.estimateRisk();
+            if (risk === 'high') {
+                highRiskCount++;
+            } else if (risk === 'medium') {
+                mediumRiskCount++;
+            } else if (risk === 'low') {
+                lowRiskCount++;
+            }
+        }
+
+        // 如果有任何高风险修复，整体风险为高
+        if (highRiskCount > 0) {
+            return 'high';
+        }
+
+        // 如果中风险修复超过一半，整体风险为中
+        const totalRepairs = repairs.length;
+        if (mediumRiskCount / totalRepairs > 0.5) {
+            return 'medium';
+        }
+
+        // 如果有中风险或低风险修复，整体风险为低
+        if (mediumRiskCount > 0 || lowRiskCount > 0) {
+            return 'low';
+        }
+
+        return 'none';
     }
 }
 

@@ -158,6 +158,7 @@ export interface SyncHistoryEntry {
     timestamp: string;
     type: 'pull' | 'push' | 'bidirectional';
     status: 'success' | 'failed' | 'partial';
+    success: boolean; // 是否成功
     changes?: {
         added: number;
         updated: number;

@@ -82,7 +82,7 @@ export function ConflictResolutionDialog({
             isOpen={isOpen}
             onClose={handleCancel}
             title="检测到数据冲突"
-            size="lg"
+            className="max-w-4xl"
         >
             <div className="space-y-6">
                 {/* 冲突说明 */}
@@ -117,8 +117,8 @@ export function ConflictResolutionDialog({
                             key={strategy.value}
                             onClick={() => setSelectedStrategy(strategy.value)}
                             className={`w-full text-left p-4 rounded-lg border-2 transition-all ${selectedStrategy === strategy.value
-                                    ? 'border-blue-500 bg-blue-50'
-                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                ? 'border-blue-500 bg-blue-50'
+                                : 'border-gray-200 hover:border-gray-300 bg-white'
                                 } ${strategy.recommended ? 'ring-2 ring-green-500 ring-opacity-50' : ''}`}
                         >
                             <div className="flex items-start">
@@ -204,8 +204,8 @@ export function ConflictResolutionDialog({
                         onClick={handleConfirm}
                         disabled={!selectedStrategy}
                         className={`flex-1 py-2 px-4 text-sm font-medium text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors ${selectedStrategy
-                                ? 'bg-blue-600 hover:bg-blue-700'
-                                : 'bg-gray-400 cursor-not-allowed'
+                            ? 'bg-blue-600 hover:bg-blue-700'
+                            : 'bg-gray-400 cursor-not-allowed'
                             }`}
                     >
                         确认并继续

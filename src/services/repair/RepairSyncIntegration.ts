@@ -69,7 +69,7 @@ class RepairSyncIntegrationService {
             if (autoSync && repairResult.success) {
                 try {
                     syncResult = await Promise.race([
-                        this.syncRepairedData(repairResult.repairedData),
+                        this.syncRepairedData(),
                         new Promise<never>((_, reject) =>
                             setTimeout(() => reject(new Error('Sync timeout')), syncTimeout)
                         )
@@ -179,7 +179,7 @@ class RepairSyncIntegrationService {
     /**
      * 同步修复后的数据到 Gist
      */
-    private async syncRepairedData(repairedData: any): Promise<SyncResult> {
+    private async syncRepairedData(): Promise<SyncResult> {
         // 注意：修复后的数据应该已经在 DataRepairer 中被应用
         // 这里只需要触发同步即可
         // 实际的数据保存应该在调用此方法之前完成

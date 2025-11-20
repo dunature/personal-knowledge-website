@@ -104,7 +104,7 @@ describe('Data Validation - Property Tests', () => {
             fc.property(
                 // Generate multiple fields to omit
                 fc.subarray(['resources', 'questions', 'subQuestions', 'answers', 'metadata'], { minLength: 2, maxLength: 5 }),
-                (fieldsToOmit) => {
+                (_fieldsToOmit) => {
                     // Create incomplete data
                     const data: any = {};
 

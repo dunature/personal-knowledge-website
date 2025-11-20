@@ -52,7 +52,6 @@ export function SyncProgressModal({
             isOpen={isOpen}
             onClose={() => { }} // 同步进行中不允许直接关闭
             title="正在同步"
-            size="md"
         >
             <div className="space-y-6">
                 {/* 进度条 */}

@@ -3,7 +3,7 @@
  * Shows summary of selected repairs and warns about data changes
  */
 
-import React from 'react';
+
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import type { RepairAction } from '@/types/dataRepair';
@@ -44,10 +44,10 @@ export function RepairConfirmationDialog({
             <div className="space-y-6">
                 {/* Warning Banner */}
                 <div className={`border rounded-lg p-4 ${hasHighRisk
-                        ? 'bg-red-50 border-red-200'
-                        : hasMediumRisk
-                            ? 'bg-yellow-50 border-yellow-200'
-                            : 'bg-blue-50 border-blue-200'
+                    ? 'bg-red-50 border-red-200'
+                    : hasMediumRisk
+                        ? 'bg-yellow-50 border-yellow-200'
+                        : 'bg-blue-50 border-blue-200'
                     }`}>
                     <div className="flex items-start space-x-3">
                         <span className="text-2xl">
@@ -55,10 +55,10 @@ export function RepairConfirmationDialog({
                         </span>
                         <div>
                             <h3 className={`font-semibold ${hasHighRisk
-                                    ? 'text-red-900'
-                                    : hasMediumRisk
-                                        ? 'text-yellow-900'
-                                        : 'text-blue-900'
+                                ? 'text-red-900'
+                                : hasMediumRisk
+                                    ? 'text-yellow-900'
+                                    : 'text-blue-900'
                                 }`}>
                                 {hasHighRisk
                                     ? '高风险操作警告'
@@ -67,10 +67,10 @@ export function RepairConfirmationDialog({
                                         : '即将修复数据'}
                             </h3>
                             <p className={`text-sm mt-1 ${hasHighRisk
-                                    ? 'text-red-700'
-                                    : hasMediumRisk
-                                        ? 'text-yellow-700'
-                                        : 'text-blue-700'
+                                ? 'text-red-700'
+                                : hasMediumRisk
+                                    ? 'text-yellow-700'
+                                    : 'text-blue-700'
                                 }`}>
                                 {hasHighRisk
                                     ? '此操作包含高风险修复，可能导致数据丢失或不可预期的变更。请确保已仔细审查所有修复项。'

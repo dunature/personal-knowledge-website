@@ -33,6 +33,8 @@ export interface ItemError {
     currentValue: any;
     expectedFormat: string;
     message: string;
+    suggestedFix?: string;
+    dataType?: DataType;
 }
 
 /**
@@ -80,6 +82,7 @@ export interface RepairAction {
     };
     autoApplicable: boolean;
     selected: boolean;
+    riskLevel: 'none' | 'low' | 'medium' | 'high';
 }
 
 /**
@@ -90,6 +93,7 @@ export interface RepairPlan {
     autoRepairableCount: number;
     manualRepairCount: number;
     estimatedDataLoss: 'none' | 'minimal' | 'significant';
+    dataLossRisk: 'none' | 'low' | 'medium' | 'high';
 }
 
 /**

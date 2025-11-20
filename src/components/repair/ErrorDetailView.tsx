@@ -3,11 +3,11 @@
  * Displays detailed list of errors organized by data type
  */
 
-import React, { useState } from 'react';
-import type { ItemError, ValidationResult } from '@/types/dataRepair';
+import { useState } from 'react';
+import type { ItemError, DetectionResult } from '@/types/dataRepair';
 
 interface ErrorDetailViewProps {
-    validationResult: ValidationResult;
+    validationResult: DetectionResult;
     onClose?: () => void;
 }
 

@@ -3,7 +3,7 @@
  * Displays before/after comparison for each repair with selection controls
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import type { RepairAction, RepairPlan } from '@/types/dataRepair';
@@ -54,7 +54,7 @@ function RepairItemPreview({ repair, isSelected, onToggle }: RepairItemPreviewPr
 
                     <div className="flex-1">
                         <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-medium text-gray-900">{repair.description}</h4>
+                            <h4 className="font-medium text-gray-900">{repair.error.message}</h4>
                             <button
                                 onClick={() => setExpanded(!expanded)}
                                 className="text-sm text-blue-600 hover:text-blue-800"
@@ -79,13 +79,13 @@ function RepairItemPreview({ repair, isSelected, onToggle }: RepairItemPreviewPr
 
                             {repair.strategy && (
                                 <span className="text-xs text-gray-500">
-                                    策略: {repair.strategy}
+                                    策略: {repair.strategy.name}
                                 </span>
                             )}
                         </div>
 
-                        {repair.details && (
-                            <p className="text-sm text-gray-600 mt-2">{repair.details}</p>
+                        {repair.error.suggestedFix && (
+                            <p className="text-sm text-gray-600 mt-2">{repair.error.suggestedFix}</p>
                         )}
                     </div>
                 </div>
@@ -182,7 +182,7 @@ export function RepairPreviewModal({
     const totalCount = repairPlan.repairs.length;
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="修复预览" size="large">
+        <Modal isOpen={isOpen} onClose={onClose} title="修复预览" className="max-w-6xl">
             <div className="space-y-6">
                 {/* Summary */}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -196,7 +196,7 @@ export function RepairPreviewModal({
                         <div className="flex space-x-2">
                             <Button
                                 variant="secondary"
-                                size="sm"
+                                size="small"
                                 onClick={onSelectAll}
                                 disabled={selectedCount === totalCount}
                             >
@@ -204,7 +204,7 @@ export function RepairPreviewModal({
                             </Button>
                             <Button
                                 variant="secondary"
-                                size="sm"
+                                size="small"
                                 onClick={onSelectNone}
                                 disabled={selectedCount === 0}
                             >

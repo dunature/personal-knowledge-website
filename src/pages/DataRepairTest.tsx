@@ -27,7 +27,6 @@ export default function DataRepairTest() {
         autoRepairSafe,
         checkDataHealth,
         getBackups,
-        restoreBackup,
         clearError,
         showSuccessDetails,
         hideSuccessDetails

@@ -3,12 +3,12 @@
  * Displays error summary with counts by category and provides action buttons
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from '../ui/Button';
-import type { ValidationResult } from '@/types/dataRepair';
+import type { DetectionResult } from '@/types/dataRepair';
 
 interface DataValidationReportProps {
-    validationResult: ValidationResult;
+    validationResult: DetectionResult;
     onViewDetails?: () => void;
     onAutoRepair?: () => void;
     onExportReport?: (format: 'json' | 'text') => void;
@@ -27,13 +27,13 @@ export function DataValidationReport({
     const {
         valid,
         totalErrors,
-        criticalErrors,
-        autoRepairableErrors,
         errorsByType,
-        errorSummary,
+        summary,
     } = validationResult;
 
     // Calculate statistics
+    const criticalErrors = summary.criticalErrors;
+    const autoRepairableErrors = summary.autoRepairableErrors;
     const manualRepairErrors = totalErrors - autoRepairableErrors;
     const autoRepairPercentage = totalErrors > 0
         ? Math.round((autoRepairableErrors / totalErrors) * 100)
@@ -96,13 +96,13 @@ export function DataValidationReport({
             </div>
 
             {/* Error Breakdown by Data Type */}
-            {errorSummary && (
+            {summary && (
                 <div className="bg-white border border-gray-200 rounded-lg p-6">
                     <h4 className="font-semibold text-gray-900 mb-4">按数据类型分类</h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {Object.entries(errorSummary.byDataType).map(([type, count]) => (
+                        {Object.entries(summary.errorsByType).map(([type, count]) => (
                             <div key={type} className="border border-gray-200 rounded-lg p-4 text-center">
-                                <div className="text-xl font-bold text-gray-900">{count}</div>
+                                <div className="text-xl font-bold text-gray-900">{String(count)}</div>
                                 <div className="text-sm text-gray-600 mt-1 capitalize">
                                     {type === 'bigQuestion' ? '大问题' :
                                         type === 'subQuestion' ? '子问题' :
