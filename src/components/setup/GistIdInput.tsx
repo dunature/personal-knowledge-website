@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { gistService } from '@/services/gistService';
 import { cacheService, STORAGE_KEYS } from '@/services/cacheService';
-import { validateGistData } from '@/utils/dataValidation';
+import { validateGistDataDetailed } from '@/utils/dataValidation';
 
 interface GistIdInputProps {
     onBack: () => void;
@@ -31,9 +31,9 @@ const GistIdInput: React.FC<GistIdInputProps> = ({ onBack, onComplete }) => {
             return;
         }
 
-        // 验证 Gist ID 格式（32位十六进制字符）
-        if (!/^[a-f0-9]{32}$/i.test(gistIdInput.trim())) {
-            setError('Gist ID 格式不正确，应该是32位字符');
+        // 验证 Gist ID 格式（20-40位十六进制字符）
+        if (!/^[a-f0-9]{20,40}$/i.test(gistIdInput.trim())) {
+            setError('Gist ID 格式不正确，应该是20-40位十六进制字符');
             return;
         }
 
@@ -50,8 +50,12 @@ const GistIdInput: React.FC<GistIdInputProps> = ({ onBack, onComplete }) => {
             // Step 2: 验证数据格式
             setLoadingProgress(40);
             setLoadingMessage('正在验证数据...');
-            if (!validateGistData(gistData)) {
-                throw new Error('数据格式无效');
+            const validationResult = validateGistDataDetailed(gistData);
+            if (!validationResult.valid) {
+                const errorMessage = validationResult.errors
+                    ? `数据验证失败：\n${validationResult.errors.join('\n')}`
+                    : '数据格式无效';
+                throw new Error(errorMessage);
             }
 
             // Step 3: 保存到本地缓存
@@ -85,8 +89,11 @@ const GistIdInput: React.FC<GistIdInputProps> = ({ onBack, onComplete }) => {
                     setError('Gist 不存在，请检查 ID 是否正确');
                 } else if (err.message.includes('403')) {
                     setError('Gist 是私有的，需要权限访问');
+                } else if (err.message.includes('数据验证失败')) {
+                    // 使用详细的验证错误消息
+                    setError(err.message);
                 } else if (err.message.includes('数据格式')) {
-                    setError('Gist 数据格式无效，可能不是知识库数据');
+                    setError(err.message);
                 } else {
                     setError('无法访问该 Gist，请检查 ID 是否正确或 Gist 是否为公开');
                 }
@@ -147,11 +154,17 @@ const GistIdInput: React.FC<GistIdInputProps> = ({ onBack, onComplete }) => {
             <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <h3 className="font-semibold text-blue-900 mb-2">什么是 Gist ID？</h3>
                 <p className="text-sm text-blue-800 mb-3">
-                    Gist ID 是一个32位字符的唯一标识符，用于访问存储在 GitHub Gist 上的知识库数据。
+                    Gist ID 是一个20-40位十六进制字符（0-9, a-f）的唯一标识符，用于访问存储在 GitHub Gist 上的知识库数据。
                 </p>
-                <p className="text-sm text-blue-800">
-                    示例：<code className="px-2 py-1 bg-blue-100 rounded">a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6</code>
-                </p>
+                <div className="space-y-2">
+                    <p className="text-sm text-blue-800">
+                        <span className="font-medium">有效示例：</span>
+                    </p>
+                    <ul className="text-xs text-blue-700 space-y-1 ml-4">
+                        <li>• 32位：<code className="px-2 py-1 bg-blue-100 rounded font-mono">a1b2c3d4e5f6789012345678901234ab</code></li>
+                        <li>• 40位：<code className="px-2 py-1 bg-blue-100 rounded font-mono">a1b2c3d4e5f67890123456789012345678901234</code></li>
+                    </ul>
+                </div>
             </div>
 
             {/* Gist ID 输入表单 */}
@@ -164,13 +177,13 @@ const GistIdInput: React.FC<GistIdInputProps> = ({ onBack, onComplete }) => {
                         type="text"
                         value={gistIdInput}
                         onChange={(e) => setGistIdInputValue(e.target.value)}
-                        placeholder="输入32位 Gist ID"
+                        placeholder="输入20-40位 Gist ID"
                         className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary placeholder:text-gray-400 transition-all duration-200 font-mono text-sm"
                         disabled={isLoading}
-                        maxLength={32}
+                        maxLength={40}
                     />
                     <p className="mt-2 text-sm text-gray-500">
-                        {gistIdInput.length}/32 字符
+                        {gistIdInput.length}/40 字符
                     </p>
                 </div>
 
@@ -191,19 +204,35 @@ const GistIdInput: React.FC<GistIdInputProps> = ({ onBack, onComplete }) => {
 
                 {/* 错误提示 */}
                 {error && !isLoading && (
-                    <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start">
-                        <svg
-                            className="w-5 h-5 text-red-600 mr-2 flex-shrink-0 mt-0.5"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                        >
-                            <path
-                                fillRule="evenodd"
-                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                                clipRule="evenodd"
-                            />
-                        </svg>
-                        <p className="text-sm text-red-800">{error}</p>
+                    <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <div className="flex items-start mb-2">
+                            <svg
+                                className="w-5 h-5 text-red-600 mr-2 flex-shrink-0 mt-0.5"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                            >
+                                <path
+                                    fillRule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                    clipRule="evenodd"
+                                />
+                            </svg>
+                            <div className="flex-1">
+                                <p className="text-sm text-red-800 font-medium mb-1">加载失败</p>
+                                <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>
+                            </div>
+                        </div>
+                        {/* 格式错误时显示额外帮助 */}
+                        {error.includes('格式不正确') && (
+                            <div className="mt-3 pt-3 border-t border-red-200">
+                                <p className="text-xs text-red-700 font-medium mb-1">格式要求：</p>
+                                <ul className="text-xs text-red-600 space-y-1 ml-4">
+                                    <li>• 长度：20-40 个字符</li>
+                                    <li>• 字符：仅包含 0-9 和 a-f（不区分大小写）</li>
+                                    <li>• 示例：a1b2c3d4e5f6789012345678901234ab</li>
+                                </ul>
+                            </div>
+                        )}
                     </div>
                 )}
 

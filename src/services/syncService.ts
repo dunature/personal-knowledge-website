@@ -10,6 +10,7 @@ import { dataComparator } from './dataComparator';
 import { conflictResolver } from './conflictResolver';
 import { validateGistData } from '@/utils/dataValidation';
 import { toGistError } from '@/utils/errorHandler';
+import { dataDetector, dataRepairer, repairAnalyzer } from './repair';
 import type { GistData, GistMetadataExtended } from '@/types/gist';
 import type { Resource } from '@/types/resource';
 import type { BigQuestion, SubQuestion, TimelineAnswer } from '@/types/question';
@@ -209,12 +210,15 @@ class SyncService {
                 throw new Error('Gist 数据格式无效');
             }
 
+            // 自动验证和修复数据
+            const repairedData = await this.autoValidateAndRepair(gistData);
+
             // 保存到缓存
-            await cacheService.saveData(STORAGE_KEYS.RESOURCES, gistData.resources);
-            await cacheService.saveData(STORAGE_KEYS.QUESTIONS, gistData.questions);
-            await cacheService.saveData(STORAGE_KEYS.SUB_QUESTIONS, gistData.subQuestions);
-            await cacheService.saveData(STORAGE_KEYS.ANSWERS, gistData.answers);
-            await cacheService.saveData(STORAGE_KEYS.METADATA, gistData.metadata);
+            await cacheService.saveData(STORAGE_KEYS.RESOURCES, repairedData.resources);
+            await cacheService.saveData(STORAGE_KEYS.QUESTIONS, repairedData.questions);
+            await cacheService.saveData(STORAGE_KEYS.SUB_QUESTIONS, repairedData.subQuestions);
+            await cacheService.saveData(STORAGE_KEYS.ANSWERS, repairedData.answers);
+            await cacheService.saveData(STORAGE_KEYS.METADATA, repairedData.metadata);
 
             // 保存同步时间
             await cacheService.saveData(STORAGE_KEYS.LAST_SYNC, new Date().toISOString());
@@ -959,6 +963,9 @@ class SyncService {
                 throw new Error('Gist 数据格式无效');
             }
 
+            // 自动验证和修复数据
+            const repairedRemoteData = await this.autoValidateAndRepair(remoteData);
+
             // 检查是否有冲突
             if (!options?.force) {
                 const pendingChanges = await this.getPendingChanges();
@@ -966,7 +973,7 @@ class SyncService {
 
                 const conflictInfo = conflictResolver.detectConflict(
                     localData,
-                    remoteData,
+                    repairedRemoteData,
                     pendingChanges
                 );
 
@@ -975,7 +982,7 @@ class SyncService {
                     const strategy = options?.strategy || 'merge';
                     const resolvedData = await conflictResolver.resolve(
                         localData,
-                        remoteData,
+                        repairedRemoteData,
                         strategy
                     );
 
@@ -995,7 +1002,7 @@ class SyncService {
             }
 
             // 没有冲突或强制同步，直接保存云端数据
-            await this.saveDataToLocal(remoteData);
+            await this.saveDataToLocal(repairedRemoteData);
 
             // 清除待同步变更
             await this.clearAllPendingChanges();
@@ -1209,6 +1216,57 @@ class SyncService {
         await cacheService.saveData(STORAGE_KEYS.ANSWERS, data.answers);
         await cacheService.saveData(STORAGE_KEYS.METADATA, data.metadata);
         await cacheService.saveData(STORAGE_KEYS.LAST_SYNC, new Date().toISOString());
+    }
+
+    /**
+     * 自动验证和修复从云端拉取的数据
+     * @param data 原始 Gist 数据
+     * @returns 修复后的数据
+     */
+    private async autoValidateAndRepair(data: GistData): Promise<GistData> {
+        try {
+            // 1. 检测错误
+            const detectionResult = dataDetector.detectErrors(data);
+
+            if (!detectionResult.valid && detectionResult.totalErrors > 0) {
+                console.log(`[SyncService] 检测到 ${detectionResult.totalErrors} 个数据错误，开始自动修复`);
+                console.log('[SyncService] 错误摘要:', detectionResult.summary);
+
+                // 2. 分析错误并生成修复计划
+                const allErrors = Object.values(detectionResult.errorsByType).flat();
+                const repairPlan = repairAnalyzer.analyzeErrors(allErrors, data);
+
+                console.log(`[SyncService] 生成修复计划: ${repairPlan.autoRepairableCount} 个可自动修复, ${repairPlan.manualRepairCount} 个需要手动修复`);
+
+                // 3. 自动应用所有安全的修复
+                const repairsToApply = repairPlan.repairs.filter(repair => repair.autoApplicable);
+                const repairResult = dataRepairer.applyRepairs(data, repairsToApply);
+
+                if (repairResult.success) {
+                    console.log(`[SyncService] 成功应用 ${repairResult.appliedRepairs} 个修复`);
+
+                    if (repairResult.remainingErrors.length > 0) {
+                        console.warn(`[SyncService] 仍有 ${repairResult.remainingErrors.length} 个错误无法自动修复`);
+                    }
+
+                    if (repairResult.isolatedItems.length > 0) {
+                        console.warn(`[SyncService] ${repairResult.isolatedItems.length} 个数据项被隔离，需要手动处理`);
+                    }
+
+                    return repairResult.repairedData;
+                } else {
+                    console.error('[SyncService] 数据修复失败，使用原始数据');
+                    return data;
+                }
+            } else {
+                console.log('[SyncService] 数据验证通过，无需修复');
+                return data;
+            }
+        } catch (error) {
+            console.error('[SyncService] 自动验证和修复过程出错:', error);
+            // 出错时返回原始数据，不影响同步流程
+            return data;
+        }
     }
 }
 

@@ -50,11 +50,31 @@ class PermissionService {
 
     /**
      * 检查是否可以同步数据
+     * 访客模式：可以从 Gist 拉取数据（只读）
+     * 拥有者模式：可以双向同步（需要认证）
      */
     canSync(): boolean {
         const mode = authService.getMode();
+        const gistId = authService.getGistId();
+
+        // 访客模式：只要有 Gist ID 就可以拉取数据
+        if (mode === 'visitor') {
+            return gistId !== null;
+        }
+
+        // 拥有者模式：需要认证和 Gist ID
         const isAuthenticated = authService.isAuthenticated();
-        return mode === 'owner' && isAuthenticated;
+        return mode === 'owner' && isAuthenticated && gistId !== null;
+    }
+
+    /**
+     * 检查是否可以推送数据到 Gist
+     */
+    canPush(): boolean {
+        const mode = authService.getMode();
+        const isAuthenticated = authService.isAuthenticated();
+        const gistId = authService.getGistId();
+        return mode === 'owner' && isAuthenticated && gistId !== null;
     }
 
     /**

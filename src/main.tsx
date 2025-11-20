@@ -32,6 +32,8 @@ import ManualSyncTest from './pages/ManualSyncTest.tsx'
 import UserInfoDebugPage from './pages/UserInfoDebugPage.tsx'
 import { PermissionTest } from './pages/PermissionTest.tsx'
 import ToastTest from './pages/ToastTest.tsx'
+import DataRepairTest from './pages/DataRepairTest.tsx'
+import DataRepairPage from './pages/DataRepairPage.tsx'
 import App from './App.tsx'
 
 // 迁移旧的占位图 URL
@@ -50,6 +52,7 @@ createRoot(document.getElementById('root')!).render(
                   <Routes>
                     <Route path="/" element={<HomePage />} />
                     <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="/data-repair" element={<DataRepairPage />} />
                     {/* 开发测试路由 - 生产环境可以移除 */}
                     {import.meta.env.DEV && (
                       <>
@@ -74,6 +77,7 @@ createRoot(document.getElementById('root')!).render(
                         <Route path="/user-info-debug" element={<UserInfoDebugPage />} />
                         <Route path="/permission-test" element={<PermissionTest />} />
                         <Route path="/toast-test" element={<ToastTest />} />
+                        <Route path="/data-repair-test" element={<DataRepairTest />} />
                       </>
                     )}
                   </Routes>

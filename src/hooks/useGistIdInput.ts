@@ -8,7 +8,7 @@ import { useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { gistService } from '@/services/gistService';
 import { cacheService, STORAGE_KEYS } from '@/services/cacheService';
-import { validateGistData } from '@/utils/dataValidation';
+import { validateGistDataDetailed } from '@/utils/dataValidation';
 
 interface UseGistIdInputOptions {
     onSuccess?: () => void;
@@ -27,8 +27,8 @@ interface UseGistIdInputReturn {
     clearError: () => void;
 }
 
-// Gist ID 格式验证正则表达式（32位十六进制）
-const GIST_ID_REGEX = /^[a-f0-9]{32}$/i;
+// Gist ID 格式验证正则表达式（20-40位十六进制）
+const GIST_ID_REGEX = /^[a-f0-9]{20,40}$/i;
 
 export function useGistIdInput(options?: UseGistIdInputOptions): UseGistIdInputReturn {
     const { setGistId, switchMode } = useAuth();
@@ -77,7 +77,7 @@ export function useGistIdInput(options?: UseGistIdInputOptions): UseGistIdInputR
 
         // Step 1: 验证格式
         if (!validateFormat(gistIdInput)) {
-            const errorMsg = 'Gist ID 格式不正确，应该是32位十六进制字符';
+            const errorMsg = 'Gist ID 格式不正确，应该是20-40位十六进制字符';
             setError(errorMsg);
             options?.onError?.(errorMsg);
             return;
@@ -99,8 +99,12 @@ export function useGistIdInput(options?: UseGistIdInputOptions): UseGistIdInputR
             // Step 3: 验证数据格式
             setLoadingProgress(40);
             setLoadingMessage('正在验证数据...');
-            if (!validateGistData(gistData)) {
-                throw new Error('数据格式无效');
+            const validationResult = validateGistDataDetailed(gistData);
+            if (!validationResult.valid) {
+                const errorMessage = validationResult.errors
+                    ? `数据验证失败：\n${validationResult.errors.join('\n')}`
+                    : '数据格式无效';
+                throw new Error(errorMessage);
             }
 
             // Step 4: 保存到本地缓存
@@ -129,21 +133,38 @@ export function useGistIdInput(options?: UseGistIdInputOptions): UseGistIdInputR
             setLoadingProgress(0);
 
             let errorMsg = '加载失败，请稍后重试';
+            let errorCategory: 'format' | 'network' | 'validation' | 'unknown' = 'unknown';
 
             if (err instanceof Error) {
+                // 网络错误
                 if (err.message.includes('404')) {
-                    errorMsg = 'Gist 不存在，请检查 ID 是否正确';
+                    errorMsg = 'Gist 不存在。请检查：\n• Gist ID 是否正确\n• Gist 是否已被删除';
+                    errorCategory = 'network';
                 } else if (err.message.includes('403')) {
-                    errorMsg = 'Gist 是私有的，需要权限访问';
+                    errorMsg = 'Gist 是私有的。请确保：\n• Gist 设置为公开\n• 或者您有访问权限';
+                    errorCategory = 'network';
+                } else if (err.message.includes('Failed to fetch') || err.message.includes('Network')) {
+                    errorMsg = '网络连接失败。请检查：\n• 网络连接是否正常\n• GitHub 服务是否可访问';
+                    errorCategory = 'network';
+                }
+                // 验证错误
+                else if (err.message.includes('数据验证失败')) {
+                    errorMsg = err.message;
+                    errorCategory = 'validation';
                 } else if (err.message.includes('数据格式')) {
-                    errorMsg = 'Gist 数据格式无效，可能不是知识库数据';
+                    errorMsg = err.message;
+                    errorCategory = 'validation';
                 } else if (err.message.includes('不存在') || err.message.includes('无权访问')) {
-                    errorMsg = '无法访问该 Gist，请检查 ID 是否正确或 Gist 是否为公开';
+                    errorMsg = '无法访问该 Gist。请检查：\n• Gist ID 是否正确\n• Gist 是否为公开';
+                    errorCategory = 'network';
                 }
             }
 
             setError(errorMsg);
             options?.onError?.(errorMsg);
+
+            // 记录错误类别用于调试
+            console.log(`Error category: ${errorCategory}`);
         } finally {
             setIsLoading(false);
         }

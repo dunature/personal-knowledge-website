@@ -6,7 +6,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { gistService } from '@/services/gistService';
 import { cacheService, STORAGE_KEYS } from '@/services/cacheService';
-import { validateGistData } from '@/utils/dataValidation';
+import { validateGistDataDetailed } from '@/utils/dataValidation';
 import type { GistData } from '@/types/gist';
 
 export interface UseGistUrlLoaderReturn {
@@ -96,8 +96,12 @@ export function useGistUrlLoader(): UseGistUrlLoaderReturn {
             const data = await gistService.getGist(gistId, undefined);
 
             // 验证数据格式
-            if (!validateGistData(data)) {
-                throw new Error('数据格式不正确，请确保 Gist 包含有效的知识库数据');
+            const validationResult = validateGistDataDetailed(data);
+            if (!validationResult.valid) {
+                const errorMessage = validationResult.errors
+                    ? `数据验证失败：\n${validationResult.errors.join('\n')}`
+                    : '数据格式不正确，请确保 Gist 包含有效的知识库数据';
+                throw new Error(errorMessage);
             }
 
             // 计算远程数据统计
@@ -137,6 +141,9 @@ export function useGistUrlLoader(): UseGistUrlLoaderReturn {
                     setError('无法访问私有 Gist，请确保 Gist 是公开的');
                 } else if (err.message.includes('network') || err.message.includes('fetch')) {
                     setError('网络错误，请检查网络连接后重试');
+                } else if (err.message.includes('数据验证失败')) {
+                    // 使用详细的验证错误消息
+                    setError(err.message);
                 } else {
                     setError(err.message);
                 }

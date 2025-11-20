@@ -178,11 +178,21 @@ class GistService {
                 headers,
             });
 
+            // 详细的错误处理
             if (!response.ok) {
                 if (response.status === 404) {
-                    throw new Error('Gist 不存在或无权访问');
+                    throw new Error('404: Gist 不存在或已被删除。请检查 Gist ID 是否正确。');
+                } else if (response.status === 403) {
+                    throw new Error('403: Gist 是私有的或您没有访问权限。请确保 Gist 设置为公开，或者您有相应的访问权限。');
+                } else if (response.status === 401) {
+                    throw new Error('401: 身份验证失败。如果这是私有 Gist，请提供有效的访问令牌。');
+                } else if (response.status === 500 || response.status === 502 || response.status === 503) {
+                    throw new Error(`${response.status}: GitHub 服务暂时不可用。请稍后重试。`);
+                } else if (response.status === 429) {
+                    throw new Error('429: API 请求频率超限。请稍后重试。');
+                } else {
+                    throw new Error(`获取 Gist 失败: HTTP ${response.status}。请检查网络连接或稍后重试。`);
                 }
-                throw new Error(`获取 Gist 失败: ${response.status}`);
             }
 
             const gist: GitHubGist = await response.json();
@@ -193,7 +203,7 @@ class GistService {
             const metadataContent = gist.files['metadata.json']?.content;
 
             if (!resourcesContent || !questionsContent || !metadataContent) {
-                throw new Error('Gist 数据格式不完整');
+                throw new Error('Gist 数据格式不完整。缺少必需的文件：resources.json、questions.json 或 metadata.json。');
             }
 
             // 解压数据（如果已压缩）
@@ -213,6 +223,13 @@ class GistService {
             };
         } catch (error) {
             console.error('获取 Gist 失败:', error);
+
+            // 如果是网络错误，提供更友好的错误消息
+            if (error instanceof TypeError && error.message.includes('fetch')) {
+                throw new Error('Network: 网络连接失败。请检查您的网络连接是否正常，或者 GitHub 服务是否可访问。');
+            }
+
+            // 重新抛出原始错误（已经包含详细信息）
             throw error;
         }
     }

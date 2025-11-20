@@ -41,20 +41,20 @@ const GistIdInputForm: React.FC<GistIdInputFormProps> = ({
             {/* 输入框 */}
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Gist ID (32位十六进制)
+                    Gist ID (20-40位十六进制)
                 </label>
                 <input
                     type="text"
                     value={gistIdInput}
                     onChange={(e) => setGistIdInput(e.target.value)}
-                    placeholder="输入32位 Gist ID"
+                    placeholder="输入20-40位 Gist ID"
                     className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-400 transition-all duration-200 font-mono text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
                     disabled={isLoading}
-                    maxLength={32}
+                    maxLength={40}
                 />
                 <div className="mt-2 flex items-center justify-between">
-                    <p className="text-sm text-gray-500">{gistIdInput.length}/32 字符</p>
-                    {gistIdInput.length === 32 && (
+                    <p className="text-sm text-gray-500">{gistIdInput.length}/40 字符</p>
+                    {gistIdInput.length >= 20 && gistIdInput.length <= 40 && /^[a-f0-9]+$/i.test(gistIdInput) && (
                         <span className="text-sm text-green-600 flex items-center">
                             <svg
                                 className="w-4 h-4 mr-1"
@@ -107,19 +107,35 @@ const GistIdInputForm: React.FC<GistIdInputFormProps> = ({
 
             {/* 错误提示 */}
             {error && !isLoading && (
-                <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start">
-                    <svg
-                        className="w-5 h-5 text-red-600 mr-2 flex-shrink-0 mt-0.5"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                    >
-                        <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                            clipRule="evenodd"
-                        />
-                    </svg>
-                    <p className="text-sm text-red-800">{error}</p>
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="flex items-start mb-2">
+                        <svg
+                            className="w-5 h-5 text-red-600 mr-2 flex-shrink-0 mt-0.5"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                        >
+                            <path
+                                fillRule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                clipRule="evenodd"
+                            />
+                        </svg>
+                        <div className="flex-1">
+                            <p className="text-sm text-red-800 font-medium mb-1">操作失败</p>
+                            <p className="text-sm text-red-700 whitespace-pre-line">{error}</p>
+                        </div>
+                    </div>
+                    {/* 格式错误时显示额外帮助 */}
+                    {error.includes('格式不正确') && (
+                        <div className="mt-3 pt-3 border-t border-red-200">
+                            <p className="text-xs text-red-700 font-medium mb-1">格式要求：</p>
+                            <ul className="text-xs text-red-600 space-y-1 ml-4">
+                                <li>• 长度：20-40 个字符</li>
+                                <li>• 字符：仅包含 0-9 和 a-f（不区分大小写）</li>
+                                <li>• 示例：a1b2c3d4e5f6789012345678901234ab</li>
+                            </ul>
+                        </div>
+                    )}
                 </div>
             )}
 

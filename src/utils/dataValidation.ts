@@ -8,7 +8,16 @@ import type { BigQuestion, SubQuestion, TimelineAnswer } from '@/types/question'
 import type { GistData, GistMetadata } from '@/types/gist';
 
 /**
+ * Validation result interface
+ */
+export interface ValidationResult {
+    valid: boolean;
+    errors?: string[];
+}
+
+/**
  * 验证资源数据
+ * 只检查字段存在性和基本类型，不验证业务规则
  * @param data - 要验证的数据
  * @returns 是否为有效的资源数据
  */
@@ -23,7 +32,6 @@ export function validateResource(data: any): data is Resource {
         typeof data.cover === 'string' &&
         typeof data.platform === 'string' &&
         Array.isArray(data.content_tags) &&
-        data.content_tags.every((tag: any) => typeof tag === 'string') &&
         typeof data.category === 'string' &&
         typeof data.author === 'string' &&
         typeof data.recommendation === 'string' &&
@@ -35,6 +43,7 @@ export function validateResource(data: any): data is Resource {
 
 /**
  * 验证大问题数据
+ * 只检查字段存在性和基本类型，不验证业务规则
  * @param data - 要验证的数据
  * @returns 是否为有效的大问题数据
  */
@@ -46,18 +55,47 @@ export function validateBigQuestion(data: any): data is BigQuestion {
         typeof data.title === 'string' &&
         typeof data.description === 'string' &&
         typeof data.status === 'string' &&
-        ['unsolved', 'solving', 'solved'].includes(data.status) &&
         typeof data.category === 'string' &&
         typeof data.summary === 'string' &&
         Array.isArray(data.sub_questions) &&
-        data.sub_questions.every((id: any) => typeof id === 'string') &&
         typeof data.created_at === 'string' &&
         typeof data.updated_at === 'string'
     );
 }
 
 /**
+ * 验证大问题数据并返回详细错误
+ * 只检查字段存在性和基本类型，不验证业务规则
+ * @param data - 要验证的数据
+ * @param index - 数据项索引（用于错误消息）
+ * @returns 错误消息数组，如果有效则返回空数组
+ */
+export function validateBigQuestionDetailed(data: any, index: number): string[] {
+    const errors: string[] = [];
+
+    if (typeof data !== 'object' || data === null) {
+        errors.push(`问题 #${index}: 不是有效的对象`);
+        return errors;
+    }
+
+    if (typeof data.id !== 'string') errors.push(`问题 #${index}: 缺少或无效的 'id' 字段`);
+    if (typeof data.title !== 'string') errors.push(`问题 #${index}: 缺少或无效的 'title' 字段`);
+    if (typeof data.description !== 'string') errors.push(`问题 #${index}: 缺少或无效的 'description' 字段`);
+    if (typeof data.status !== 'string') errors.push(`问题 #${index}: 缺少或无效的 'status' 字段`);
+    if (typeof data.category !== 'string') errors.push(`问题 #${index}: 缺少或无效的 'category' 字段`);
+    if (typeof data.summary !== 'string') errors.push(`问题 #${index}: 缺少或无效的 'summary' 字段`);
+    if (!Array.isArray(data.sub_questions)) {
+        errors.push(`问题 #${index}: 'sub_questions' 应该是数组`);
+    }
+    if (typeof data.created_at !== 'string') errors.push(`问题 #${index}: 缺少或无效的 'created_at' 字段`);
+    if (typeof data.updated_at !== 'string') errors.push(`问题 #${index}: 缺少或无效的 'updated_at' 字段`);
+
+    return errors;
+}
+
+/**
  * 验证小问题数据
+ * 只检查字段存在性和基本类型，不验证业务规则
  * @param data - 要验证的数据
  * @returns 是否为有效的小问题数据
  */
@@ -69,9 +107,7 @@ export function validateSubQuestion(data: any): data is SubQuestion {
         typeof data.parent_id === 'string' &&
         typeof data.title === 'string' &&
         typeof data.status === 'string' &&
-        ['unsolved', 'solving', 'solved'].includes(data.status) &&
         Array.isArray(data.answers) &&
-        data.answers.every((id: any) => typeof id === 'string') &&
         typeof data.created_at === 'string' &&
         typeof data.updated_at === 'string'
     );
@@ -111,91 +147,93 @@ export function validateGistMetadata(data: any): data is GistMetadata {
 }
 
 /**
- * 验证完整的 Gist 数据
+ * 验证完整的 Gist 数据（返回布尔值，向后兼容）
  * @param data - 要验证的数据
  * @returns 是否为有效的 Gist 数据
  */
 export function validateGistData(data: any): data is GistData {
+    const result = validateGistDataDetailed(data);
+    if (!result.valid && result.errors) {
+        result.errors.forEach(error => console.error(error));
+    }
+    return result.valid;
+}
+
+/**
+ * 验证完整的 Gist 数据（返回详细结果）
+ * @param data - 要验证的数据
+ * @returns 验证结果，包含错误详情
+ */
+export function validateGistDataDetailed(data: any): ValidationResult {
+    const errors: string[] = [];
+
+    // 基础类型检查
     if (typeof data !== 'object' || data === null) {
-        console.error('数据验证失败: 数据不是对象');
-        return false;
+        errors.push('数据格式错误：数据不是有效的对象');
+        return { valid: false, errors };
+    }
+
+    // 检查必需的文件/字段
+    const requiredFields = ['resources', 'questions', 'subQuestions', 'answers', 'metadata'];
+    const missingFields = requiredFields.filter(field => !(field in data));
+
+    if (missingFields.length > 0) {
+        errors.push(`缺少必需的数据字段：${missingFields.join(', ')}`);
+        return { valid: false, errors };
     }
 
     // 验证 resources 数组
     if (!Array.isArray(data.resources)) {
-        console.error('数据验证失败: resources 不是数组');
-        return false;
-    }
-    const invalidResources = data.resources.filter((r: any, i: number) => {
-        const valid = validateResource(r);
-        if (!valid) {
-            console.error(`资源 ${i} 验证失败:`, r);
+        errors.push('数据结构错误：resources 应该是数组类型');
+    } else {
+        const invalidResources = data.resources.filter((r: any) => !validateResource(r));
+        if (invalidResources.length > 0) {
+            errors.push(`发现 ${invalidResources.length} 个无效的资源数据项（resources 数组中的数据格式不正确）`);
         }
-        return !valid;
-    });
-    if (invalidResources.length > 0) {
-        console.error(`发现 ${invalidResources.length} 个无效资源`);
-        return false;
     }
 
     // 验证 questions 数组
     if (!Array.isArray(data.questions)) {
-        console.error('数据验证失败: questions 不是数组');
-        return false;
-    }
-    const invalidQuestions = data.questions.filter((q: any, i: number) => {
-        const valid = validateBigQuestion(q);
-        if (!valid) {
-            console.error(`问题 ${i} 验证失败:`, q);
-        }
-        return !valid;
-    });
-    if (invalidQuestions.length > 0) {
-        console.error(`发现 ${invalidQuestions.length} 个无效问题`);
-        return false;
+        errors.push('数据结构错误：questions 应该是数组类型');
+    } else {
+        // 使用详细验证检查每个问题
+        data.questions.forEach((q: any, index: number) => {
+            const questionErrors = validateBigQuestionDetailed(q, index);
+            errors.push(...questionErrors);
+        });
     }
 
     // 验证 subQuestions 数组
     if (!Array.isArray(data.subQuestions)) {
-        console.error('数据验证失败: subQuestions 不是数组');
-        return false;
-    }
-    const invalidSubQuestions = data.subQuestions.filter((sq: any, i: number) => {
-        const valid = validateSubQuestion(sq);
-        if (!valid) {
-            console.error(`子问题 ${i} 验证失败:`, sq);
+        errors.push('数据结构错误：subQuestions 应该是数组类型');
+    } else {
+        const invalidSubQuestions = data.subQuestions.filter((sq: any) => !validateSubQuestion(sq));
+        if (invalidSubQuestions.length > 0) {
+            errors.push(`发现 ${invalidSubQuestions.length} 个无效的子问题数据项（subQuestions 数组中的数据格式不正确）`);
         }
-        return !valid;
-    });
-    if (invalidSubQuestions.length > 0) {
-        console.error(`发现 ${invalidSubQuestions.length} 个无效子问题`);
-        return false;
     }
 
     // 验证 answers 数组
     if (!Array.isArray(data.answers)) {
-        console.error('数据验证失败: answers 不是数组');
-        return false;
-    }
-    const invalidAnswers = data.answers.filter((a: any, i: number) => {
-        const valid = validateTimelineAnswer(a);
-        if (!valid) {
-            console.error(`答案 ${i} 验证失败:`, a);
+        errors.push('数据结构错误：answers 应该是数组类型');
+    } else {
+        const invalidAnswers = data.answers.filter((a: any) => !validateTimelineAnswer(a));
+        if (invalidAnswers.length > 0) {
+            errors.push(`发现 ${invalidAnswers.length} 个无效的答案数据项（answers 数组中的数据格式不正确）`);
         }
-        return !valid;
-    });
-    if (invalidAnswers.length > 0) {
-        console.error(`发现 ${invalidAnswers.length} 个无效答案`);
-        return false;
     }
 
     // 验证 metadata
-    if (!validateGistMetadata(data.metadata)) {
-        console.error('数据验证失败: metadata 无效', data.metadata);
-        return false;
+    if (!data.metadata) {
+        errors.push('缺少必需的字段：metadata');
+    } else if (!validateGistMetadata(data.metadata)) {
+        errors.push('数据结构错误：metadata 格式不正确（应包含 version, lastSync, owner 字段）');
     }
 
-    return true;
+    return {
+        valid: errors.length === 0,
+        errors: errors.length > 0 ? errors : undefined,
+    };
 }
 
 /**

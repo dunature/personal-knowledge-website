@@ -7,6 +7,7 @@ import { useState, useRef } from 'react';
 import { cacheService, STORAGE_KEYS } from '@/services/cacheService';
 import { validateGistData } from '@/utils/dataValidation';
 import { SyncResultModal } from '@/components/common/SyncResultModal';
+import { dataDetector, dataRepairer, repairAnalyzer } from '@/services/repair';
 
 export function DataImport() {
     const [isImporting, setIsImporting] = useState(false);
@@ -41,46 +42,12 @@ export function DataImport() {
 
             const { resources, questions, subQuestions, answers, metadata } = importData.data;
 
-            // 修复缺失的字段
-            const now = new Date().toISOString();
-
-            const fixedResources = (resources || []).map((r: any) => ({
-                ...r,
-                id: r.id || `resource_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                created_at: r.created_at || now,
-                updated_at: r.updated_at || now,
-            }));
-
-            const fixedQuestions = (questions || []).map((q: any) => ({
-                ...q,
-                id: q.id || `question_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                created_at: q.created_at || now,
-                updated_at: q.updated_at || now,
-                sub_questions: q.sub_questions || [],
-            }));
-
-            const fixedSubQuestions = (subQuestions || []).map((sq: any) => ({
-                ...sq,
-                id: sq.id || `subquestion_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                created_at: sq.created_at || now,
-                updated_at: sq.updated_at || now,
-                answers: sq.answers || [],
-            }));
-
-            const fixedAnswers = (answers || []).map((a: any) => ({
-                ...a,
-                id: a.id || `answer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                created_at: a.created_at || now,
-                updated_at: a.updated_at || now,
-                timestamp: a.timestamp || now,
-            }));
-
-            // 验证数据
-            const dataToValidate = {
-                resources: fixedResources,
-                questions: fixedQuestions,
-                subQuestions: fixedSubQuestions,
-                answers: fixedAnswers,
+            // 构建原始数据对象
+            const rawData = {
+                resources: resources || [],
+                questions: questions || [],
+                subQuestions: subQuestions || [],
+                answers: answers || [],
                 metadata: metadata || {
                     version: '1.0.0',
                     lastSync: new Date().toISOString(),
@@ -88,6 +55,46 @@ export function DataImport() {
                 },
             };
 
+            // 1. 检测错误
+            console.log('[DataImport] 开始检测数据错误...');
+            const detectionResult = dataDetector.detectErrors(rawData);
+
+            let dataToValidate = rawData;
+
+            if (!detectionResult.valid && detectionResult.totalErrors > 0) {
+                console.log(`[DataImport] 检测到 ${detectionResult.totalErrors} 个数据错误，开始自动修复`);
+                console.log('[DataImport] 错误摘要:', detectionResult.summary);
+
+                // 2. 分析错误并生成修复计划
+                const allErrors = Object.values(detectionResult.errorsByType).flat();
+                const repairPlan = repairAnalyzer.analyzeErrors(allErrors, rawData);
+
+                console.log(`[DataImport] 生成修复计划: ${repairPlan.autoRepairableCount} 个可自动修复, ${repairPlan.manualRepairCount} 个需要手动修复`);
+
+                // 3. 自动应用所有安全的修复
+                const repairsToApply = repairPlan.repairs.filter(repair => repair.autoApplicable);
+                const repairResult = dataRepairer.applyRepairs(rawData, repairsToApply);
+
+                if (repairResult.success) {
+                    console.log(`[DataImport] 成功应用 ${repairResult.appliedRepairs} 个修复`);
+
+                    if (repairResult.remainingErrors.length > 0) {
+                        console.warn(`[DataImport] 仍有 ${repairResult.remainingErrors.length} 个错误无法自动修复`);
+                    }
+
+                    if (repairResult.isolatedItems.length > 0) {
+                        console.warn(`[DataImport] ${repairResult.isolatedItems.length} 个数据项被隔离，需要手动处理`);
+                    }
+
+                    dataToValidate = repairResult.repairedData;
+                } else {
+                    console.error('[DataImport] 数据修复失败，使用原始数据');
+                }
+            } else {
+                console.log('[DataImport] 数据验证通过，无需修复');
+            }
+
+            // 最终验证
             const isValid = validateGistData(dataToValidate);
 
             if (!isValid) {
@@ -116,10 +123,10 @@ export function DataImport() {
             if (
                 !confirm(
                     `确定要导入数据吗？\n\n` +
-                    `资源: ${fixedResources.length} 个\n` +
-                    `问题: ${fixedQuestions.length} 个\n` +
-                    `子问题: ${fixedSubQuestions.length} 个\n` +
-                    `答案: ${fixedAnswers.length} 个\n\n` +
+                    `资源: ${dataToValidate.resources.length} 个\n` +
+                    `问题: ${dataToValidate.questions.length} 个\n` +
+                    `子问题: ${dataToValidate.subQuestions.length} 个\n` +
+                    `答案: ${dataToValidate.answers.length} 个\n\n` +
                     `这将覆盖当前的本地数据。`
                 )
             ) {
@@ -127,20 +134,18 @@ export function DataImport() {
             }
 
             // 保存数据
-            await cacheService.saveData(STORAGE_KEYS.RESOURCES, fixedResources);
-            await cacheService.saveData(STORAGE_KEYS.QUESTIONS, fixedQuestions);
-            await cacheService.saveData(STORAGE_KEYS.SUB_QUESTIONS, fixedSubQuestions);
-            await cacheService.saveData(STORAGE_KEYS.ANSWERS, fixedAnswers);
-            if (metadata) {
-                await cacheService.saveData(STORAGE_KEYS.METADATA, metadata);
-            }
+            await cacheService.saveData(STORAGE_KEYS.RESOURCES, dataToValidate.resources);
+            await cacheService.saveData(STORAGE_KEYS.QUESTIONS, dataToValidate.questions);
+            await cacheService.saveData(STORAGE_KEYS.SUB_QUESTIONS, dataToValidate.subQuestions);
+            await cacheService.saveData(STORAGE_KEYS.ANSWERS, dataToValidate.answers);
+            await cacheService.saveData(STORAGE_KEYS.METADATA, dataToValidate.metadata);
 
             // 显示成功模态框
             setImportResult({
                 show: true,
                 type: 'success',
                 title: '导入成功！',
-                message: `已成功导入 ${fixedResources.length} 个资源和 ${fixedQuestions.length} 个问题，页面即将刷新...`,
+                message: `已成功导入 ${dataToValidate.resources.length} 个资源和 ${dataToValidate.questions.length} 个问题，页面即将刷新...`,
             });
 
             // 刷新页面以加载新数据

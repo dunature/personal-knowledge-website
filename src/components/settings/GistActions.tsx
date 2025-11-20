@@ -6,7 +6,12 @@
 
 import React, { useState } from 'react';
 import { authService } from '@/services/authService';
+import { syncService } from '@/services/syncService';
+import { gistService } from '@/services/gistService';
+import { cacheService, STORAGE_KEYS } from '@/services/cacheService';
+import { validateGistDataDetailed } from '@/utils/dataValidation';
 import { useToast } from '@/hooks/useToast';
+import { permissionService } from '@/services/permissionService';
 
 interface GistActionsProps {
     gistId: string | null;
@@ -17,13 +22,15 @@ interface GistActionsProps {
 
 const GistActions: React.FC<GistActionsProps> = ({
     gistId,
-    // mode, // 保留以备将来使用
+    mode,
     onDisconnect,
     onGenerateShareLink,
 }) => {
     const { showToast } = useToast();
     const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
     const [isDisconnecting, setIsDisconnecting] = useState(false);
+    const [isSyncing, setIsSyncing] = useState(false);
+    const [syncProgress, setSyncProgress] = useState(0);
 
     if (!gistId) {
         return null;
@@ -48,6 +55,74 @@ const GistActions: React.FC<GistActionsProps> = ({
         }
     };
 
+    const handleSync = async () => {
+        if (!gistId) {
+            showToast('error', '没有连接的 Gist');
+            return;
+        }
+
+        setIsSyncing(true);
+        setSyncProgress(0);
+
+        try {
+            if (mode === 'visitor') {
+                // 访客模式：只从 Gist 拉取数据
+                setSyncProgress(20);
+                const gistData = await gistService.getGist(gistId);
+
+                setSyncProgress(40);
+                const validationResult = validateGistDataDetailed(gistData);
+                if (!validationResult.valid) {
+                    throw new Error(
+                        validationResult.errors
+                            ? `数据验证失败：\n${validationResult.errors.join('\n')}`
+                            : '数据格式无效'
+                    );
+                }
+
+                setSyncProgress(60);
+                await cacheService.saveData(STORAGE_KEYS.RESOURCES, gistData.resources);
+                await cacheService.saveData(STORAGE_KEYS.QUESTIONS, gistData.questions);
+                await cacheService.saveData(STORAGE_KEYS.SUB_QUESTIONS, gistData.subQuestions);
+                await cacheService.saveData(STORAGE_KEYS.ANSWERS, gistData.answers);
+                await cacheService.saveData(STORAGE_KEYS.METADATA, gistData.metadata);
+
+                setSyncProgress(100);
+                showToast('success', '数据同步成功');
+
+                // 刷新页面以显示新数据
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500);
+            } else {
+                // 拥有者模式：双向同步
+                setSyncProgress(20);
+                const result = await syncService.syncNow();
+                setSyncProgress(100);
+
+                if (result.success) {
+                    showToast('success', '数据同步成功');
+                    // 刷新页面以显示新数据
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
+                } else {
+                    throw new Error(result.error || '同步失败');
+                }
+            }
+        } catch (error) {
+            console.error('同步失败:', error);
+            if (error instanceof Error) {
+                showToast('error', `同步失败: ${error.message}`);
+            } else {
+                showToast('error', '同步失败，请稍后重试');
+            }
+        } finally {
+            setIsSyncing(false);
+            setSyncProgress(0);
+        }
+    };
+
     const handleDisconnect = async () => {
         setIsDisconnecting(true);
         try {
@@ -68,9 +143,69 @@ const GistActions: React.FC<GistActionsProps> = ({
         }
     };
 
+    const canSync = permissionService.canSync();
+
     return (
         <div className="space-y-3">
             <h3 className="text-sm font-medium text-gray-700 mb-2">操作</h3>
+
+            {/* 同步按钮 */}
+            {canSync && (
+                <div>
+                    <button
+                        onClick={handleSync}
+                        disabled={isSyncing}
+                        className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {isSyncing ? (
+                            <>
+                                <svg
+                                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <circle
+                                        className="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        strokeWidth="4"
+                                    />
+                                    <path
+                                        className="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                    />
+                                </svg>
+                                同步中... {syncProgress}%
+                            </>
+                        ) : (
+                            <>
+                                <svg
+                                    className="w-5 h-5 mr-2"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                    />
+                                </svg>
+                                {mode === 'visitor' ? '从 Gist 拉取数据' : '同步数据'}
+                            </>
+                        )}
+                    </button>
+                    {mode === 'visitor' && (
+                        <p className="text-xs text-gray-500 mt-1">
+                            访客模式下只能从 Gist 拉取最新数据
+                        </p>
+                    )}
+                </div>
+            )}
 
             {/* 生成分享链接 */}
             <button
