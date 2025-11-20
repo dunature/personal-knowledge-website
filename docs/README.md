@@ -16,6 +16,8 @@ GitHub Gist 云端同步功能
 - [实现状态](GIST_IMPLEMENTATION_STATUS.md)
 - [功能完成清单](GIST_FEATURE_COMPLETE.md)
 - [实现总结](GIST_IMPLEMENTATION_SUMMARY.md)
+- [验证增强功能](features/GIST_VALIDATION_IMPROVEMENTS.md) - **新增**
+- [访客模式同步](features/VISITOR_MODE_SYNC.md) - **新增**
 - [所有权验证](features/gist-integration/GIST_OWNERSHIP_TEST_GUIDE.md)
 - [访问测试](features/gist-integration/GIST_TEST_ACCESS.md)
 - [所有权验证 UI](features/gist-integration/OWNERSHIP_VERIFICATION_UI.md)
@@ -172,4 +174,4 @@ docs/
 
 ---
 
-**最后更新**：2025-11-18
+**最后更新**：2025-11-20
