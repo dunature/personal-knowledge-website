@@ -4,7 +4,7 @@
  * 使用 React.memo 优化性能
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
 interface GistInfo {
     id: string;
@@ -22,25 +22,13 @@ interface CurrentGistInfoProps {
     gistId: string | null;
     gistInfo: GistInfo | null;
     mode: 'visitor' | 'owner';
-    onRefresh: () => void;
 }
 
 const CurrentGistInfo: React.FC<CurrentGistInfoProps> = ({
     gistId,
     gistInfo,
     mode,
-    onRefresh,
 }) => {
-    const [isRefreshing, setIsRefreshing] = useState(false);
-
-    const handleRefresh = async () => {
-        setIsRefreshing(true);
-        try {
-            await onRefresh();
-        } finally {
-            setIsRefreshing(false);
-        }
-    };
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -164,28 +152,6 @@ const CurrentGistInfo: React.FC<CurrentGistInfoProps> = ({
                             </>
                         )}
                     </div>
-
-                    {/* 刷新按钮 */}
-                    <button
-                        onClick={handleRefresh}
-                        disabled={isRefreshing}
-                        className="ml-4 p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-colors disabled:opacity-50"
-                        title="刷新信息"
-                    >
-                        <svg
-                            className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`}
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                            />
-                        </svg>
-                    </button>
                 </div>
             </div>
 

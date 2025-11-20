@@ -34,11 +34,7 @@ export default function GistManagementSection() {
         }
     }, [gistId]);
 
-    const handleRefresh = () => {
-        // 刷新 Gist 信息
-        // 这个功能将在后续任务中实现
-        console.log('Refresh gist info');
-    };
+
 
     const handleInputSuccess = () => {
         setShowInput(false);
@@ -59,7 +55,6 @@ export default function GistManagementSection() {
                     gistId={gistId}
                     gistInfo={gistInfo}
                     mode={mode}
-                    onRefresh={handleRefresh}
                 />
             )}
 

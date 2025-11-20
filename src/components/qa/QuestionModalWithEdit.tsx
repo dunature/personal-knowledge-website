@@ -122,8 +122,8 @@ export const QuestionModalWithEdit: React.FC<QuestionModalWithEditProps> = ({
         onStatusChange?.(newStatus);
     };
 
-    // 动态生成状态选项，根据验证结果禁用"已解决"选项
-    const statusOptions: DropdownOption[] = useMemo(() => {
+    // 动态生成大问题状态选项，根据验证结果禁用"已解决"选项
+    const bigQuestionStatusOptions: DropdownOption[] = useMemo(() => {
         const solvedValidation = QuestionStatusValidator.validateStatusChange(
             'solved',
             question.status,
@@ -144,6 +144,13 @@ export const QuestionModalWithEdit: React.FC<QuestionModalWithEditProps> = ({
             },
         ];
     }, [question.status, subQuestions, editedSummary, question.summary]);
+
+    // 小问题状态选项（无验证限制）
+    const subQuestionStatusOptions: DropdownOption[] = [
+        { value: 'unsolved', label: STATUS_COLORS.unsolved.label },
+        { value: 'solving', label: STATUS_COLORS.solving.label },
+        { value: 'solved', label: STATUS_COLORS.solved.label },
+    ];
 
     // 开始编辑描述
     const startEditDescription = () => {
@@ -568,7 +575,7 @@ export const QuestionModalWithEdit: React.FC<QuestionModalWithEditProps> = ({
 
                             {canEdit && (
                                 <Dropdown
-                                    options={statusOptions}
+                                    options={bigQuestionStatusOptions}
                                     value={question.status}
                                     onChange={(value) => handleStatusChange(value as QuestionStatus)}
                                 />
@@ -625,7 +632,7 @@ export const QuestionModalWithEdit: React.FC<QuestionModalWithEditProps> = ({
                                             </label>
                                             <div className="w-full">
                                                 <Dropdown
-                                                    options={statusOptions}
+                                                    options={subQuestionStatusOptions}
                                                     value={editingData.status || 'unsolved'}
                                                     onChange={(value) => setEditingData(prev => ({ ...prev, status: value as QuestionStatus }))}
                                                     className="w-full"
